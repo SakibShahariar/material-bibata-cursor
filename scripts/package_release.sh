@@ -78,9 +78,6 @@ Material Bibata Cursor — Installation
    DE/WM's cursor theme picker, and select one of the "Material Bibata Cursor ..."
    themes.
 
-If your cursor theme doesn't show up after copying, log out and back in
-— some environments only rescan cursor themes at session start.
-
 Full source, build instructions, and the wallpaper-aware auto-switcher:
 https://github.com/SakibShahariar/bibata-material
 EOF

@@ -34,9 +34,6 @@ if not test -d $build_dir
         exit 1
     end
 else if not test -f "$build_dir/src/cursor_utils.py"
-    # Directory exists but looks incomplete/empty — likely a previous
-    # clone got interrupted. Re-clone instead of failing cryptically
-    # later at the cp step.
     echo "Existing bibata_cursor/ looks incomplete, re-cloning..."
     rm -rf $build_dir
     if not git clone https://github.com/rtgiskard/bibata_cursor $build_dir

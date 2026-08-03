@@ -1,8 +1,8 @@
-# Cloned upstream source (fetched fresh by compile_bibata_m3.fish)
+# Cloned upstream source (fetched fresh by compile_bibata_material.fish)
 scripts/bibata_cursor/
 
 # Compiled/packaged output should not be committed — these are
-# generated artifacts. Run compile_bibata_m3.fish to produce them
+# generated artifacts. Run compile_bibata_material.fish to produce them
 # locally, or package_release.sh to bundle for distribution.
 dist/
 out/

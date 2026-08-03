@@ -102,7 +102,7 @@ def main():
             print(f"Skipping '{folder_name}': {'; '.join(problems)}", file=sys.stderr)
             continue
 
-        comment = f"M3-styled Bibata cursor theme, tonal variant: {key.replace('-', ' ')}"
+        comment = "Material Bibata Cursor"
         if write_index_theme(theme_dir, key, comment, args.inherits, args.dry_run):
             ok_count += 1
             if not args.dry_run:

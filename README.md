@@ -1,7 +1,11 @@
+<div align="center">
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.png">
   <img src="docs/logo-light.png" alt="Material Bibata Cursor" width="360">
 </picture>
+
+</div>
 
 # Material Bibata Cursor
 

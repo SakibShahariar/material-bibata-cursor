@@ -15,7 +15,11 @@ system instead of just darkening an accent color for the body.
 Grab whichever variant matches your setup, or add your own color —
 `themes.json` is open for anyone to edit, no review needed.
 
+<div align="center">
+
 ![All 28 themes](docs/comparison-all-28.png)
+
+</div>
 
 ## Themes
 
@@ -26,7 +30,11 @@ Midnight, Charcoal. Exact hex values are in `themes.json`.
 
 Each theme's actual range of cursor shapes:
 
+<div align="center">
+
 ![All 28 themes, several shapes each](docs/matrix-all-28.png)
+
+</div>
 
 ## Install
 
@@ -102,7 +110,7 @@ For Ice Blue:
 ```
 Body    (Container) : #1a333d
 Primary (Outline)   : #a8cbe2
-Watch                : #0a1f26
+Watch               : #0a1f26
 ```
 
 The body isn't a darkened version of the primary — it's chosen on its
@@ -114,11 +122,11 @@ own. That's the whole point: it keeps contrast consistent across all
 ## Files
 
 ```
-themes.json                     # all theme colors, edit this to add/change one
+themes.json                       # all theme colors, edit this to add/change one
 scripts/
-├── compile_bibata_material.fish   # builds themes.json -> ~/.icons
-├── metadata_generator.py       # writes index.theme so GNOME picks it up
-└── package_release.sh          # bundles compiled themes for release
+├── compile_bibata_material.fish  # builds themes.json -> ~/.icons
+├── metadata_generator.py         # writes index.theme so GNOME picks it up
+└── package_release.sh            # bundles compiled themes for release
 ```
 
 Build flow: clone `bibata_cursor`, patch its render config with each

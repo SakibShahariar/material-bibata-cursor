@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" width="480" height="120">
+  <defs>
+    <style>
+      .word-main { font-family: -apple-system, 'Segoe UI', 'Inter', sans-serif; font-weight: 700; }
+      .word-sub  { font-family: -apple-system, 'Segoe UI', 'Inter', sans-serif; font-weight: 500; letter-spacing: 0.14em; }
+    </style>
+  </defs>
+  <g transform="translate(14, 20)">
+    <path d="M 8 4 L 8 68 L 24 53 L 34 76 L 46 71 L 36 48 L 58 48 Z"
+          fill="#1a333d" stroke="#a8cbe2" stroke-width="5" stroke-linejoin="round" />
+  </g>
+  <text x="96" y="58" class="word-main" font-size="34" fill="#e8f1f6">Material Bibata</text>
+  <text x="97" y="80" class="word-sub" font-size="14" fill="#a8cbe2">CURSOR</text>
+</svg>

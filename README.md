@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.png">
+  <img src="docs/logo-light.png" alt="Material Bibata Cursor" width="360">
+</picture>
+
 # Material Bibata Cursor
 
 28 Bibata cursor themes, colored using Material Design 3's tonal

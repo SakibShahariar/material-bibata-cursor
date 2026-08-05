@@ -10,10 +10,11 @@
 # Material Bibata Cursor
 
 28 Bibata cursor themes, colored using Material Design 3's tonal
-system instead of just darkening an accent color for the body.
+system — a dark body paired with a vibrant accent outline, tuned
+independently per theme.
 
-Grab whichever variant matches your setup, or add your own color —
-`themes.json` is open for anyone to edit, no review needed.
+Pick whichever variant fits your setup, or add your own color — see
+[Adding a color](#adding-a-color) below.
 
 <div align="center">
 
@@ -48,16 +49,16 @@ cd material-bibata-cursor
 fish scripts/compile_bibata_material.fish
 ```
 
-That installs all 28 to `~/.icons`. Pick one via GNOME Settings →
-Mouse & Touchpad → Cursor Size (or Tweaks), or however your setup
-picks a cursor theme.
+That installs all 28 to `~/.icons`. From there, pick one through GNOME
+Settings, GNOME Tweaks, or however your desktop/WM selects a cursor
+theme — the exact menu depends on your setup.
 
 Don't want to run fish directly? There's a `justfile`:
 
 ```bash
 just build              # all 28
 just build-one Coral    # just one, faster for testing a color
-just package v1.0.0     # bundle for a release
+just package <version>  # bundle for a release, e.g. just package v1.0.0
 just list
 just show Ice-Blue
 just check-deps
@@ -78,7 +79,7 @@ Add an entry to `themes.json`:
 Then `fish scripts/compile_bibata_material.fish Coral` (or
 `just build-one Coral`) to build just that one instead of all 28.
 
-Some guidelines for picking colors that actually work:
+A few guidelines for picking colors that hold up visually:
 
 - **Body**: dark, desaturated, roughly 10-25% lightness. This is the
   neutral fill, not a darker copy of your accent.
@@ -94,11 +95,11 @@ on Hyprland.
 ## Why body and primary are separate colors
 
 Most themed-cursor setups just take an accent color and darken it for
-the body. That's why a lot of them end up low-contrast or hard to see
-depending on the wallpaper.
+the body. That works fine against some wallpapers and falls apart
+against others — low contrast, hard to spot the cursor at all.
 
-Here, body and primary are picked independently, following Material
-Design 3's Container/Primary roles:
+This project picks body and primary independently instead, following
+Material Design 3's Container/Primary roles:
 
 | M3 Role | Cursor part | What it does |
 |---|---|---|
@@ -113,9 +114,8 @@ Primary (Outline)   : #a8cbe2
 Watch               : #0a1f26
 ```
 
-The body isn't a darkened version of the primary — it's chosen on its
-own. That's the whole point: it keeps contrast consistent across all
-28 themes no matter how saturated the accent color is.
+This keeps contrast consistent across all 28 themes, regardless of how
+saturated or pastel the accent color is.
 
 ---
 
@@ -130,23 +130,25 @@ scripts/
 ```
 
 Build flow: clone `bibata_cursor`, patch its render config with each
-theme's colors, compile, install to `~/.icons`, write `index.theme`
-right after so a broken metadata file gets caught immediately instead
-of at the end of a 28-theme run.
+theme's colors, then compile and install to `~/.icons`. `index.theme`
+gets written right after each theme installs, so a broken metadata
+file gets caught immediately instead of at the end of a 28-theme run.
 
-## Packaging a release
+## Packaging for redistribution
 
-The repo doesn't hold compiled cursor binaries — those are
-`.gitignore`d. For a GitHub Release or GNOME-Look.org upload, package
-them separately after building:
+If you want to share compiled themes somewhere as a single download
+(a GitHub Release, GNOME-Look.org, wherever) instead of having people
+clone and build the repo themselves, package what you've built:
 
 ```bash
-bash scripts/package_release.sh v1.0.0
+bash scripts/package_release.sh <version>
 ```
 
-Writes `dist/bibata-material-v1.0.0.tar.gz` from whatever's in
-`~/.icons`, with a plain-language `INSTALL.txt` inside for people who
-never see this README. That archive is what you actually upload.
+Writes `dist/bibata-material-<version>.tar.gz` from whatever's
+compiled in `~/.icons`, with a plain-language `INSTALL.txt` inside for
+anyone who downloads the archive directly and never sees this repo.
+This step is entirely optional — it's only for packaging a downloadable
+copy, not part of building or using the themes yourself.
 
 ---
 

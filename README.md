@@ -152,6 +152,28 @@ copy, not part of building or using the themes yourself.
 
 ---
 
+## Matugen Setup
+
+To make these themes work with [matugen](https://github.com/InioX/matugen) put `scripts/cursor_matugen.sh` in your `~/.config/matugen/post-hook-scripts/` folder. Then inside your `~/.config/matugen/config.toml` file add
+
+```toml
+[templates.cursor]
+input_path = "~/.config/matugen/templates/cursors.json"
+output_path = "~/.config/colors.json"
+post_hook = "~/.config/matugen/post-hook-scripts/cursor_matugen.sh"
+```
+
+then inside the `~/.config/matugen/templates/` folder create `cursors.json` with this
+
+```json
+{
+    "colors": {
+        "color13": "{{colors.primary.default.hex}}"
+    }
+}
+```
+Then running matugen command will do the job
+
 ## License
 
 Scripts and `themes.json` in this repo are MIT — see `LICENSE`.

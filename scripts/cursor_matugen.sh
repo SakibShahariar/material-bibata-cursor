@@ -7,14 +7,13 @@ THEMES_JSON="$SCRIPT_DIR/themes.json"
 COLOR_MATCH_PY="$SCRIPT_DIR/color_match.py"
 
 INSTALL_DIR="${BIBATA_MATUGEN_INSTALL_DIR:-$HOME/.icons}"
-
 COLORS_FILE="$HOME/.config/colors.json"
 
 MATUGEN_KEY="${MATUGEN_KEY:-.colors.color13}"
 
 # --- Preflight checks --------------------------------------------------
 if [[ ! -f "$COLORS_FILE" ]]; then
-    echo "Error: matugen color profile missing at $COLORS_FILE" >&2
+    echo "Error: color profile missing at $COLORS_FILE" >&2
     exit 1
 fi
 
@@ -28,18 +27,22 @@ if [[ ! -f "$COLOR_MATCH_PY" ]]; then
     exit 1
 fi
 
-if ! command -v jq >/dev/null; then
-    echo "Error: jq is required to read $COLORS_FILE reliably." >&2
-    exit 1
+# --- 1. Extract active wallpaper hex color (JSON or Raw Text) ----------
+hex_input=""
+
+# Case A: Try reading as JSON if jq is available
+if command -v jq >/dev/null 2>&1 && jq empty "$COLORS_FILE" 2>/dev/null; then
+    hex_input=$(jq -r "$MATUGEN_KEY // ." "$COLORS_FILE" 2>/dev/null | tr '[:upper:]' '[:lower:]')
 fi
 
-# --- 1. Extract active wallpaper hex color ------------------------------
-
-hex_input=$(jq -r "$MATUGEN_KEY" "$COLORS_FILE" 2>/dev/null | tr '[:upper:]' '[:lower:]')
-
+# Case B: Fallback to reading raw text (e.g. if file contains just #ffb5a0)
 if [[ -z "$hex_input" || "$hex_input" == "null" || ! "$hex_input" =~ ^#[0-9a-f]{6}$ ]]; then
-    echo "Error: could not extract a valid hex color using key '$MATUGEN_KEY' from $COLORS_FILE" >&2
-    echo "Run 'jq . \"$COLORS_FILE\"' to inspect the schema and set MATUGEN_KEY accordingly." >&2
+    hex_input=$(tr -d '[:space:]"' < "$COLORS_FILE" | tr '[:upper:]' '[:lower:]')
+fi
+
+# Final validation
+if [[ ! "$hex_input" =~ ^#[0-9a-f]{6}$ ]]; then
+    echo "Error: Could not extract a valid 6-digit hex color from $COLORS_FILE" >&2
     exit 1
 fi
 
@@ -66,22 +69,30 @@ THEME_NAME="Bibata-Material-$nearest_theme"
 # --- 3. Verify the theme is actually installed before switching ----------
 if [[ ! -d "$INSTALL_DIR/$THEME_NAME" ]]; then
     echo "Error: matched theme '$THEME_NAME' but it isn't compiled at $INSTALL_DIR/$THEME_NAME" >&2
-    echo "Run compile_matugen_packs.fish first (or check BIBATA_MATUGEN_INSTALL_DIR matches in both scripts)." >&2
     exit 1
 fi
 
-# --- 4. Apply the chosen theme --------------------------------------------
-if command -v gsettings >/dev/null; then
-    gsettings set org.gnome.desktop.interface cursor-theme "$THEME_NAME"
-    echo "✓ Switched to: $THEME_NAME (GNOME)"
-else
-    echo "Warning: gsettings not available, skipped GNOME cursor-theme switch." >&2
+# --- 4. Apply the chosen theme across desktop environments ---------------
+
+# A. GNOME & GTK Applications (Works for GNOME & GTK apps running in Hyprland)
+if command -v gsettings >/dev/null 2>&1; then
+    gsettings set org.gnome.desktop.interface cursor-theme "$THEME_NAME" 2>/dev/null || true
+    echo "✓ Set gsettings cursor-theme: $THEME_NAME"
 fi
 
-# Hyprland doesn't read gsettings for its own cursor rendering — if you're
-# on Hyprland, also update hyprcursor via hyprctl so both toolkits agree:
-if command -v hyprctl >/dev/null; then
+# B. Hyprland compositor
+if command -v hyprctl >/dev/null 2>&1 && pgrep -x Hyprland >/dev/null 2>&1; then
     hyprctl setcursor "$THEME_NAME" 24 >/dev/null 2>&1 \
-        && echo "✓ Switched to: $THEME_NAME (Hyprland)" \
+        && echo "✓ Set hyprctl cursor: $THEME_NAME" \
         || echo "Warning: hyprctl setcursor failed" >&2
 fi
+
+# C. XCursor fallback (Ensures legacy X11 & Wayland apps show the cursor under Hyprland)
+mkdir -p "$HOME/.icons/default"
+cat <<EOF > "$HOME/.icons/default/index.theme"
+[Icon Theme]
+Name=Default
+Comment=Default Cursor Theme
+Inherits=$THEME_NAME
+EOF
+echo "✓ Updated ~/.icons/default/index.theme"

@@ -154,7 +154,7 @@ copy, not part of building or using the themes yourself.
 
 ## Matugen Setup
 
-To make these themes work with [matugen](https://github.com/InioX/matugen) put `scripts/cursor_matugen.sh` in your `~/.config/matugen/post-hook-scripts/` folder. Then inside your `~/.config/matugen/config.toml` file add
+To make these themes work with [matugen](https://github.com/InioX/matugen) put `scripts/cursor_matugen.sh`, `scripts/themes.json` and `scripts/color_match.py` in your `~/.config/matugen/post-hook-scripts/` folder. Then inside your `~/.config/matugen/config.toml` file add
 
 ```toml
 [templates.cursor]

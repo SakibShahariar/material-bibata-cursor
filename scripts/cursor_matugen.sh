@@ -66,11 +66,25 @@ fi
 
 THEME_NAME="Bibata-Material-$nearest_theme"
 
-# --- 3. Verify the theme is actually installed before switching ----------
-if [[ ! -d "$INSTALL_DIR/$THEME_NAME" ]]; then
-    echo "Error: matched theme '$THEME_NAME' but it isn't compiled at $INSTALL_DIR/$THEME_NAME" >&2
+# --- 3. Verify the theme is actually installed across known icon directories ---
+FOUND_DIR=""
+
+for candidate_dir in "$INSTALL_DIR" "$HOME/.local/share/icons" "/usr/share/icons"; do
+    if [[ -d "$candidate_dir/$THEME_NAME" ]]; then
+        FOUND_DIR="$candidate_dir"
+        break
+    fi
+done
+
+if [[ -z "$FOUND_DIR" ]]; then
+    echo "Error: matched theme '$THEME_NAME' was not found in:" >&2
+    echo "  - $INSTALL_DIR" >&2
+    echo "  - $HOME/.local/share/icons" >&2
+    echo "  - /usr/share/icons" >&2
     exit 1
 fi
+
+INSTALL_DIR="$FOUND_DIR"
 
 # --- 4. Apply the chosen theme across desktop environments ---------------
 

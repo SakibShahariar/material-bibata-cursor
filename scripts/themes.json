@@ -1,0 +1,142 @@
+{
+  "Ice-Blue": {
+    "body": "#1a333d",
+    "primary": "#a8cbe2",
+    "watch": "#0a1f26"
+  },
+  "Sky-Blue": {
+    "body": "#0e3251",
+    "primary": "#8dcdff",
+    "watch": "#051d32"
+  },
+  "Deep-Blue": {
+    "body": "#003340",
+    "primary": "#00b4d8",
+    "watch": "#001f27"
+  },
+  "Soft-Blue": {
+    "body": "#353f61",
+    "primary": "#b2c5ff",
+    "watch": "#1c233a"
+  },
+  "Mint": {
+    "body": "#00382f",
+    "primary": "#65dac4",
+    "watch": "#00211c"
+  },
+  "Seafoam": {
+    "body": "#003730",
+    "primary": "#85dfcf",
+    "watch": "#00211d"
+  },
+  "Teal": {
+    "body": "#002020",
+    "primary": "#008080",
+    "watch": "#001010"
+  },
+  "Peach": {
+    "body": "#4e2a1f",
+    "primary": "#ffb59a",
+    "watch": "#31170e"
+  },
+  "Apricot": {
+    "body": "#4e2e1d",
+    "primary": "#ffc9a8",
+    "watch": "#31190a"
+  },
+  "Sunset": {
+    "body": "#4e2b14",
+    "primary": "#ffb785",
+    "watch": "#311905"
+  },
+  "Blush": {
+    "body": "#4e2a27",
+    "primary": "#ffb4a8",
+    "watch": "#311714"
+  },
+  "Salmon": {
+    "body": "#532226",
+    "primary": "#fa8072",
+    "watch": "#351315"
+  },
+  "Pink-Pastel": {
+    "body": "#502334",
+    "primary": "#ffb0cb",
+    "watch": "#331520"
+  },
+  "Pink-Rose": {
+    "body": "#502a3d",
+    "primary": "#ffbade",
+    "watch": "#331925"
+  },
+  "Lilac": {
+    "body": "#373151",
+    "primary": "#ccbeff",
+    "watch": "#201c31"
+  },
+  "Violet": {
+    "body": "#2e3a5e",
+    "primary": "#b2c5ff",
+    "watch": "#19233c"
+  },
+  "Sage": {
+    "body": "#354a23",
+    "primary": "#c7f69a",
+    "watch": "#1e2d12"
+  },
+  "Lime": {
+    "body": "#3c4a30",
+    "primary": "#d5f6b8",
+    "watch": "#242d1c"
+  },
+  "Moss": {
+    "body": "#232208",
+    "primary": "#98971a",
+    "watch": "#141304"
+  },
+  "Sand": {
+    "body": "#3d352f",
+    "primary": "#d7c4b6",
+    "watch": "#25201c"
+  },
+  "Beige": {
+    "body": "#4a4232",
+    "primary": "#f5e6ca",
+    "watch": "#2d271e"
+  },
+  "Brown": {
+    "body": "#392312",
+    "primary": "#965d34",
+    "watch": "#22140a"
+  },
+  "Cloud": {
+    "body": "#2e3138",
+    "primary": "#abb2bf",
+    "watch": "#1a1d22"
+  },
+  "Grey": {
+    "body": "#35373c",
+    "primary": "#c7ccd6",
+    "watch": "#202124"
+  },
+  "Slate": {
+    "body": "#1f262b",
+    "primary": "#708090",
+    "watch": "#121619"
+  },
+  "Noir": {
+    "body": "#1a1a1a",
+    "primary": "#454545",
+    "watch": "#0a0a0a"
+  },
+  "Midnight": {
+    "body": "#080a07",
+    "primary": "#232b1e",
+    "watch": "#030403"
+  },
+  "Charcoal": {
+    "body": "#0f1519",
+    "primary": "#36454f",
+    "watch": "#080b0e"
+  }
+}

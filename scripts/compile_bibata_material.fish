@@ -34,6 +34,9 @@ if not test -d $build_dir
         exit 1
     end
 else if not test -f "$build_dir/src/cursor_utils.py"
+    # Directory exists but looks incomplete/empty — likely a previous
+    # clone got interrupted. Re-clone instead of failing cryptically
+    # later at the cp step.
     echo "Existing bibata_cursor/ looks incomplete, re-cloning..."
     rm -rf $build_dir
     if not git clone https://github.com/rtgiskard/bibata_cursor $build_dir
@@ -125,6 +128,17 @@ except Exception as e:
                 --themes-json "$themes_json" \
                 --theme "$NAME" >/dev/null 2>metadata_err.log
             set ok_count (math $ok_count + 1)
+
+            # KDE Plasma 6.2+ SVG cursor variant — additive, non-fatal:
+            # a failure here doesn't invalidate the theme, since the
+            # core Xcursor/hyprcursor output already succeeded above.
+            if not python3 "$script_dir/generate_kde_svg_cursors.py" \
+                    --install-dir "$install_dir" \
+                    --themes-json "$themes_json" \
+                    --theme "$NAME" >/dev/null 2>kde_svg_err.log
+                echo "Warning: KDE SVG cursor generation failed for $NAME:" >&2
+                cat kde_svg_err.log >&2
+            end
         else
             echo "Theme compiled but metadata_generator.py failed for $NAME:" >&2
             cat metadata_err.log >&2

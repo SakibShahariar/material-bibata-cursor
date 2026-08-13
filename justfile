@@ -16,10 +16,6 @@ build:
 build-one theme:
     fish scripts/compile_bibata_material.fish {{theme}}
 
-# Regenerate KDE SVG cursors (cursors_scalable/) without a full recompile, e.g. `just kde-svg` or `just kde-svg Coral`
-kde-svg theme="":
-    python3 scripts/generate_kde_svg_cursors.py {{ if theme != "" { "--theme" } else { "" } }} {{theme}}
-
 # Package already-compiled themes into a release archive, e.g. `just package v1.0.0`
 package version:
     bash scripts/package_release.sh {{version}}

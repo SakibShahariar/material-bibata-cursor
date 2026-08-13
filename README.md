@@ -58,6 +58,7 @@ Don't want to run fish directly? There's a `justfile`:
 ```bash
 just build              # all 28
 just build-one Coral    # just one, faster for testing a color
+just kde-svg            # regenerate KDE SVG cursors without recompiling
 just package <version>  # bundle for a release, e.g. just package v1.0.0
 just list
 just show Ice-Blue
@@ -126,6 +127,7 @@ themes.json                       # all theme colors, edit this to add/change on
 scripts/
 ├── compile_bibata_material.fish  # builds themes.json -> ~/.icons
 ├── metadata_generator.py         # writes index.theme so GNOME picks it up
+├── generate_kde_svg_cursors.py   # writes cursors_scalable/ for KDE Plasma 6.2+
 └── package_release.sh            # bundles compiled themes for release
 ```
 
@@ -133,6 +135,12 @@ Build flow: clone `bibata_cursor`, patch its render config with each
 theme's colors, then compile and install to `~/.icons`. `index.theme`
 gets written right after each theme installs, so a broken metadata
 file gets caught immediately instead of at the end of a 28-theme run.
+Each theme also gets a `cursors_scalable/` directory alongside the
+regular `cursors/` — Plasma 6.2+'s native SVG cursor format, real
+vector versions of every shape (including animated ones like the wait
+spinner), for crisp scaling at any DPI. Apps that don't support it fall
+back to the regular Xcursor files automatically — nothing extra to
+configure.
 
 ## Packaging for redistribution
 

@@ -97,8 +97,24 @@ try:
     d[t]['colors'][2]['replace'] = '$WATCH'
     with open('config/render.json', 'w') as f:
         json.dump(d, f, indent=2)
+
+    # Expand X11 cursor sizes beyond the upstream default so fractional
+    # display scaling (125%, 150%, etc.) gets an exact-match bitmap
+    # instead of a blurry nearest-size scale. Sizes are 24px-base scaled
+    # 0.5x-3x in 0.25x steps, merged with upstream's original list.
+    # See: https://blogs.kde.org/2024/10/09/cursor-size-problems-in-wayland-explained/
+    with open('config/build.toml') as f:
+        build_toml = f.read()
+    old_sizes = 'x11_sizes = [16, 20, 22, 24, 28, 32, 48, 64, 72, 84, 96]'
+    new_sizes = 'x11_sizes = [12, 16, 18, 20, 22, 24, 28, 30, 32, 36, 42, 48, 54, 60, 64, 66, 72, 84, 96]'
+    if old_sizes not in build_toml:
+        print('build.toml sizes line not found in expected format, skipping size expansion', file=sys.stderr)
+    else:
+        build_toml = build_toml.replace(old_sizes, new_sizes)
+        with open('config/build.toml', 'w') as f:
+            f.write(build_toml)
 except Exception as e:
-    print(f'render.json patch failed: {e}', file=sys.stderr)
+    print(f'config patch failed: {e}', file=sys.stderr)
     sys.exit(1)
 "; echo $status)
 

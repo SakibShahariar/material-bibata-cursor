@@ -134,6 +134,14 @@ theme's colors, then compile and install to `~/.icons`. `index.theme`
 gets written right after each theme installs, so a broken metadata
 file gets caught immediately instead of at the end of a 28-theme run.
 
+Cursors are also compiled at more sizes than upstream's default (19
+sizes instead of 11) — specifically every exact size a 24px cursor
+hits across Plasma/GNOME's fractional display scaling steps (0.5x
+through 3x). Without an exact match, some apps scale the nearest
+available bitmap instead, which can look blurry on fractional scaling.
+This roughly doubles build time (~30s vs ~17s per theme) but doesn't
+change anything about how you use the themes.
+
 ## Packaging for redistribution
 
 If you want to share compiled themes somewhere as a single download

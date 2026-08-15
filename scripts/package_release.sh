@@ -9,7 +9,11 @@
 # channels that need actual files, not a build script.
 #
 # Usage:
-#   bash scripts/package_release.sh [version]
+#   bash scripts/package_release.sh <version> [--exclude Name1,Name2,...]
+#
+# Example: exclude Classic (the vanilla Bibata colors, not one of the
+# 28 M3 themes) from an official release:
+#   bash scripts/package_release.sh v1.1.0 --exclude Classic
 #
 # Output: dist/bibata-material-<version>.tar.gz — extract straight into ~/.icons
 
@@ -19,8 +23,26 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 INSTALL_DIR="${BIBATA_MATERIAL_INSTALL_DIR:-$HOME/.icons}"
 THEMES_JSON="$REPO_ROOT/themes.json"
-VERSION="${1:-untagged}"
 DIST_DIR="$REPO_ROOT/dist"
+
+VERSION="untagged"
+EXCLUDE_LIST=""
+
+# Simple manual arg parsing: first non-flag arg is the version,
+# --exclude takes a comma-separated list.
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --exclude)
+            EXCLUDE_LIST="$2"
+            shift 2
+            ;;
+        *)
+            VERSION="$1"
+            shift
+            ;;
+    esac
+done
+
 STAGE_DIR="$DIST_DIR/bibata-material-$VERSION"
 
 if [[ ! -f "$THEMES_JSON" ]]; then
@@ -44,8 +66,24 @@ mkdir -p "$STAGE_DIR"
 
 missing=0
 included=0
+excluded=0
+
+# Build a lookup set from the comma-separated exclude list
+declare -A EXCLUDE_SET
+if [[ -n "$EXCLUDE_LIST" ]]; then
+    IFS=',' read -ra _excl_arr <<< "$EXCLUDE_LIST"
+    for name in "${_excl_arr[@]}"; do
+        EXCLUDE_SET["$name"]=1
+    done
+fi
 
 while IFS= read -r name; do
+    if [[ -n "${EXCLUDE_SET[$name]+x}" ]]; then
+        echo "Excluding '$name' (--exclude)" >&2
+        excluded=$((excluded + 1))
+        continue
+    fi
+
     folder="Bibata-Material-$name"
     src="$INSTALL_DIR/$folder"
 
@@ -81,12 +119,12 @@ Material Bibata Cursor — Installation
 If your cursor theme doesn't show up after copying, log out and back in
 — some environments only rescan cursor themes at session start.
 
-Full source, build instructions, and the wallpaper-aware auto-switcher:
-https://github.com/SakibShahariar/bibata-material
+Full source and build instructions:
+https://github.com/SakibShahariar/material-bibata-cursor
 EOF
 
 echo ""
-echo "Packaged $included theme(s), skipped $missing missing."
+echo "Packaged $included theme(s), excluded $excluded, skipped $missing missing."
 
 mkdir -p "$DIST_DIR"
 tar_path="$DIST_DIR/bibata-material-$VERSION.tar.gz"

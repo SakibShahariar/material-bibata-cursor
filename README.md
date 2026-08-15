@@ -29,6 +29,12 @@ Apricot, Sunset, Blush, Salmon, Pink Pastel, Pink Rose, Lilac, Violet,
 Sage, Lime, Moss, Sand, Beige, Brown, Cloud, Grey, Slate, Noir,
 Midnight, Charcoal. Exact hex values are in `themes.json`.
 
+There's also **Classic** — the original stock Bibata-Modern-Classic
+colors (`#000000` body, `#ffffff` outline), included as-is for anyone
+who wants the vanilla look rather than an M3 variant. It's not one of
+the 28 (it doesn't follow the Container/Primary design this project is
+actually about), just a convenient extra in the same pack.
+
 Each theme's actual range of cursor shapes:
 
 <div align="center">
@@ -157,6 +163,16 @@ compiled in `~/.icons`, with a plain-language `INSTALL.txt` inside for
 anyone who downloads the archive directly and never sees this repo.
 This step is entirely optional — it's only for packaging a downloadable
 copy, not part of building or using the themes yourself.
+
+To leave specific themes out of the package (e.g. `Classic`, since
+it's not one of the 28 M3 themes):
+
+```bash
+bash scripts/package_release.sh <version> --exclude Classic
+```
+
+Comma-separate multiple names to exclude more than one:
+`--exclude Classic,Noir`.
 
 ---
 

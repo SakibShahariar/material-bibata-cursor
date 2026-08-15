@@ -111,7 +111,7 @@
   },
   "Brown": {
     "body": "#392312",
-    "primary": "#965d34",
+    "primary": "#cb824d",
     "watch": "#22140a"
   },
   "Cloud": {
@@ -131,17 +131,17 @@
   },
   "Noir": {
     "body": "#1a1a1a",
-    "primary": "#454545",
+    "primary": "#8c8c8c",
     "watch": "#0a0a0a"
   },
   "Midnight": {
     "body": "#080a07",
-    "primary": "#232b1e",
+    "primary": "#6d8c5a",
     "watch": "#030403"
   },
   "Charcoal": {
     "body": "#0f1519",
-    "primary": "#36454f",
+    "primary": "#7591a3",
     "watch": "#080b0e"
   }
 }

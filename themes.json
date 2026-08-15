@@ -1,4 +1,9 @@
 {
+  "Classic": {
+    "body": "#000000",
+    "primary": "#ffffff",
+    "watch": "#000000"
+  },
   "Ice-Blue": {
     "body": "#1a333d",
     "primary": "#a8cbe2",

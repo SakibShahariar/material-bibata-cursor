@@ -35,6 +35,14 @@ who wants the vanilla look rather than an M3 variant. It's not one of
 the 28 (it doesn't follow the Container/Primary design this project is
 actually about), just a convenient extra in the same pack.
 
+Each theme's actual range of cursor shapes:
+
+<div align="center">
+
+![All 28 themes, several shapes each](docs/matrix-all-28.png)
+
+</div>
+
 ### Light versions
 
 Every one of the 28 also has a `-Light` counterpart (e.g. `Ice-Blue-Light`)
@@ -56,14 +64,6 @@ Each light theme's range of cursor shapes:
 <div align="center">
 
 ![All 28 light themes, several shapes each](docs/matrix-all-28-light.png)
-
-</div>
-
-Each theme's actual range of cursor shapes:
-
-<div align="center">
-
-![All 28 themes, several shapes each](docs/matrix-all-28.png)
 
 </div>
 

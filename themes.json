@@ -143,5 +143,145 @@
     "body": "#0f1519",
     "primary": "#7591a3",
     "watch": "#080b0e"
+  },
+  "Ice-Blue-Light": {
+    "body": "#e0eaf1",
+    "primary": "#126ba6",
+    "watch": "#f3f5f6"
+  },
+  "Sky-Blue-Light": {
+    "body": "#dfeaf3",
+    "primary": "#0567b4",
+    "watch": "#f3f5f6"
+  },
+  "Deep-Blue-Light": {
+    "body": "#d9edf0",
+    "primary": "#037086",
+    "watch": "#f3f6f6"
+  },
+  "Soft-Blue-Light": {
+    "body": "#e0e5f3",
+    "primary": "#0531b9",
+    "watch": "#f3f4f6"
+  },
+  "Mint-Light": {
+    "body": "#def0ed",
+    "primary": "#0b7964",
+    "watch": "#f3f6f6"
+  },
+  "Seafoam-Light": {
+    "body": "#dff1ee",
+    "primary": "#0b7462",
+    "watch": "#f3f6f6"
+  },
+  "Teal-Light": {
+    "body": "#d6efef",
+    "primary": "#036f6f",
+    "watch": "#f3f6f6"
+  },
+  "Peach-Light": {
+    "body": "#f3e4df",
+    "primary": "#b63405",
+    "watch": "#f6f4f3"
+  },
+  "Apricot-Light": {
+    "body": "#f3e7e0",
+    "primary": "#ae4504",
+    "watch": "#f6f4f3"
+  },
+  "Sunset-Light": {
+    "body": "#f3e7de",
+    "primary": "#a94804",
+    "watch": "#f6f5f3"
+  },
+  "Blush-Light": {
+    "body": "#f3e2e0",
+    "primary": "#b81d05",
+    "watch": "#f6f4f3"
+  },
+  "Salmon-Light": {
+    "body": "#f2e0de",
+    "primary": "#ad1806",
+    "watch": "#f6f4f3"
+  },
+  "Pink-Pastel-Light": {
+    "body": "#f3e0e6",
+    "primary": "#b90542",
+    "watch": "#f6f3f4"
+  },
+  "Pink-Rose-Light": {
+    "body": "#f3e0ea",
+    "primary": "#ba0563",
+    "watch": "#f6f3f5"
+  },
+  "Lilac-Light": {
+    "body": "#e4e0f3",
+    "primary": "#2c05bb",
+    "watch": "#f4f3f6"
+  },
+  "Violet-Light": {
+    "body": "#eee0f3",
+    "primary": "#8c05ba",
+    "watch": "#f6f3f6"
+  },
+  "Sage-Light": {
+    "body": "#e9f2df",
+    "primary": "#3d7606",
+    "watch": "#f5f6f3"
+  },
+  "Lime-Light": {
+    "body": "#e9f2e0",
+    "primary": "#3c7908",
+    "watch": "#f5f6f3"
+  },
+  "Moss-Light": {
+    "body": "#efefd9",
+    "primary": "#676608",
+    "watch": "#f6f6f3"
+  },
+  "Sand-Light": {
+    "body": "#f0e8e1",
+    "primary": "#a05218",
+    "watch": "#f6f5f3"
+  },
+  "Beige-Light": {
+    "body": "#f2ece1",
+    "primary": "#8c5f0b",
+    "watch": "#f6f5f3"
+  },
+  "Brown-Light": {
+    "body": "#f0e5dd",
+    "primary": "#97490f",
+    "watch": "#f6f5f3"
+  },
+  "Cloud-Light": {
+    "body": "#e1e6ef",
+    "primary": "#1c4798",
+    "watch": "#f3f4f6"
+  },
+  "Grey-Light": {
+    "body": "#e2e7f0",
+    "primary": "#1c489f",
+    "watch": "#f3f4f6"
+  },
+  "Slate-Light": {
+    "body": "#dde6ee",
+    "primary": "#19528a",
+    "watch": "#f3f5f6"
+  },
+  "Noir-Light": {
+    "body": "#ebebeb",
+    "primary": "#4c4c4c",
+    "watch": "#f7f7f7"
+  },
+  "Midnight-Light": {
+    "body": "#e3eedc",
+    "primary": "#3a7714",
+    "watch": "#f4f6f3"
+  },
+  "Charcoal-Light": {
+    "body": "#dee8ee",
+    "primary": "#18608f",
+    "watch": "#f3f5f6"
   }
 }

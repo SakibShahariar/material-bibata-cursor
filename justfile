@@ -8,13 +8,21 @@
 default:
     @just --list
 
-# Build all 28 themes and install to ~/.icons (or $BIBATA_MATERIAL_INSTALL_DIR)
+# Build all 57 themes and install to ~/.icons (or $BIBATA_MATERIAL_INSTALL_DIR)
 build:
     fish scripts/compile_bibata_material.fish
 
 # Build a single theme by name, e.g. `just build-one Coral`
 build-one theme:
     fish scripts/compile_bibata_material.fish {{theme}}
+
+# Build only the 28 dark themes + Classic (skips the -Light set, faster)
+build-dark:
+    fish scripts/compile_bibata_material.fish --only-dark
+
+# Build only the 28 -Light themes (skips the dark set, faster)
+build-light:
+    fish scripts/compile_bibata_material.fish --only-light
 
 # Package already-compiled themes into a release archive, e.g. `just package v1.0.0`
 package version:

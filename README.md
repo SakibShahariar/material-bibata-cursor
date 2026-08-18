@@ -35,6 +35,30 @@ who wants the vanilla look rather than an M3 variant. It's not one of
 the 28 (it doesn't follow the Container/Primary design this project is
 actually about), just a convenient extra in the same pack.
 
+### Light versions
+
+Every one of the 28 also has a `-Light` counterpart (e.g. `Ice-Blue-Light`)
+— same hue, tone-swapped: a pale/light body instead of a dark one, and a
+darker, saturated outline instead of a light one. This mirrors how
+Material Design 3 actually defines light vs dark surfaces (it's not a
+simple color inversion — light and dark mode swap which tone from the
+same palette plays which role). All 28 light variants meet the same
+≥4.5 contrast bar as the dark set.
+
+<div align="center">
+
+![All 28 light themes](docs/comparison-all-28-light.png)
+
+</div>
+
+Each light theme's range of cursor shapes:
+
+<div align="center">
+
+![All 28 light themes, several shapes each](docs/matrix-all-28-light.png)
+
+</div>
+
 Each theme's actual range of cursor shapes:
 
 <div align="center">
@@ -55,20 +79,28 @@ cd material-bibata-cursor
 fish scripts/compile_bibata_material.fish
 ```
 
-That installs all 28 to `~/.icons`. From there, pick one through GNOME
-Settings, GNOME Tweaks, or however your desktop/WM selects a cursor
-theme — the exact menu depends on your setup.
+That installs all 57 (28 dark, 28 light, plus Classic) to `~/.icons`.
+From there, pick one through GNOME Settings, GNOME Tweaks, or however
+your desktop/WM selects a cursor theme — the exact menu depends on
+your setup.
 
 Don't want to run fish directly? There's a `justfile`:
 
 ```bash
-just build              # all 28
+just build              # all 57 (28 dark, 28 light, Classic)
+just build-dark         # just the 28 dark themes + Classic
+just build-light        # just the 28 light themes
 just build-one Coral    # just one, faster for testing a color
 just package <version>  # bundle for a release, e.g. just package v1.0.0
 just list
 just show Ice-Blue
 just check-deps
 ```
+
+For finer control (e.g. skipping specific themes, or combining
+`--only-light`/`--only-dark` with `--exclude`), call the fish script
+directly: `fish scripts/compile_bibata_material.fish --only-light
+--exclude Noir-Light,Charcoal-Light`.
 
 ## Adding a color
 
@@ -83,7 +115,8 @@ Add an entry to `themes.json`:
 ```
 
 Then `fish scripts/compile_bibata_material.fish Coral` (or
-`just build-one Coral`) to build just that one instead of all 28.
+`just build-one Coral`) to build just that one instead of recompiling
+everything.
 
 A few guidelines for picking colors that hold up visually:
 
@@ -158,14 +191,18 @@ clone and build the repo themselves, package what you've built:
 bash scripts/package_release.sh <version>
 ```
 
-Writes `dist/bibata-material-<version>.tar.gz` from whatever's
-compiled in `~/.icons`, with a plain-language `INSTALL.txt` inside for
-anyone who downloads the archive directly and never sees this repo.
-This step is entirely optional — it's only for packaging a downloadable
-copy, not part of building or using the themes yourself.
+Writes two separate archives:
 
-To leave specific themes out of the package (e.g. `Classic`, since
-it's not one of the 28 M3 themes):
+- `dist/bibata-material-dark-<version>.tar.gz` — the 28 dark themes + Classic
+- `dist/bibata-material-light-<version>.tar.gz` — the 28 `-Light` themes
+
+Each has its own plain-language `INSTALL.txt` inside for anyone who
+downloads the archive directly and never sees this repo. This step is
+entirely optional — it's only for packaging downloadable copies, not
+part of building or using the themes yourself.
+
+To leave specific themes out (e.g. `Classic`, since it's not one of
+the 28 M3 themes — this only affects the dark archive):
 
 ```bash
 bash scripts/package_release.sh <version> --exclude Classic

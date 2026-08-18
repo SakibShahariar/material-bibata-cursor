@@ -1,9 +1,23 @@
 #!/usr/bin/env fish
 # Compiles themes from themes.json into installed Bibata cursor packs.
-# Usage: compile_bibata_material.fish [theme-name]
+#
+# Usage:
+#   compile_bibata_material.fish [theme-name] [--exclude Name1,Name2] [--only-light] [--only-dark]
+#
 #   No argument: compiles every theme in themes.json.
 #   With a theme name (e.g. "Coral"): compiles only that one — much
 #   faster when testing a new color you just added.
+#   --exclude: comma-separated theme names to skip.
+#   --only-light / --only-dark: only build "-Light" themes, or only
+#   the non-"-Light" set (includes Classic). Mutually exclusive.
+
+argparse 'exclude=' 'only-light' 'only-dark' -- $argv
+or exit 1
+
+if set -q _flag_only_light; and set -q _flag_only_dark
+    echo "Error: --only-light and --only-dark can't be used together." >&2
+    exit 1
+end
 
 set -l requested_theme $argv[1]
 
@@ -56,8 +70,29 @@ else
     set theme_names (jq -r 'keys[]' $themes_json)
 end
 
+# Apply --only-light / --only-dark filtering
+if set -q _flag_only_light
+    set theme_names (for t in $theme_names; string match -q '*-Light' -- $t; and echo $t; end)
+else if set -q _flag_only_dark
+    set theme_names (for t in $theme_names; string match -qv '*-Light' -- $t; and echo $t; end)
+end
+
+# Apply --exclude filtering
+if set -q _flag_exclude
+    set -l exclude_names (string split ',' $_flag_exclude)
+    set -l filtered
+    for t in $theme_names
+        if not contains $t $exclude_names
+            set -a filtered $t
+        else
+            echo "Excluding '$t' (--exclude)" >&2
+        end
+    end
+    set theme_names $filtered
+end
+
 if test (count $theme_names) -eq 0
-    echo "Error: themes.json contains no themes" >&2
+    echo "Error: no themes to build after filtering" >&2
     exit 1
 end
 

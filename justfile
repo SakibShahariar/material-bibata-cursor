@@ -24,9 +24,33 @@ build-dark:
 build-light:
     fish scripts/compile_bibata_material.fish --only-light
 
+# Build Windows .cur cursor themes (all 57)
+build-win:
+    python3 scripts/build_windows.py
+
+# Build a single Windows theme, e.g. `just build-win-one Coral`
+build-win-one theme:
+    python3 scripts/build_windows.py {{theme}}
+
+# Remove Windows build artifacts (out_win/)
+clean-win:
+    rm -rf out_win
+
 # Package already-compiled themes into a release archive, e.g. `just package v1.0.0`
 package version:
     bash scripts/package_release.sh {{version}}
+
+# Package Windows .cur themes for release, e.g. `just package-win v1.0.0`
+package-win version:
+    bash scripts/package_release.sh {{version}} --win
+
+# Package Windows .cur themes for release (dark only), e.g. `just package-win-dark v1.0.0`
+package-win-dark version:
+    bash scripts/package_release.sh {{version}} --win --only-dark
+
+# Package Windows .cur themes for release (light only), e.g. `just package-win-light v1.0.0`
+package-win-light version:
+    bash scripts/package_release.sh {{version}} --win --only-light
 
 # List all theme names defined in themes.json
 list:

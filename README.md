@@ -67,6 +67,36 @@ Each light theme's range of cursor shapes:
 
 </div>
 
+## Windows cursors
+
+Windows `.cur` cursor files are generated separately using `scripts/build_windows.py`:
+
+```bash
+python3 scripts/build_windows.py            # all themes
+python3 scripts/build_windows.py --only-dark # dark themes only
+python3 scripts/build_windows.py --only-light # light themes only
+```
+
+Each theme gets a folder under `out_win/` containing `.cur` files at sizes 16, 24, 32, 48, 64, and 128px.
+
+To install on Windows, copy each theme folder into `%LOCALAPPDATA%\Icons\` (per-user) or `C:\Windows\Cursors\` (all users, requires admin), then select the cursor in **Settings → Personalization → Colors**.
+
+Package Windows cursors into a distributable `.zip`:
+
+```bash
+bash scripts/package_release.sh <version> --win
+bash scripts/package_release.sh <version> --win --only-dark
+bash scripts/package_release.sh <version> --win --only-light
+```
+
+Each archive contains an `INSTALL.txt` with Windows-specific instructions.
+
+For finer control (e.g. skipping specific themes):
+
+```bash
+bash scripts/package_release.sh <version> --win --exclude Noir
+```
+
 ## Install
 
 Needs `fish`, `git`, `python3`, `jq`, plus whatever `bibata_cursor`
@@ -92,6 +122,7 @@ just build-dark         # just the 28 dark themes + Classic
 just build-light        # just the 28 light themes
 just build-one Coral    # just one, faster for testing a color
 just package <version>  # bundle for a release, e.g. just package v1.0.0
+just package-win <version>       # Windows .cur .zip archives
 just list
 just show Ice-Blue
 just check-deps
@@ -189,17 +220,20 @@ clone and build the repo themselves, package what you've built:
 
 ```bash
 bash scripts/package_release.sh <version>
+bash scripts/package_release.sh <version> --win        # Windows .cur archives
 ```
 
-Writes two separate archives:
+Writes two separate archives (dark/light) by default:
 
 - `dist/bibata-material-dark-<version>.tar.gz` — the 28 dark themes + Classic
 - `dist/bibata-material-light-<version>.tar.gz` — the 28 `-Light` themes
 
-Each has its own plain-language `INSTALL.txt` inside for anyone who
-downloads the archive directly and never sees this repo. This step is
-entirely optional — it's only for packaging downloadable copies, not
-part of building or using the themes yourself.
+With `--win`, outputs Windows `.zip` archives instead:
+
+- `dist/bibata-material-dark-<version>-win.zip` — dark themes as `.cur` files
+- `dist/bibata-material-light-<version>-win.zip` — light themes as `.cur` files
+
+Each archive contains its own plain-language `INSTALL.txt`. Use `--only-dark`, `--only-light`, or `--exclude` to filter themes. This step is entirely optional — it's only for packaging downloadable copies, not part of building or using the themes yourself.
 
 To leave specific themes out (e.g. `Classic`, since it's not one of
 the 28 M3 themes — this only affects the dark archive):

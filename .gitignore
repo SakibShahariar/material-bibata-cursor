@@ -6,6 +6,7 @@ scripts/bibata_cursor/
 # locally, or package_release.sh to bundle for distribution.
 dist/
 out/
+out_win/
 
 # Python
 __pycache__/

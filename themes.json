@@ -256,17 +256,17 @@
   },
   "Cloud-Light": {
     "body": "#e1e6ef",
-    "primary": "#1c4798",
+    "primary": "#2f3a4d",
     "watch": "#f3f4f6"
   },
   "Grey-Light": {
     "body": "#e2e7f0",
-    "primary": "#1c489f",
+    "primary": "#40444a",
     "watch": "#f3f4f6"
   },
   "Slate-Light": {
     "body": "#dde6ee",
-    "primary": "#19528a",
+    "primary": "#2e4052",
     "watch": "#f3f5f6"
   },
   "Noir-Light": {

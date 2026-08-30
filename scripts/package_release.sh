@@ -77,11 +77,6 @@ if [[ -n "${EXCLUDE_LIST:-}" ]]; then
     done
 fi
 
-if [[ "$MODE" == "windows" ]]; then
-    package_windows
-    exit 0
-fi
-
 # Plain-language install instructions, shared by both archives.
 write_install_txt() {
     local dir="$1"
@@ -266,6 +261,11 @@ Full source and build instructions:
 https://github.com/SakibShahariar/material-bibata-cursor
 EOF
 }
+
+if [[ "$MODE" == "windows" ]]; then
+    package_windows
+    exit 0
+fi
 
 dark_names=()
 light_names=()

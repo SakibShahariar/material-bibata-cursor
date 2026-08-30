@@ -10,8 +10,8 @@
 # Output:
 #   dist/bibata-material-dark-<version>.tar.gz    — the 28 dark themes + Classic
 #   dist/bibata-material-light-<version>.tar.gz   — the 28 "-Light" themes
-#   dist/bibata-material-dark-<version>-win.zip   — Windows .cur (dark + light)
-#   dist/bibata-material-light-<version>-win.zip  — Windows .cur (light only)
+#   dist/bibata-material-dark-<version>-win.zip   — Windows .cur (dark themes + Classic)
+#   dist/bibata-material-light-<version>-win.zip  — Windows .cur (light themes)
 
 set -euo pipefail
 

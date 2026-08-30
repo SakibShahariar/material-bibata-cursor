@@ -70,11 +70,13 @@ def render_svg_to_png(svg_path: Path, png_path: Path, size: int) -> None:
     )
 
 
-def find_svg(render_dir: str, cursor_name: str) -> Path:
-    for pat in (f"{cursor_name}.svg", f"{cursor_name}-*.svg"):
-        matches = sorted(Path(render_dir).glob(pat))
-        if matches:
-            return matches[0]
+def find_svg(cursor_name: str) -> Path:
+    candidates = [cursor_name, cursor_name.replace("_", "-")]
+    for name in candidates:
+        for pat in (f"{name}.svg", f"{name}-*.svg"):
+            matches = sorted(SVG_DIR.rglob(pat))
+            if matches:
+                return matches[0]
     return None
 
 
@@ -120,7 +122,6 @@ def build_theme(theme_key: str, themes: dict,
     colors[1]["replace"] = primary
     colors[2]["replace"] = watch
 
-    render_dir = str(SVG_DIR / render_theme["dir"])
     cursor_configs, defaults = load_cursor_config()
     theme_dir = out_base / f"{THEME_PREFIX}{theme_key}"
     theme_dir.mkdir(parents=True, exist_ok=True)
@@ -134,7 +135,7 @@ def build_theme(theme_key: str, themes: dict,
 
         x_hot = get_hotspot(params, defaults, "x_hotspot")
         y_hot = get_hotspot(params, defaults, "y_hotspot")
-        svg_path = find_svg(render_dir, cursor_name)
+        svg_path = find_svg(cursor_name)
 
         if svg_path is None:
             print(f"  SVG not found for {cursor_name}", file=sys.stderr)

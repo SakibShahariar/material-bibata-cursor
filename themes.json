@@ -166,12 +166,12 @@
   },
   "Mint-Light": {
     "body": "#def0ed",
-    "primary": "#0b7964",
+    "primary": "#0a6e5a",
     "watch": "#f3f6f6"
   },
   "Seafoam-Light": {
     "body": "#dff1ee",
-    "primary": "#0b7462",
+    "primary": "#0b6b7a",
     "watch": "#f3f6f6"
   },
   "Teal-Light": {
@@ -191,7 +191,7 @@
   },
   "Sunset-Light": {
     "body": "#f3e7de",
-    "primary": "#a94804",
+    "primary": "#a63a00",
     "watch": "#f6f5f3"
   },
   "Blush-Light": {
@@ -230,8 +230,8 @@
     "watch": "#f5f6f3"
   },
   "Lime-Light": {
-    "body": "#e9f2e0",
-    "primary": "#3c7908",
+    "body": "#eef3d9",
+    "primary": "#5a7500",
     "watch": "#f5f6f3"
   },
   "Moss-Light": {

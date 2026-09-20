@@ -18,6 +18,15 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 INSTALL_DIR="${BIBATA_MATERIAL_INSTALL_DIR:-$HOME/.icons}"
+# Where the scalable SVG cursor trees live (KDE Plasma 6.2+ / GNOME 51+).
+# GNOME only scans XDG data dirs for cursors_scalable, never ~/.icons.
+if [[ -n "${BIBATA_MATERIAL_SCALABLE_DIR:-}" ]]; then
+    SCALABLE_DIR="$BIBATA_MATERIAL_SCALABLE_DIR"
+elif [[ "$INSTALL_DIR" == /usr/share/icons || "$INSTALL_DIR" == /usr/local/share/icons ]]; then
+    SCALABLE_DIR="$INSTALL_DIR"
+else
+    SCALABLE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/icons"
+fi
 THEMES_JSON="$REPO_ROOT/themes.json"
 DIST_DIR="$REPO_ROOT/dist"
 OUT_WIN="$REPO_ROOT/out_win"
@@ -84,11 +93,24 @@ write_install_txt() {
     cat > "$dir/INSTALL.txt" << EOF
 Material Bibata Cursor — $group_label — Installation
 
-1. Extract this archive.
-2. Copy every "Bibata-Material-*" folder into ~/.icons/
+Each "Bibata-Material-*" folder ships two cursor formats:
+  - cursors/  (Xcursor bitmaps) — every desktop, and the fallback for
+    X11/XWayland apps.
+  - cursors_scalable/ (SVG cursors) — rendered by KDE Plasma 6.2+ and
+    GNOME 51+ instead of the bitmaps.
+
+On Linux:
+1. Copy every "Bibata-Material-*" folder into ~/.icons/
    (create that folder if it doesn't exist).
-3. Open GNOME Settings (or GNOME Tweaks) → Mouse & Touchpad, or your
-   DE/WM's cursor theme picker, and select one of the themes.
+2. For KDE 6.2+ / GNOME 51+, also copy the SVG cursors into your icon
+   data directory (GNOME does NOT scan ~/.icons for those):
+     install -d ~/.local/share/icons
+     for d in Bibata-Material-*; do
+       install -d ~/.local/share/icons/"\$d"
+       cp -r "\$d"/cursors_scalable ~/.local/share/icons/"\$d"/
+     done
+3. Select the theme in GNOME Settings (Mouse & Touchpad), GNOME Tweaks,
+   or your DE/WM's cursor theme picker.
 
 If your cursor theme doesn't show up after copying, log out and back in
 — some environments only rescan cursor themes at session start.
@@ -128,6 +150,18 @@ package_group() {
         fi
 
         cp -r "$src" "$stage_dir/$folder"
+
+        # Merge in the scalable SVG cursors when they live in a separate
+        # dir (the ~/.local/share/icons case). System-wide installs
+        # already have them inside "$src".
+        if [[ "$SCALABLE_DIR" != "$INSTALL_DIR" ]]; then
+            local scalable_src="$SCALABLE_DIR/$folder/cursors_scalable"
+            if [[ -d "$scalable_src" ]]; then
+                cp -r "$scalable_src" "$stage_dir/$folder/"
+            else
+                echo "Warning: no cursors_scalable at $scalable_src" >&2
+            fi
+        fi
         included=$((included + 1))
     done
 

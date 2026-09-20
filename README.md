@@ -153,7 +153,8 @@ change anything about how you use the themes.
 
 ## Windows cursors
 
-Windows `.cur` cursor files are generated separately using `scripts/build_windows.py`:
+Windows `.cur` cursor files are generated separately using
+`scripts/build_windows.py`:
 
 ```bash
 python3 scripts/build_windows.py            # all themes
@@ -161,7 +162,8 @@ python3 scripts/build_windows.py --only-dark # dark themes only
 python3 scripts/build_windows.py --only-light # light themes only
 ```
 
-Each theme gets a folder under `out_win/` containing `.cur` files at sizes 16, 24, 32, 48, 64, and 128px.
+Each theme gets a folder under `out_win/` containing `.cur` files at
+sizes 16, 24, 32, 48, 64, and 128px.
 
 To install on Windows, open any `Bibata-Material-*` folder, right-click
 `Install.inf` and choose **Install** — it copies the `.cur` files into a
@@ -260,13 +262,13 @@ If you want to share compiled themes somewhere as a single download
 clone and build the repo themselves, package what you've built:
 
 ```bash
-bash scripts/package_release.sh <version>
-bash scripts/package_release.sh <version> --win        # Windows .cur archives
+bash scripts/package_release.sh <version>                     # Linux tar.gz
+bash scripts/package_release.sh <version> --win               # Windows .zip
 bash scripts/package_release.sh <version> --win --only-dark
 bash scripts/package_release.sh <version> --win --only-light
 ```
 
-Writes two separate archives (dark/light) by default:
+Writes two separate Linux archives (dark/light) by default:
 
 - `dist/bibata-material-dark-<version>.tar.gz` — the 28 dark themes + Classic
 - `dist/bibata-material-light-<version>.tar.gz` — the 28 `-Light` themes
@@ -278,7 +280,8 @@ or skipped when it's the same system-wide install dir). So a single
 archive works on any desktop: X11 apps use `cursors/`, Hyprland uses
 `hyprcursors/`, KDE Plasma 6.2+ and GNOME 51+ use `cursors_scalable/`.
 
-With `--win`, outputs Windows `.zip` archives instead:
+With `--win`, outputs Windows `.zip` archives instead (built from the
+`out_win/` output of the [Windows cursors](#windows-cursors) step):
 
 - `dist/bibata-material-dark-<version>-win.zip` — dark themes as `.cur` files
 - `dist/bibata-material-light-<version>-win.zip` — light themes as `.cur` files

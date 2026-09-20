@@ -207,36 +207,54 @@ WIN_SCHEME = [
 def write_install_inf(theme_dir: Path, theme_key: str) -> None:
     """Write an install.inf so Windows users can right-click -> Install.
 
-    Copies the mapped .cur files into a per-theme subfolder of
-    C:\\Windows\\Cursors\\ and registers the scheme under
-    HKCU\\Control Panel\\Cursors, so multiple Material Bibata themes can
-    be installed side-by-side without overwriting each other."""
+    Follows the clickgen/Vimix layout that reliably shows the theme in
+    the Mouse Properties -> Pointers scheme dropdown:
+      * a named scheme value under Cursors\\Schemes listing all 15
+        cursor slots comma-joined in the fixed required order, and
+      * live values under Cursors written with REG_EXPAND_SZ
+        (0x00020000) so the %10% paths expand.
+    Files land in a per-theme C:\\Windows\\Cursors\\ subfolder so
+    multiple Material Bibata themes can coexist."""
     scheme = [(v, f"{n}.cur") for v, n in WIN_SCHEME if (theme_dir / f"{n}.cur").is_file()]
     subdir = f"{THEME_PREFIX}{theme_key}"
+    scheme_name = f"Material Bibata ({theme_key})"
+
+    cur_dir = f"Cursors\\{subdir}"
+    frame = "%10%\\{cd}\\{f}"
+    cur_paths = ",".join(frame.format(cd=cur_dir, f=cur) for _, cur in scheme)
 
     lines = [
         "[Version]",
-        'Signature="$CHICAGO$"',
+        'signature="$CHICAGO$"',
         "Provider=Material Bibata Cursor",
         "",
         "[DefaultInstall]",
-        "CopyFiles=Cur.Copy",
-        "AddReg=Cursor.Reg",
+        "CopyFiles = Scheme.Cur",
+        "AddReg = Scheme.Reg,Wreg",
         "",
-        "[Cur.Copy]",
+        "[Scheme.Cur]",
     ]
     lines += [cur for _, cur in scheme]
     lines += [
         "",
         "[DestinationDirs]",
-        f'Cur.Copy=10,"Cursors\\{subdir}"',
+        f'Scheme.Cur = 10,"%CUR_DIR%"',
         "",
-        "[Cursor.Reg]",
+        "[Scheme.Reg]",
+        f'HKCU,"Control Panel\\Cursors\\Schemes","%SCHEME_NAME%",,"{cur_paths}"',
+        "",
+        "[Wreg]",
+        f'HKCU,"Control Panel\\Cursors",,0x00020000,"%SCHEME_NAME%"',
     ]
-    lines += ['HKCU,"Control Panel\\Cursors","{value}",,"%10%\\Cursors\\{subdir}\\{cur}"'.format(
-        value=v, subdir=subdir, cur=c) for v, c in scheme]
-    lines += ['HKCU,"Control Panel\\Cursors",,,"Material Bibata ({theme})"'.format(theme=theme_key)]
-    lines.append("")
+    for value, cur in scheme:
+        lines.append(f'HKCU,"Control Panel\\Cursors",{value},0x00020000,"{frame.format(cd=cur_dir, f=cur)}"')
+    lines += [
+        "",
+        "[Strings]",
+        f'CUR_DIR = "{cur_dir}"',
+        f'SCHEME_NAME = "{scheme_name}"',
+        "",
+    ]
     (theme_dir / "install.inf").write_text("\r\n".join(lines), encoding="utf-8")
 
 

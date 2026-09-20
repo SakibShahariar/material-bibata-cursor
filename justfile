@@ -12,7 +12,7 @@ default:
 build:
     fish scripts/compile_bibata_material.fish
 
-# Build a single theme by name, e.g. `just build-one Coral`
+# Build a single theme by name, e.g. `just build-one Apricot`
 build-one theme:
     fish scripts/compile_bibata_material.fish {{theme}}
 
@@ -28,7 +28,7 @@ build-light:
 svg:
     python3 scripts/generate_svg_cursors.py
 
-# Regenerate SVG cursors for one installed theme, e.g. `just svg-one Coral`
+# Regenerate SVG cursors for one installed theme, e.g. `just svg-one Apricot`
 svg-one theme:
     python3 scripts/generate_svg_cursors.py --theme {{theme}}
 

@@ -120,6 +120,9 @@ Each theme also gets a `cursors_scalable/` SVG export written to
 `~/.local/share/icons` (override with `BIBATA_MATERIAL_SCALABLE_DIR`).
 That's the format KDE Plasma 6.2+ and **GNOME 51+** actually render in
 the compositor — see [SVG cursors](#svg-cursors) below.
+The same build also produces `hyprcursors/` for Hyprland, so a single
+install covers X11 apps (`cursors/`), GNOME/KDE (the SVGs), and
+Hyprland (`hyprctl setcursor Bibata-Material-<Name> 24`).
 From there, pick one through GNOME Settings, GNOME Tweaks, or however
 your desktop/WM selects a cursor theme — the exact menu depends on
 your setup.
@@ -130,13 +133,13 @@ Don't want to run fish directly? There's a `justfile`:
 just build              # all 57 (28 dark, 28 light, Classic)
 just build-dark         # just the 28 dark themes + Classic
 just build-light        # just the 28 light themes
-just build-one Coral    # just one, faster for testing a color
+just build-one Apricot  # just one, faster for testing a color
 just svg                # (re)generate SVG cursors for installed themes
-just svg-one Coral      # SVG cursors for just one theme
+just svg-one Apricot    # SVG cursors for just one theme
 just package <version>  # bundle for a release, e.g. just package v1.0.0
 just package-win <version>       # Windows .cur .zip archives
 just list
-just show Ice-Blue
+just show Apricot
 just check-deps
 ```
 
@@ -206,18 +209,23 @@ saturated or pastel the accent color is.
 ```
 themes.json                       # all theme colors, edit this to add/change one
 scripts/
-├── compile_bibata_material.fish  # builds themes.json -> ~/.icons
+├── bibata_cursor/                # build dependency, cloned on first build
+├── compile_bibata_material.fish  # builds themes.json -> ~/.icons (Xcursor + Hyprcursor)
 ├── metadata_generator.py         # writes index.theme so GNOME picks it up
 ├── generate_svg_cursors.py       # writes cursors_scalable/ SVG cursors
+├── build_windows.py              # Windows .cur themes (see "Windows cursors")
+├── color_match.py                # finds the closest theme color to a hex
+├── cursor_matugen.sh             # matugen post-hook (see "Matugen Setup")
 └── package_release.sh            # bundles compiled themes for release
 ```
 
 Build flow: clone `bibata_cursor`, patch its render config with each
-theme's colors, then compile and install to `~/.icons`. `index.theme`
-gets written right after each theme installs, so a broken metadata
-file gets caught immediately instead of at the end of a 28-theme run.
-Then the same SVG sources are recolored again into a `cursors_scalable/`
-tree under `$XDG_DATA_HOME/icons`.
+theme's colors, then compile and install to `~/.icons` (Xcursor
+`cursors/` + Hyprland `hyprcursors/`). `index.theme` gets written right
+after each theme installs, so a broken metadata file gets caught
+immediately instead of at the end of a 28-theme run. Then the same SVG
+sources are recolored again into a `cursors_scalable/` tree under
+`$XDG_DATA_HOME/icons`.
 
 ## SVG cursors
 
@@ -274,12 +282,12 @@ Writes two separate archives (dark/light) by default:
 - `dist/bibata-material-dark-<version>.tar.gz` — the 28 dark themes + Classic
 - `dist/bibata-material-light-<version>.tar.gz` — the 28 `-Light` themes
 
-Each theme folder in an archive contains both cursor formats: the
-Xcursor `cursors/` tree from the install dir **plus** the scalable
-`cursors_scalable/` SVGs (merged from `$XDG_DATA_HOME/icons`, where the
-build puts them — or skipped when it's the same system-wide install
-dir). So a single archive works on any desktop: X11 apps use `cursors/`,
-KDE Plasma 6.2+ and GNOME 51+ use `cursors_scalable/`.
+Each theme folder in an archive contains every format: the Xcursor
+`cursors/` tree from the install dir, the Hyprland `hyprcursors/`, and
+the scalable `cursors_scalable/` SVGs (merged from `$XDG_DATA_HOME/icons`,
+or skipped when it's the same system-wide install dir). So a single
+archive works on any desktop: X11 apps use `cursors/`, Hyprland uses
+`hyprcursors/`, KDE Plasma 6.2+ and GNOME 51+ use `cursors_scalable/`.
 
 With `--win`, outputs Windows `.zip` archives instead:
 
@@ -304,7 +312,7 @@ Comma-separate multiple names to exclude more than one:
 
 ## Matugen Setup
 
-To make these themes work with [matugen](https://github.com/InioX/matugen) put `scripts/cursor_matugen.sh`, `scripts/themes.json` and `scripts/color_match.py` in your `~/.config/matugen/post-hook-scripts/` folder. Then inside your `~/.config/matugen/config.toml` file add
+To make these themes work with [matugen](https://github.com/InioX/matugen) put `scripts/cursor_matugen.sh`, the root `themes.json` (the script looks for it next to itself) and `scripts/color_match.py` in your `~/.config/matugen/post-hook-scripts/` folder. Then inside your `~/.config/matugen/config.toml` file add
 
 ```toml
 [templates.cursor]

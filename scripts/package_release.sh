@@ -112,6 +112,11 @@ On Linux:
 3. Select the theme in GNOME Settings (Mouse & Touchpad), GNOME Tweaks,
    or your DE/WM's cursor theme picker.
 
+On Hyprland (Wayland):
+1. Copy every "Bibata-Material-*" folder into ~/.config/hypr/cursors/
+2. Set the theme, e.g.:
+     hyprctl setcursor Bibata-Material-<Name> 24
+
 If your cursor theme doesn't show up after copying, log out and back in
 — some environments only rescan cursor themes at session start.
 

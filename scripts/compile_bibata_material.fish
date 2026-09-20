@@ -10,6 +10,12 @@
 #   --exclude: comma-separated theme names to skip.
 #   --only-light / --only-dark: only build "-Light" themes, or only
 #   the non-"-Light" set (includes Classic). Mutually exclusive.
+#
+#   Each compiled theme also gets a cursors_scalable/ SVG export (the
+#   format KDE Plasma 6.2+ and GNOME 51+ render instead of Xcursor
+#   bitmaps). Those are written to $XDG_DATA_HOME/icons by default
+#   (override with BIBATA_MATERIAL_SCALABLE_DIR), since GNOME only
+#   searches data dirs for SVG cursors, never ~/.icons.
 
 argparse 'exclude=' 'only-light' 'only-dark' -- $argv
 or exit 1
@@ -178,7 +184,16 @@ except Exception as e:
                 --install-dir "$install_dir" \
                 --themes-json "$themes_json" \
                 --theme "$NAME" >/dev/null 2>metadata_err.log
-            set ok_count (math $ok_count + 1)
+            if python3 "$script_dir/generate_svg_cursors.py" \
+                    --theme "$NAME" \
+                    --install-dir "$install_dir" \
+                    --themes-json "$themes_json" >/dev/null 2>svg_err.log
+                set ok_count (math $ok_count + 1)
+            else
+                echo "Theme compiled but generate_svg_cursors.py failed for $NAME:" >&2
+                cat svg_err.log >&2
+                set fail_count (math $fail_count + 1)
+            end
         else
             echo "Theme compiled but metadata_generator.py failed for $NAME:" >&2
             cat metadata_err.log >&2

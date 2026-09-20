@@ -24,6 +24,14 @@ build-dark:
 build-light:
     fish scripts/compile_bibata_material.fish --only-light
 
+# (Re)generate cursors_scalable/ SVG cursors for all installed themes (GNOME 51 / KDE Plasma 6.2+)
+svg:
+    python3 scripts/generate_svg_cursors.py
+
+# Regenerate SVG cursors for one installed theme, e.g. `just svg-one Coral`
+svg-one theme:
+    python3 scripts/generate_svg_cursors.py --theme {{theme}}
+
 # Build Windows .cur cursor themes (all 57)
 build-win:
     python3 scripts/build_windows.py

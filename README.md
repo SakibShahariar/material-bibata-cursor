@@ -110,6 +110,10 @@ fish scripts/compile_bibata_material.fish
 ```
 
 That installs all 57 (28 dark, 28 light, plus Classic) to `~/.icons`.
+Each theme also gets a `cursors_scalable/` SVG export written to
+`~/.local/share/icons` (override with `BIBATA_MATERIAL_SCALABLE_DIR`).
+That's the format KDE Plasma 6.2+ and **GNOME 51+** actually render in
+the compositor — see [SVG cursors](#svg-cursors) below.
 From there, pick one through GNOME Settings, GNOME Tweaks, or however
 your desktop/WM selects a cursor theme — the exact menu depends on
 your setup.
@@ -121,6 +125,8 @@ just build              # all 57 (28 dark, 28 light, Classic)
 just build-dark         # just the 28 dark themes + Classic
 just build-light        # just the 28 light themes
 just build-one Coral    # just one, faster for testing a color
+just svg                # (re)generate SVG cursors for installed themes
+just svg-one Coral      # SVG cursors for just one theme
 just package <version>  # bundle for a release, e.g. just package v1.0.0
 just package-win <version>       # Windows .cur .zip archives
 just list
@@ -196,6 +202,7 @@ themes.json                       # all theme colors, edit this to add/change on
 scripts/
 ├── compile_bibata_material.fish  # builds themes.json -> ~/.icons
 ├── metadata_generator.py         # writes index.theme so GNOME picks it up
+├── generate_svg_cursors.py       # writes cursors_scalable/ SVG cursors
 └── package_release.sh            # bundles compiled themes for release
 ```
 
@@ -203,6 +210,39 @@ Build flow: clone `bibata_cursor`, patch its render config with each
 theme's colors, then compile and install to `~/.icons`. `index.theme`
 gets written right after each theme installs, so a broken metadata
 file gets caught immediately instead of at the end of a 28-theme run.
+Then the same SVG sources are recolored again into a `cursors_scalable/`
+tree under `$XDG_DATA_HOME/icons`.
+
+## SVG cursors
+
+KDE Plasma 6.2+ and GNOME 51+ no longer render cursor *bitmap* files —
+they look for a `cursors_scalable/<shape>/metadata.json` layout, where
+each shape directory holds SVG frames and a small JSON file pointing at
+those frames with their hotspot. GNOME's compositor does this inside
+GNOME Shell (`st-cursor.c`), and only searches the XDG data icon dirs
+(`~/.local/share/icons`, then `/usr/local/share/icons`, `/usr/share/
+icons`) — `~/.icons` is never scanned, which is why SVG cursors land
+there instead of next to the Xcursor pack.
+
+`generate_svg_cursors.py` builds that tree straight from Bibata's SVG
+sources (same group/color logic the compile step uses):
+
+- one real directory per cursor shape, named by its X11 name (what KDE
+  and X11 apps request), and
+- symlinked directories for the CSS cursor names **GNOME/Mutter** looks
+  up (`default`, `pointer`, `text`, `ew-resize`, ...), mapped onto the
+  same shapes the Xcursor bitmap theme uses, so both renderers draw the
+  same arrows (e.g. GNOME's `text` maps to the same `xterm` shape).
+
+The animated `wait`/`left_ptr_watch` cursors keep their 54 frames with a
+40ms delay. `nominal_size` is 256 to match Bibata's SVG canvas, so
+hotspots and scaling are identical to the bitmap theme's.
+
+If you'd installed themes before SVG export existed, there's nothing to
+undo: `just svg` regenerates the scalable tree without recompiling
+anything (it only touches `cursors_scalable/`; the Xcursor fallback and
+`index.theme` of each theme in `~/.local/share/icons` are symlinked to
+the compiled pack).
 
 Cursors are also compiled at more sizes than upstream's default (19
 sizes instead of 11) — specifically every exact size a 24px cursor

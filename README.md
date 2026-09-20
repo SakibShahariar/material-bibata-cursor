@@ -67,42 +67,6 @@ Each light theme's range of cursor shapes:
 
 </div>
 
-## Windows cursors
-
-Windows `.cur` cursor files are generated separately using `scripts/build_windows.py`:
-
-```bash
-python3 scripts/build_windows.py            # all themes
-python3 scripts/build_windows.py --only-dark # dark themes only
-python3 scripts/build_windows.py --only-light # light themes only
-```
-
-Each theme gets a folder under `out_win/` containing `.cur` files at sizes 16, 24, 32, 48, 64, and 128px.
-
-To install on Windows, open any `Bibata-Material-*` folder, right-click
-`Install.inf` and choose **Install** — it copies the `.cur` files into a
-per-theme `C:\Windows\Cursors\<theme>\` subfolder and registers the
-scheme, so multiple themes can be installed side by side (admin prompt).
-Alternatively copy the theme folder into `%LOCALAPPDATA%\Icons\`
-(per-user, no admin) and set the cursors in **Settings → Devices →
-Mouse → Additional mouse settings → Pointers**.
-
-Package Windows cursors into a distributable `.zip`:
-
-```bash
-bash scripts/package_release.sh <version> --win
-bash scripts/package_release.sh <version> --win --only-dark
-bash scripts/package_release.sh <version> --win --only-light
-```
-
-Each archive contains an `INSTALL.txt` with Windows-specific instructions.
-
-For finer control (e.g. skipping specific themes):
-
-```bash
-bash scripts/package_release.sh <version> --win --exclude Noir
-```
-
 ## Install
 
 Needs `fish`, `git`, `python3`, `jq`, plus whatever `bibata_cursor`
@@ -147,6 +111,68 @@ For finer control (e.g. skipping specific themes, or combining
 `--only-light`/`--only-dark` with `--exclude`), call the fish script
 directly: `fish scripts/compile_bibata_material.fish --only-light
 --exclude Noir-Light,Charcoal-Light`.
+
+## SVG cursors
+
+KDE Plasma 6.2+ and GNOME 51+ no longer render cursor *bitmap* files —
+they look for a `cursors_scalable/<shape>/metadata.json` layout, where
+each shape directory holds SVG frames and a small JSON file pointing at
+those frames with their hotspot. GNOME's compositor does this inside
+GNOME Shell (`st-cursor.c`), and only searches the XDG data icon dirs
+(`~/.local/share/icons`, then `/usr/local/share/icons`, `/usr/share/
+icons`) — `~/.icons` is never scanned, which is why SVG cursors land
+there instead of next to the Xcursor pack.
+
+`generate_svg_cursors.py` builds that tree straight from Bibata's SVG
+sources (same group/color logic the compile step uses):
+
+- one real directory per cursor shape, named by its X11 name (what KDE
+  and X11 apps request), and
+- symlinked directories for the CSS cursor names **GNOME/Mutter** looks
+  up (`default`, `pointer`, `text`, `ew-resize`, ...), mapped onto the
+  same shapes the Xcursor bitmap theme uses, so both renderers draw the
+  same arrows (e.g. GNOME's `text` maps to the same `xterm` shape).
+
+The animated `wait`/`left_ptr_watch` cursors keep their 54 frames with a
+40ms delay. `nominal_size` is 256 to match Bibata's SVG canvas, so
+hotspots and scaling are identical to the bitmap theme's.
+
+If you'd installed themes before SVG export existed, there's nothing to
+undo: `just svg` regenerates the scalable tree without recompiling
+anything (it only touches `cursors_scalable/`; the Xcursor fallback and
+`index.theme` of each theme in `~/.local/share/icons` are symlinked to
+the compiled pack).
+
+Cursors are also compiled at more sizes than upstream's default (19
+sizes instead of 11) — specifically every exact size a 24px cursor
+hits across Plasma/GNOME's fractional display scaling steps (0.5x
+through 3x). Without an exact match, some apps scale the nearest
+available bitmap instead, which can look blurry on fractional scaling.
+This roughly doubles build time (~30s vs ~17s per theme) but doesn't
+change anything about how you use the themes.
+
+## Windows cursors
+
+Windows `.cur` cursor files are generated separately using `scripts/build_windows.py`:
+
+```bash
+python3 scripts/build_windows.py            # all themes
+python3 scripts/build_windows.py --only-dark # dark themes only
+python3 scripts/build_windows.py --only-light # light themes only
+```
+
+Each theme gets a folder under `out_win/` containing `.cur` files at sizes 16, 24, 32, 48, 64, and 128px.
+
+To install on Windows, open any `Bibata-Material-*` folder, right-click
+`Install.inf` and choose **Install** — it copies the `.cur` files into a
+per-theme `C:\Windows\Cursors\<theme>\` subfolder and registers the
+scheme in the registry, so multiple themes can be installed side by
+side (admin prompt). Alternatively copy the theme folder into
+`%LOCALAPPDATA%\Icons\` (per-user, no admin) and set the cursors in
+**Settings → Devices → Mouse → Additional mouse settings → Pointers**.
+
+Bundling these into distributable `.zip` archives is covered in
+[Packaging for redistribution](#packaging-for-redistribution) below.
 
 ## Adding a color
 
@@ -227,45 +253,6 @@ immediately instead of at the end of a 28-theme run. Then the same SVG
 sources are recolored again into a `cursors_scalable/` tree under
 `$XDG_DATA_HOME/icons`.
 
-## SVG cursors
-
-KDE Plasma 6.2+ and GNOME 51+ no longer render cursor *bitmap* files —
-they look for a `cursors_scalable/<shape>/metadata.json` layout, where
-each shape directory holds SVG frames and a small JSON file pointing at
-those frames with their hotspot. GNOME's compositor does this inside
-GNOME Shell (`st-cursor.c`), and only searches the XDG data icon dirs
-(`~/.local/share/icons`, then `/usr/local/share/icons`, `/usr/share/
-icons`) — `~/.icons` is never scanned, which is why SVG cursors land
-there instead of next to the Xcursor pack.
-
-`generate_svg_cursors.py` builds that tree straight from Bibata's SVG
-sources (same group/color logic the compile step uses):
-
-- one real directory per cursor shape, named by its X11 name (what KDE
-  and X11 apps request), and
-- symlinked directories for the CSS cursor names **GNOME/Mutter** looks
-  up (`default`, `pointer`, `text`, `ew-resize`, ...), mapped onto the
-  same shapes the Xcursor bitmap theme uses, so both renderers draw the
-  same arrows (e.g. GNOME's `text` maps to the same `xterm` shape).
-
-The animated `wait`/`left_ptr_watch` cursors keep their 54 frames with a
-40ms delay. `nominal_size` is 256 to match Bibata's SVG canvas, so
-hotspots and scaling are identical to the bitmap theme's.
-
-If you'd installed themes before SVG export existed, there's nothing to
-undo: `just svg` regenerates the scalable tree without recompiling
-anything (it only touches `cursors_scalable/`; the Xcursor fallback and
-`index.theme` of each theme in `~/.local/share/icons` are symlinked to
-the compiled pack).
-
-Cursors are also compiled at more sizes than upstream's default (19
-sizes instead of 11) — specifically every exact size a 24px cursor
-hits across Plasma/GNOME's fractional display scaling steps (0.5x
-through 3x). Without an exact match, some apps scale the nearest
-available bitmap instead, which can look blurry on fractional scaling.
-This roughly doubles build time (~30s vs ~17s per theme) but doesn't
-change anything about how you use the themes.
-
 ## Packaging for redistribution
 
 If you want to share compiled themes somewhere as a single download
@@ -275,6 +262,8 @@ clone and build the repo themselves, package what you've built:
 ```bash
 bash scripts/package_release.sh <version>
 bash scripts/package_release.sh <version> --win        # Windows .cur archives
+bash scripts/package_release.sh <version> --win --only-dark
+bash scripts/package_release.sh <version> --win --only-light
 ```
 
 Writes two separate archives (dark/light) by default:
@@ -296,7 +285,10 @@ With `--win`, outputs Windows `.zip` archives instead:
 
 Each archive contains its own plain-language `INSTALL.txt` (which lists
 both the `~/.icons` and `~/.local/share/icons` copy steps for the SVG
-cursors). Use `--only-dark`, `--only-light`, or `--exclude` to filter themes. This step is entirely optional — it's only for packaging downloadable copies, not part of building or using the themes yourself.
+cursors, plus the Windows right-click `Install.inf` flow). Use
+`--only-dark`, `--only-light`, or `--exclude` to filter themes.
+This step is entirely optional — it's only for packaging downloadable
+copies, not part of building or using the themes yourself.
 
 To leave specific themes out (e.g. `Classic`, since it's not one of
 the 28 M3 themes — this only affects the dark archive):

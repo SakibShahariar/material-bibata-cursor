@@ -79,7 +79,13 @@ python3 scripts/build_windows.py --only-light # light themes only
 
 Each theme gets a folder under `out_win/` containing `.cur` files at sizes 16, 24, 32, 48, 64, and 128px.
 
-To install on Windows, copy each theme folder into `%LOCALAPPDATA%\Icons\` (per-user) or `C:\Windows\Cursors\` (all users, requires admin), then select the cursor in **Settings → Personalization → Colors**.
+To install on Windows, open any `Bibata-Material-*` folder, right-click
+`Install.inf` and choose **Install** — it copies the `.cur` files into a
+per-theme `C:\Windows\Cursors\<theme>\` subfolder and registers the
+scheme, so multiple themes can be installed side by side (admin prompt).
+Alternatively copy the theme folder into `%LOCALAPPDATA%\Icons\`
+(per-user, no admin) and set the cursors in **Settings → Devices →
+Mouse → Additional mouse settings → Pointers**.
 
 Package Windows cursors into a distributable `.zip`:
 

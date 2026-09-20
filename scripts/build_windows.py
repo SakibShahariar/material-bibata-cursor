@@ -207,9 +207,12 @@ WIN_SCHEME = [
 def write_install_inf(theme_dir: Path, theme_key: str) -> None:
     """Write an install.inf so Windows users can right-click -> Install.
 
-    Copies the mapped .cur files into C:\\Windows\\Cursors and registers
-    the scheme under HKCU\\Control Panel\\Cursors."""
+    Copies the mapped .cur files into a per-theme subfolder of
+    C:\\Windows\\Cursors\\ and registers the scheme under
+    HKCU\\Control Panel\\Cursors, so multiple Material Bibata themes can
+    be installed side-by-side without overwriting each other."""
     scheme = [(v, f"{n}.cur") for v, n in WIN_SCHEME if (theme_dir / f"{n}.cur").is_file()]
+    subdir = f"{THEME_PREFIX}{theme_key}"
 
     lines = [
         "[Version]",
@@ -226,12 +229,12 @@ def write_install_inf(theme_dir: Path, theme_key: str) -> None:
     lines += [
         "",
         "[DestinationDirs]",
-        'Cur.Copy=10,"Cursors"',
+        f'Cur.Copy=10,"Cursors\\{subdir}"',
         "",
         "[Cursor.Reg]",
     ]
-    lines += ['HKCU,"Control Panel\\Cursors","{value}",,"%10%\\Cursors\\{cur}"'.format(value=v, cur=c)
-              for v, c in scheme]
+    lines += ['HKCU,"Control Panel\\Cursors","{value}",,"%10%\\Cursors\\{subdir}\\{cur}"'.format(
+        value=v, subdir=subdir, cur=c) for v, c in scheme]
     lines += ['HKCU,"Control Panel\\Cursors",,,"Material Bibata ({theme})"'.format(theme=theme_key)]
     lines.append("")
     (theme_dir / "install.inf").write_text("\r\n".join(lines), encoding="utf-8")

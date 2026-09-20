@@ -268,12 +268,21 @@ Writes two separate archives (dark/light) by default:
 - `dist/bibata-material-dark-<version>.tar.gz` — the 28 dark themes + Classic
 - `dist/bibata-material-light-<version>.tar.gz` — the 28 `-Light` themes
 
+Each theme folder in an archive contains both cursor formats: the
+Xcursor `cursors/` tree from the install dir **plus** the scalable
+`cursors_scalable/` SVGs (merged from `$XDG_DATA_HOME/icons`, where the
+build puts them — or skipped when it's the same system-wide install
+dir). So a single archive works on any desktop: X11 apps use `cursors/`,
+KDE Plasma 6.2+ and GNOME 51+ use `cursors_scalable/`.
+
 With `--win`, outputs Windows `.zip` archives instead:
 
 - `dist/bibata-material-dark-<version>-win.zip` — dark themes as `.cur` files
 - `dist/bibata-material-light-<version>-win.zip` — light themes as `.cur` files
 
-Each archive contains its own plain-language `INSTALL.txt`. Use `--only-dark`, `--only-light`, or `--exclude` to filter themes. This step is entirely optional — it's only for packaging downloadable copies, not part of building or using the themes yourself.
+Each archive contains its own plain-language `INSTALL.txt` (which lists
+both the `~/.icons` and `~/.local/share/icons` copy steps for the SVG
+cursors). Use `--only-dark`, `--only-light`, or `--exclude` to filter themes. This step is entirely optional — it's only for packaging downloadable copies, not part of building or using the themes yourself.
 
 To leave specific themes out (e.g. `Classic`, since it's not one of
 the 28 M3 themes — this only affects the dark archive):

@@ -289,12 +289,21 @@ write_win_install_txt() {
     cat > "$dir/INSTALL.txt" << EOF
 Material Bibata Cursor — $group_label — Installation (Windows)
 
+Easiest way:
+1. Extract this archive.
+2. Inside any "Bibata-Material-*" folder, right-click Install.inf
+   and choose "Install". This copies the .cur files to
+   C:\Windows\Cursors\ and registers the scheme (admin prompt).
+3. Open the mouse settings: Settings → Devices → Mouse → "Additional
+   mouse settings" → the Pointers tab, find the theme in the dropdown.
+
+Manual way (no admin / per-user):
 1. Extract this archive.
 2. Copy every "Bibata-Material-*" folder into your icon theme directory:
      %LOCALAPPDATA%\Icons\  (per-user) or
      C:\Windows\Cursors\   (all users, requires admin)
-3. Open Windows Settings → Personalization → Colors →
-  "Edit your settings" → select the cursor theme.
+3. Open Settings → Devices → Mouse → "Additional mouse settings" →
+   Pointers tab → Browse… → select each cursor, then Save As.
 
 Full source and build instructions:
 https://github.com/SakibShahariar/material-bibata-cursor

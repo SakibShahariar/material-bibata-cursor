@@ -166,6 +166,7 @@ def build_theme(theme_key: str, themes: dict,
         ok += 1
 
     write_index_theme(theme_dir, theme_key)
+    write_install_inf(theme_dir, theme_key)
     print(f"  {theme_key}: {ok} cursors")
     return fail
 
@@ -179,6 +180,61 @@ def write_index_theme(theme_dir: Path, theme_key: str) -> None:
         "Inherits=hicolor\n",
         encoding="utf-8",
     )
+
+
+# Windows registry scheme value -> x11_name of the .cur file to use
+# (aligned with the win_name hints in config/build.toml where they are
+# unambiguous). Only entries whose .cur file exists get written.
+WIN_SCHEME = [
+    ("Arrow", "left_ptr"),            # Pointer
+    ("Help", "question_arrow"),       # Help
+    ("AppStarting", "left_ptr_watch"),# Work
+    ("Wait", "wait"),                 # Busy
+    ("Crosshair", "crosshair"),       # Cross
+    ("IBeam", "xterm"),               # Text
+    ("NWPen", "pencil"),              # Handwriting
+    ("No", "crossed_circle"),         # Unavailable-style circle-slash
+    ("SizeNS", "sb_v_double_arrow"),  # Vert
+    ("SizeWE", "sb_h_double_arrow"),  # Horz
+    ("SizeNWSE", "fd_double_arrow"),  # Dgn2
+    ("SizeNESW", "bd_double_arrow"),  # Dgn1
+    ("SizeAll", "move"),              # Move
+    ("UpArrow", "sb_up_arrow"),
+    ("Hand", "hand2"),                # Link
+]
+
+
+def write_install_inf(theme_dir: Path, theme_key: str) -> None:
+    """Write an install.inf so Windows users can right-click -> Install.
+
+    Copies the mapped .cur files into C:\\Windows\\Cursors and registers
+    the scheme under HKCU\\Control Panel\\Cursors."""
+    scheme = [(v, f"{n}.cur") for v, n in WIN_SCHEME if (theme_dir / f"{n}.cur").is_file()]
+
+    lines = [
+        "[Version]",
+        'Signature="$CHICAGO$"',
+        "Provider=Material Bibata Cursor",
+        "",
+        "[DefaultInstall]",
+        "CopyFiles=Cur.Copy",
+        "AddReg=Cursor.Reg",
+        "",
+        "[Cur.Copy]",
+    ]
+    lines += [cur for _, cur in scheme]
+    lines += [
+        "",
+        "[DestinationDirs]",
+        'Cur.Copy=10,"Cursors"',
+        "",
+        "[Cursor.Reg]",
+    ]
+    lines += ['HKCU,"Control Panel\\Cursors","{value}",,"%10%\\Cursors\\{cur}"'.format(value=v, cur=c)
+              for v, c in scheme]
+    lines += ['HKCU,"Control Panel\\Cursors",,,"Material Bibata ({theme})"'.format(theme=theme_key)]
+    lines.append("")
+    (theme_dir / "install.inf").write_text("\r\n".join(lines), encoding="utf-8")
 
 
 def filter_themes(themes: dict, args) -> list[str]:

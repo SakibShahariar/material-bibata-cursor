@@ -20,8 +20,10 @@ variant below, or add your own color — see
 
 <div align="center">
 
-[![Latest release](https://img.shields.io/github/v/release/SakibShahariar/material-bibata-cursor?sort=semver)](https://github.com/SakibShahariar/material-bibata-cursor/releases/latest)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/SakibShahariar/material-bibata-cursor?sort=semver&style=flat&labelColor=%231a333d&color=%23a8cbe2)](https://github.com/SakibShahariar/material-bibata-cursor/releases/latest)
+[![GitHub stars](https://img.shields.io/github/stars/SakibShahariar/material-bibata-cursor?style=flat&labelColor=%231a333d&color=%23a8cbe2)](https://github.com/SakibShahariar/material-bibata-cursor)
+[![GitHub issues](https://img.shields.io/github/issues/SakibShahariar/material-bibata-cursor?style=flat&labelColor=%231a333d&color=%23a8cbe2)](https://github.com/SakibShahariar/material-bibata-cursor/issues)
+[![License: MIT](https://img.shields.io/badge/license-MIT?style=flat&labelColor=%231a333d&color=%23a8cbe2)](LICENSE)
 
 </div>
 
@@ -352,6 +354,10 @@ post_hook = "~/.config/matugen/post-hook-scripts/cursor_matugen.sh"
 A normal `matugen` run then picks your wallpaper's primary color, finds
 the closest built-in theme via `color_match.py`, and rebuilds it with
 `cursor_matugen.sh`.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=SakibShahariar/material-bibata-cursor&type=Date)](https://star-history.com/#SakibShahariar/material-bibata-cursor)
 
 ## License
 

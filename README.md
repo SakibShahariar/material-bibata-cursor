@@ -9,12 +9,34 @@
 
 # Material Bibata Cursor
 
-28 Bibata cursor themes, colored using Material Design 3's tonal
-system — a dark body paired with a vibrant accent outline, tuned
-independently per theme.
+57 Bibata cursor themes (28 dark + 28 `-Light` + the original Classic),
+colored using Material Design 3's tonal system — a dark body paired
+with a vibrant accent outline, tuned independently per theme.
 
-Pick whichever variant fits your setup, or add your own color — see
-[Adding a color](#adding-a-color) below.
+Whatever your setup — X11, Wayland, GNOME 51+, KDE Plasma 6.2+, Hyprland,
+or Windows — a single theme folder contains the format it needs. Pick a
+variant below, or add your own color — see
+[Adding a color](#adding-a-color).
+
+<div align="center">
+
+[![Latest release](https://img.shields.io/github/v/release/SakibShahariar/material-bibata-cursor?sort=semver)](https://github.com/SakibShahariar/material-bibata-cursor/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+</div>
+
+## Contents
+
+[Themes](#themes) · [Install](#install) · [SVG cursors](#svg-cursors) ·
+[Windows cursors](#windows-cursors) · [Adding a color](#adding-a-color) ·
+[Why body and primary are separate colors](#why-body-and-primary-are-separate-colors) ·
+[Files](#files) · [Packaging for redistribution](#packaging-for-redistribution) ·
+[Matugen Setup](#matugen-setup) · [License](#license)
+
+Prefer a download over building from source? Grab the latest
+[release](https://github.com/SakibShahariar/material-bibata-cursor/releases/latest) —
+every archive ships all formats (Xcursor bitmaps, Hyprcursor, scalable SVG
+for GNOME 51+ / KDE 6.2+, and Windows `.cur`/`.ani`) plus an `INSTALL.txt`.
 
 <div align="center">
 
@@ -101,7 +123,7 @@ just build-one Apricot  # just one, faster for testing a color
 just svg                # (re)generate SVG cursors for installed themes
 just svg-one Apricot    # SVG cursors for just one theme
 just package <version>  # bundle for a release, e.g. just package v1.0.0
-just package-win <version>       # Windows .cur .zip archives
+just package-win <version>       # Windows .cur/.ani .zip archives
 just list
 just show Apricot
 just check-deps
@@ -114,14 +136,13 @@ directly: `fish scripts/compile_bibata_material.fish --only-light
 
 ## SVG cursors
 
-KDE Plasma 6.2+ and GNOME 51+ no longer render cursor *bitmap* files —
-they look for a `cursors_scalable/<shape>/metadata.json` layout, where
-each shape directory holds SVG frames and a small JSON file pointing at
-those frames with their hotspot. GNOME's compositor does this inside
-GNOME Shell (`st-cursor.c`), and only searches the XDG data icon dirs
-(`~/.local/share/icons`, then `/usr/local/share/icons`, `/usr/share/
-icons`) — `~/.icons` is never scanned, which is why SVG cursors land
-there instead of next to the Xcursor pack.
+KDE Plasma 6.2+ and GNOME 51+ render cursor *SVGs* instead of bitmaps:
+they expect a `cursors_scalable/<shape>/metadata.json` tree, where each
+shape folder holds SVG frames plus a tiny JSON file listing them with
+their hotspot. GNOME's compositor (GNOME Shell `st-cursor.c`) only
+scans the XDG icon dirs (`~/.local/share/icons`, `/usr/local/share/icons`,
+`/usr/share/icons`) — `~/.icons` is never scanned, which is why the SVGs
+land in the XDG tree instead of next to the Xcursor pack.
 
 `generate_svg_cursors.py` builds that tree straight from Bibata's SVG
 sources (same group/color logic the compile step uses):
@@ -169,12 +190,13 @@ animated `.ani` files — `wait.ani` (Busy) and `left_ptr_watch.ani`
 animation and timing as the Linux cursor.
 
 To install on Windows, open any `Bibata-Material-*` folder, right-click
-`Install.inf` and choose **Install** — it copies the `.cur` files into a
-per-theme `C:\Windows\Cursors\<theme>\` subfolder and registers the
-scheme in the registry, so multiple themes can be installed side by
-side (admin prompt). Alternatively copy the theme folder into
-`%LOCALAPPDATA%\Icons\` (per-user, no admin) and set the cursors in
-**Settings → Devices → Mouse → Additional mouse settings → Pointers**.
+`Install.inf` and choose **Install** — it copies the `.cur` and `.ani`
+files into a per-theme `C:\Windows\Cursors\<theme>\` subfolder and
+registers the scheme in the registry, so multiple themes can be
+installed side by side (admin prompt). Alternatively copy the theme
+folder into `%LOCALAPPDATA%\Icons\` (per-user, no admin) and set the
+cursors in **Settings → Devices → Mouse → Additional mouse settings →
+Pointers**.
 
 Bundling these into distributable `.zip` archives is covered in
 [Packaging for redistribution](#packaging-for-redistribution) below.
@@ -210,28 +232,20 @@ on Hyprland.
 
 ## Why body and primary are separate colors
 
-Most themed-cursor setups just take an accent color and darken it for
-the body. That works fine against some wallpapers and falls apart
-against others — low contrast, hard to spot the cursor at all.
-
-This project picks body and primary independently instead, following
-Material Design 3's Container/Primary roles:
+Most themed-cursor setups darken a single accent color and call it a
+day — fine against some wallpapers, invisible against others. Picking
+body and primary independently (M3's Container/Primary roles) keeps
+the cursor legible no matter how bright or saturated the accent is:
 
 | M3 Role | Cursor part | What it does |
 |---|---|---|
 | Container | Body | Dark, desaturated fill. Stays legible regardless of how bright or saturated the accent is. |
 | Primary | Outline | The actual accent color — vibrant, high-chroma. |
 
-For Ice Blue:
+For Ice Blue: `Body #1a333d` · `Primary #a8cbe2` · `Watch #0a1f26`.
 
-```
-Body    (Container) : #1a333d
-Primary (Outline)   : #a8cbe2
-Watch               : #0a1f26
-```
-
-This keeps contrast consistent across all 28 themes, regardless of how
-saturated or pastel the accent color is.
+The same treatment is applied to every palette, so contrast stays
+consistent across all 28 themes.
 
 ---
 
@@ -286,8 +300,8 @@ archive works on any desktop: X11 apps use `cursors/`, Hyprland uses
 With `--win`, outputs Windows `.zip` archives instead (built from the
 `out_win/` output of the [Windows cursors](#windows-cursors) step):
 
-- `dist/bibata-material-dark-<version>-win.zip` — dark themes as `.cur` files
-- `dist/bibata-material-light-<version>-win.zip` — light themes as `.cur` files
+- `dist/bibata-material-dark-<version>-win.zip` — dark themes as `.cur`/`.ani` files
+- `dist/bibata-material-light-<version>-win.zip` — light themes as `.cur`/`.ani` files
 
 Each archive contains its own plain-language `INSTALL.txt` (which lists
 both the `~/.icons` and `~/.local/share/icons` copy steps for the SVG
@@ -310,7 +324,13 @@ Comma-separate multiple names to exclude more than one:
 
 ## Matugen Setup
 
-To make these themes work with [matugen](https://github.com/InioX/matugen) put `scripts/cursor_matugen.sh`, the root `themes.json` (the script looks for it next to itself) and `scripts/color_match.py` in your `~/.config/matugen/post-hook-scripts/` folder. Then inside your `~/.config/matugen/config.toml` file add
+Get a theme that matches your wallpaper with
+[matugen](https://github.com/InioX/matugen) and the included post-hook:
+
+1. Copy `scripts/cursor_matugen.sh`, `scripts/color_match.py`, and the
+   repo's root `themes.json` (looked up next to the script) into
+   `~/.config/matugen/post-hook-scripts/`.
+2. Add the template to `~/.config/matugen/config.toml`:
 
 ```toml
 [templates.cursor]
@@ -319,7 +339,7 @@ output_path = "~/.config/colors.json"
 post_hook = "~/.config/matugen/post-hook-scripts/cursor_matugen.sh"
 ```
 
-then inside the `~/.config/matugen/templates/` folder create `cursors.json` with this
+3. Create `~/.config/matugen/templates/cursors.json` with:
 
 ```json
 {
@@ -328,7 +348,10 @@ then inside the `~/.config/matugen/templates/` folder create `cursors.json` with
     }
 }
 ```
-Then running matugen command will do the job
+
+A normal `matugen` run then picks your wallpaper's primary color, finds
+the closest built-in theme via `color_match.py`, and rebuilds it with
+`cursor_matugen.sh`.
 
 ## License
 

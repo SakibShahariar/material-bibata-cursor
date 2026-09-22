@@ -289,10 +289,13 @@ write_win_install_txt() {
     cat > "$dir/INSTALL.txt" << EOF
 Material Bibata Cursor — $group_label — Installation (Windows)
 
+The cursor Busy (wait.ani) and Work (left_ptr_watch.ani) are animated
+.ani files; everything else is a .cur file. Both install the same way:
+
 Easiest way:
 1. Extract this archive.
 2. Inside any "Bibata-Material-*" folder, right-click Install.inf
-   and choose "Install". This copies the .cur files to
+   and choose "Install". This copies the .cur/.ani files to
    C:\Windows\Cursors\ and registers the scheme (admin prompt).
 3. Open the mouse settings: Settings → Devices → Mouse → "Additional
    mouse settings" → the Pointers tab, find the theme in the dropdown.

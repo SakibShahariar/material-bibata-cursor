@@ -153,7 +153,7 @@ change anything about how you use the themes.
 
 ## Windows cursors
 
-Windows `.cur` cursor files are generated separately using
+Windows `.cur`/`.ani` cursor files are generated separately using
 `scripts/build_windows.py`:
 
 ```bash
@@ -162,8 +162,11 @@ python3 scripts/build_windows.py --only-dark # dark themes only
 python3 scripts/build_windows.py --only-light # light themes only
 ```
 
-Each theme gets a folder under `out_win/` containing `.cur` files at
-sizes 16, 24, 32, 48, 64, and 128px.
+Each theme gets a folder under `out_win/` containing a `.cur` file
+(16, 24, 32, 48, 64, and 128px) for every static cursor, plus two
+animated `.ani` files — `wait.ani` (Busy) and `left_ptr_watch.ani`
+(Work) — so the spinner actually spins, reusing the same 54-frame
+animation and timing as the Linux cursor.
 
 To install on Windows, open any `Bibata-Material-*` folder, right-click
 `Install.inf` and choose **Install** — it copies the `.cur` files into a
@@ -241,7 +244,7 @@ scripts/
 ├── compile_bibata_material.fish  # builds themes.json -> ~/.icons (Xcursor + Hyprcursor)
 ├── metadata_generator.py         # writes index.theme so GNOME picks it up
 ├── generate_svg_cursors.py       # writes cursors_scalable/ SVG cursors
-├── build_windows.py              # Windows .cur themes (see "Windows cursors")
+├── build_windows.py              # Windows .cur/.ani themes (see "Windows cursors")
 ├── color_match.py                # finds the closest theme color to a hex
 ├── cursor_matugen.sh             # matugen post-hook (see "Matugen Setup")
 └── package_release.sh            # bundles compiled themes for release

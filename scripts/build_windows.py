@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Build Windows .cur cursor themes from themes.json.
+"""Build Windows .cur/.ani cursor themes from themes.json.
 
-Generates .cur files (PNG-compressed, multi-size) for each Bibata-
-Material theme. Reuses the same SVG sources and color replacement
-logic as the Linux build.
+Generates a per-theme folder under out_win/ with .cur files
+(PNG-compressed, multi-size) for static cursors, plus animated .ani
+files for the busy (wait) and working (left_ptr_watch) cursors, so the
+spinner actually spins on Windows. Reuses the same SVG sources and
+color replacement logic as the Linux build. The .ani byte layout
+mirrors clickgen's (RIFF "ACON", anih header, LIST "fram" of icon
+chunks, rate chunk).
 
 Usage:
     python3 scripts/build_windows.py
@@ -21,15 +25,23 @@ import sys
 import tomllib
 from pathlib import Path
 
+from generate_svg_cursors import resolve_source_dir
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SVG_DIR = REPO_ROOT / "scripts" / "bibata_cursor" / "svg"
-CONFIG_TOML = REPO_ROOT / "scripts" / "bibata_cursor" / "config" / "build.toml"
-RENDER_JSON = REPO_ROOT / "scripts" / "bibata_cursor" / "config" / "render.json"
+BIBATA_DIR = SVG_DIR.parent
+CONFIG_TOML = BIBATA_DIR / "config" / "build.toml"
+RENDER_JSON = BIBATA_DIR / "config" / "render.json"
 THEMES_JSON = REPO_ROOT / "themes.json"
 RSVG_CONVERT = "rsvg-convert"
 
 WINDOWS_SIZES = [16, 24, 32, 48, 64, 128]
+ANI_SIZE = 32
 THEME_PREFIX = "Bibata-Material-"
+
+RIFF_HEADER = struct.Struct("<4sI4s")
+CHUNK_HEADER = struct.Struct("<4sI")
+ANIH_HEADER = struct.Struct("<IIIIIIIII")
 
 
 def load_themes() -> dict:
@@ -111,6 +123,53 @@ def create_cur(images: list[tuple[Path, int, int]], dst: Path) -> None:
     dst.write_bytes(bytes(buf))
 
 
+def single_cur_icon(png_bytes: bytes, w: int, h: int,
+                    x_hot: int, y_hot: int) -> bytes:
+    """A single-image .cur file, used verbatim as one ANI 'icon' chunk."""
+    header = struct.pack("<HHH", 0, 2, 1)
+    entry = struct.pack("<BBBBHHII", w & 0xFF, h & 0xFF, 0, 0,
+                        x_hot, y_hot, len(png_bytes), 22)
+    return header + entry + png_bytes
+
+
+def write_ani(frames: list[bytes], dst: Path, width: int, height: int,
+              rate: int) -> None:
+    """Write an .ani file.  frames = single-image .cur bytes, one per
+    frame; rate = per-frame duration (clickgen multiplies the Windows
+    delay by 2). Mirrors clickgen's to_ani() byte-for-byte."""
+    n = len(frames)
+    anih = ANIH_HEADER.pack(36, n, n, 0, 0, 32, 1, 1, 1)
+
+    icons = []
+    for icon in frames:
+        icons.append(CHUNK_HEADER.pack(b"icon", len(icon)))
+        icons.append(icon)
+        if len(icon) & 1:
+            icons.append(b"\0")
+
+    fram = (CHUNK_HEADER.pack(b"LIST", sum(len(c) for c in icons) + 4)
+            + b"fram" + b"".join(icons))
+
+    rates = b"".join(struct.pack("<I", rate) for _ in range(n))
+    rate_chunk = CHUNK_HEADER.pack(b"rate", len(rates)) + rates
+
+    chunks = CHUNK_HEADER.pack(b"anih", len(anih)) + anih + fram + rate_chunk
+    buf = RIFF_HEADER.pack(b"RIFF", len(chunks) + 4, b"ACON") + chunks
+    dst.write_bytes(buf)
+
+
+def render_frame_icon(svg_path: Path, colors: list[dict], tmp_dir: Path,
+                      stem: str, idx: int, x_hot: int, y_hot: int) -> bytes:
+    svg_tmp = tmp_dir / f"{stem}_{idx}.svg"
+    png_tmp = tmp_dir / f"{stem}_{idx}.png"
+    recolor_svg(svg_path, colors, svg_tmp)
+    render_svg_to_png(svg_tmp, png_tmp, ANI_SIZE)
+    hx = int(ANI_SIZE * x_hot / 256)
+    hy = int(ANI_SIZE * y_hot / 256)
+    w, h = ANI_SIZE, ANI_SIZE
+    return single_cur_icon(png_tmp.read_bytes(), w, h, hx, hy)
+
+
 def build_theme(theme_key: str, themes: dict,
                 out_base: Path) -> int:
     theme = themes[theme_key]
@@ -136,6 +195,7 @@ def build_theme(theme_key: str, themes: dict,
         x_hot = get_hotspot(params, defaults, "x_hotspot")
         y_hot = get_hotspot(params, defaults, "y_hotspot")
         svg_path = find_svg(cursor_name)
+        is_animated = "*" in params.get("png", "")
 
         if svg_path is None:
             print(f"  SVG not found for {cursor_name}", file=sys.stderr)
@@ -144,6 +204,37 @@ def build_theme(theme_key: str, themes: dict,
 
         tmp_dir = theme_dir / "_tmp"
         tmp_dir.mkdir(parents=True, exist_ok=True)
+
+        if is_animated:
+            png_ref = params["png"]
+            anim_dirname = png_ref.split("*")[0].rstrip("-")
+            resolved = resolve_source_dir(BIBATA_DIR, "modern")
+            src_dir = resolved.get(anim_dirname)
+            if src_dir is None or not src_dir.is_dir():
+                src_dir = svg_path.parent
+            frame_files = sorted(src_dir.glob("*.svg"))
+            if not frame_files:
+                print(f"  No animation frames for {cursor_name}", file=sys.stderr)
+                fail += 1
+                continue
+
+            (theme_dir / f"{x11_name}.cur").unlink(missing_ok=True)
+            win_delay = params.get("win_delay", defaults.get("win_delay", 1))
+            rate = int(round(win_delay * 2))
+            frames = [
+                render_frame_icon(f, colors, tmp_dir, cursor_name, i, x_hot, y_hot)
+                for i, f in enumerate(frame_files)
+            ]
+            ani_path = theme_dir / f"{x11_name}.ani"
+            write_ani(frames, ani_path, ANI_SIZE, ANI_SIZE, rate)
+
+            for p in tmp_dir.iterdir():
+                p.unlink()
+            tmp_dir.rmdir()
+
+            ok += 1
+            continue
+
         images = []
 
         for size in WINDOWS_SIZES:
@@ -182,14 +273,16 @@ def write_index_theme(theme_dir: Path, theme_key: str) -> None:
     )
 
 
-# Windows registry scheme value -> x11_name of the .cur file to use
+# Windows registry scheme value -> x11_name of the cursor file to use
 # (aligned with the win_name hints in config/build.toml where they are
-# unambiguous). Only entries whose .cur file exists get written.
+# unambiguous). Install.inf points at the .ani file when a theme ships
+# one (Busy/Work), otherwise the .cur. Only entries whose file exists
+# get written.
 WIN_SCHEME = [
     ("Arrow", "left_ptr"),            # Pointer
     ("Help", "question_arrow"),       # Help
-    ("AppStarting", "left_ptr_watch"),# Work
-    ("Wait", "wait"),                 # Busy
+    ("AppStarting", "left_ptr_watch"),# Work (animated .ani)
+    ("Wait", "wait"),                 # Busy (animated .ani)
     ("Crosshair", "crosshair"),       # Cross
     ("IBeam", "xterm"),               # Text
     ("NWPen", "pencil"),              # Handwriting
@@ -204,6 +297,13 @@ WIN_SCHEME = [
 ]
 
 
+def scheme_file(theme_dir: Path, x11_name: str) -> str:
+    for ext in (".ani", ".cur"):
+        if (theme_dir / f"{x11_name}{ext}").is_file():
+            return f"{x11_name}{ext}"
+    return f"{x11_name}.cur"
+
+
 def write_install_inf(theme_dir: Path, theme_key: str) -> None:
     """Write an install.inf so Windows users can right-click -> Install.
 
@@ -213,9 +313,11 @@ def write_install_inf(theme_dir: Path, theme_key: str) -> None:
         cursor slots comma-joined in the fixed required order, and
       * live values under Cursors written with REG_EXPAND_SZ
         (0x00020000) so the %10% paths expand.
-    Files land in a per-theme C:\\Windows\\Cursors\\ subfolder so
-    multiple Material Bibata themes can coexist."""
-    scheme = [(v, f"{n}.cur") for v, n in WIN_SCHEME if (theme_dir / f"{n}.cur").is_file()]
+    Busy/Work use the animated .ani files (falling back to .cur only if
+    a theme ships none). Files land in a per-theme C:\\Windows\\Cursors\\
+    subfolder so multiple Material Bibata themes can coexist."""
+    scheme = [(v, scheme_file(theme_dir, n)) for v, n in WIN_SCHEME
+              if (theme_dir / f"{n}.cur").is_file() or (theme_dir / f"{n}.ani").is_file()]
     subdir = f"{THEME_PREFIX}{theme_key}"
     scheme_name = f"Material Bibata ({theme_key})"
 

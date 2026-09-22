@@ -23,7 +23,7 @@ variant below, or add your own color — see
 [![Latest release](https://img.shields.io/github/v/release/SakibShahariar/material-bibata-cursor?sort=semver&style=flat&labelColor=%231a333d&color=%23a8cbe2)](https://github.com/SakibShahariar/material-bibata-cursor/releases/latest)
 [![GitHub stars](https://img.shields.io/github/stars/SakibShahariar/material-bibata-cursor?style=flat&labelColor=%231a333d&color=%23a8cbe2)](https://github.com/SakibShahariar/material-bibata-cursor)
 [![GitHub issues](https://img.shields.io/github/issues/SakibShahariar/material-bibata-cursor?style=flat&labelColor=%231a333d&color=%23a8cbe2)](https://github.com/SakibShahariar/material-bibata-cursor/issues)
-[![License: MIT](https://img.shields.io/badge/license-MIT?style=flat&labelColor=%231a333d&color=%23a8cbe2)](LICENSE)
+[![License: MIT](https://img.shields.io/static/v1?label=license&message=MIT&style=flat&labelColor=%231a333d&color=%23a8cbe2)](LICENSE)
 
 </div>
 
@@ -357,7 +357,16 @@ the closest built-in theme via `color_match.py`, and rebuilds it with
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=SakibShahariar/material-bibata-cursor&type=Date)](https://star-history.com/#SakibShahariar/material-bibata-cursor)
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=SakibShahariar/material-bibata-cursor&type=Date&theme=dark">
+  <img src="https://api.star-history.com/svg?repos=SakibShahariar/material-bibata-cursor&type=Date&theme=light" alt="Star History Chart">
+</picture>
+
+</div>
+
+[Star history for this repository](https://star-history.com/#SakibShahariar/material-bibata-cursor)
 
 ## License
 

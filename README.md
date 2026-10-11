@@ -14,8 +14,8 @@ colored using Material Design 3's tonal system — a dark body paired
 with a vibrant accent outline, tuned independently per theme.
 
 Whatever your setup — X11, Wayland, GNOME 51+, KDE Plasma 6.2+, Hyprland,
-or Windows — a single theme folder contains the format it needs. Pick a
-variant below, or add your own color — see
+or Windows — choose the matching download or build the formats you need.
+Pick a variant below, or add your own color — see
 [Adding a color](#adding-a-color).
 
 <div align="center">
@@ -35,10 +35,23 @@ variant below, or add your own color — see
 [Files](#files) · [Packaging for redistribution](#packaging-for-redistribution) ·
 [Matugen Setup](#matugen-setup) · [License](#license)
 
-Prefer a download over building from source? Grab the latest
-[release](https://github.com/SakibShahariar/material-bibata-cursor/releases/latest) —
-every archive ships all formats (Xcursor bitmaps, Hyprcursor, scalable SVG
-for GNOME 51+ / KDE 6.2+, and Windows `.cur`/`.ani`) plus an `INSTALL.txt`.
+## Download a release
+
+Prefer downloading prebuilt themes? Get the latest files from the
+[GitHub Releases page](https://github.com/SakibShahariar/material-bibata-cursor/releases/latest).
+Linux and Windows downloads are separate archives:
+
+| Archive | Contents |
+|---|---|
+| `bibata-material-dark-<version>.tar.gz` | 28 dark themes + Classic, with Linux Xcursor, Hyprcursor, and scalable SVG assets |
+| `bibata-material-light-<version>.tar.gz` | 28 light themes, with Linux Xcursor, Hyprcursor, and scalable SVG assets |
+| `bibata-material-dark-<version>-win.zip` | Windows `.cur` and animated `.ani` files for dark themes + Classic |
+| `bibata-material-light-<version>-win.zip` | Windows `.cur` and animated `.ani` files for light themes |
+
+Each archive includes installation instructions appropriate to that platform.
+Linux archives include `INSTALL.txt`; Windows ZIPs include `INSTALL.txt` and
+the per-theme `Install.inf` files. Linux scalable SVG assets are included for
+GNOME 51+ and KDE Plasma 6.2+.
 
 <div align="center">
 
@@ -112,8 +125,8 @@ The same build also produces `hyprcursors/` for Hyprland, so a single
 install covers X11 apps (`cursors/`), GNOME/KDE (the SVGs), and
 Hyprland (`hyprctl setcursor Bibata-Material-<Name> 24`).
 From there, pick one through GNOME Settings, GNOME Tweaks, or however
-your desktop/WM selects a cursor theme — the exact menu depends on
-your setup.
+your desktop/WM selects a cursor theme — the exact menu depends on your
+setup.
 
 Don't want to run fish directly? There's a `justfile`:
 
@@ -124,8 +137,9 @@ just build-light        # just the 28 light themes
 just build-one Apricot  # just one, faster for testing a color
 just svg                # (re)generate SVG cursors for installed themes
 just svg-one Apricot    # SVG cursors for just one theme
-just package <version>  # bundle for a release, e.g. just package v1.0.0
-just package-win <version>       # Windows .cur/.ani .zip archives
+just build-win          # build Windows .cur/.ani assets
+just package <version>  # bundle Linux archives, e.g. just package v1.0.0
+just package-win <version>       # bundle Windows .cur/.ani ZIPs
 just list
 just show Apricot
 just check-deps
@@ -177,18 +191,20 @@ change anything about how you use the themes.
 ## Windows cursors
 
 Windows `.cur`/`.ani` cursor files are generated separately using
-`scripts/build_windows.py`:
+`scripts/build_windows.py`. This requires the upstream Bibata source to
+be present in `scripts/bibata_cursor/` (the Linux build clones it on first
+run) and requires `rsvg-convert` and Python's Pillow package.
 
 ```bash
-python3 scripts/build_windows.py            # all themes
-python3 scripts/build_windows.py --only-dark # dark themes only
+python3 scripts/build_windows.py             # all themes
+python3 scripts/build_windows.py --only-dark  # dark themes only
 python3 scripts/build_windows.py --only-light # light themes only
 ```
 
 Each theme gets a folder under `out_win/` containing a `.cur` file
 (16, 24, 32, 48, 64, and 128px) for every static cursor, plus two
-animated `.ani` files — `wait.ani` (Busy) and `left_ptr_watch.ani`
-(Work) — so the spinner actually spins, reusing the same 54-frame
+animated `.ani` files — `wait.ani` (Busy) and `left_ptr_watch.ani` (Work)
+— so the spinner actually spins, reusing the same 54-frame
 animation and timing as the Linux cursor.
 
 To install on Windows, open any `Bibata-Material-*` folder, right-click
@@ -256,71 +272,76 @@ consistent across all 28 themes.
 ```
 themes.json                       # all theme colors, edit this to add/change one
 scripts/
-├── bibata_cursor/                # build dependency, cloned on first build
+├── bibata_cursor/                # build dependency, cloned on first Linux build
 ├── compile_bibata_material.fish  # builds themes.json -> ~/.icons (Xcursor + Hyprcursor)
 ├── metadata_generator.py         # writes index.theme so GNOME picks it up
 ├── generate_svg_cursors.py       # writes cursors_scalable/ SVG cursors
 ├── build_windows.py              # Windows .cur/.ani themes (see "Windows cursors")
 ├── color_match.py                # finds the closest theme color to a hex
 ├── cursor_matugen.sh             # matugen post-hook (see "Matugen Setup")
-└── package_release.sh            # bundles compiled themes for release
+└── package_release.sh            # packages already-built themes for release
 ```
 
-Build flow: clone `bibata_cursor`, patch its render config with each
-theme's colors, then compile and install to `~/.icons` (Xcursor
-`cursors/` + Hyprland `hyprcursors/`). `index.theme` gets written right
-after each theme installs, so a broken metadata file gets caught
-immediately instead of at the end of a 28-theme run. Then the same SVG
-sources are recolored again into a `cursors_scalable/` tree under
+Build flow: the Linux compiler clones `bibata_cursor` if needed, patches
+its render config with each theme's colors, then compiles and installs to
+`~/.icons` (Xcursor `cursors/` + Hyprland `hyprcursors/`). `index.theme`
+gets written right after each theme installs, so a broken metadata file
+gets caught immediately instead of at the end of a 28-theme run. The same
+SVG sources are recolored into a `cursors_scalable/` tree under
 `$XDG_DATA_HOME/icons`.
 
 ## Packaging for redistribution
 
-If you want to share compiled themes somewhere as a single download
-(a GitHub Release, GNOME-Look.org, wherever) instead of having people
-clone and build the repo themselves, package what you've built:
+The packaging script bundles **already-built** themes; it does not
+compile them. Build the Linux themes and Windows assets first, then run
+the relevant packaging command.
+
+For Linux, build the themes (which also generates scalable SVG assets)
+and package them:
 
 ```bash
-bash scripts/package_release.sh <version>                     # Linux tar.gz
-bash scripts/package_release.sh <version> --win               # Windows .zip
-bash scripts/package_release.sh <version> --win --only-dark
-bash scripts/package_release.sh <version> --win --only-light
+just build
+just package v1.0.0
 ```
 
-Writes two separate Linux archives (dark/light) by default:
+This writes two archives by default:
 
-- `dist/bibata-material-dark-<version>.tar.gz` — the 28 dark themes + Classic
-- `dist/bibata-material-light-<version>.tar.gz` — the 28 `-Light` themes
+- `dist/bibata-material-dark-v1.0.0.tar.gz` — the 28 dark themes + Classic
+- `dist/bibata-material-light-v1.0.0.tar.gz` — the 28 `-Light` themes
 
-Each theme folder in an archive contains every format: the Xcursor
-`cursors/` tree from the install dir, the Hyprland `hyprcursors/`, and
-the scalable `cursors_scalable/` SVGs (merged from `$XDG_DATA_HOME/icons`,
-or skipped when it's the same system-wide install dir). So a single
-archive works on any desktop: X11 apps use `cursors/`, Hyprland uses
-`hyprcursors/`, KDE Plasma 6.2+ and GNOME 51+ use `cursors_scalable/`.
+Each Linux theme folder contains the Xcursor `cursors/` tree, Hyprland
+`hyprcursors/`, and scalable `cursors_scalable/` SVGs where available.
+A single archive therefore supports X11 apps, Hyprland, and GNOME 51+ /
+KDE Plasma 6.2+.
 
-With `--win`, outputs Windows `.zip` archives instead (built from the
-`out_win/` output of the [Windows cursors](#windows-cursors) step):
-
-- `dist/bibata-material-dark-<version>-win.zip` — dark themes as `.cur`/`.ani` files
-- `dist/bibata-material-light-<version>-win.zip` — light themes as `.cur`/`.ani` files
-
-Each archive contains its own plain-language `INSTALL.txt` (which lists
-both the `~/.icons` and `~/.local/share/icons` copy steps for the SVG
-cursors, plus the Windows right-click `Install.inf` flow). Use
-`--only-dark`, `--only-light`, or `--exclude` to filter themes.
-This step is entirely optional — it's only for packaging downloadable
-copies, not part of building or using the themes yourself.
-
-To leave specific themes out (e.g. `Classic`, since it's not one of
-the 28 M3 themes — this only affects the dark archive):
+For Windows, make sure the upstream Bibata source is present, build the
+Windows assets, and then package them. If you haven't built the Linux
+themes yet, running `just build` first also fetches the upstream source.
 
 ```bash
-bash scripts/package_release.sh <version> --exclude Classic
+just build-win
+just package-win v1.0.0
 ```
 
-Comma-separate multiple names to exclude more than one:
-`--exclude Classic,Noir`.
+The Windows archives are separate ZIPs:
+
+- `dist/bibata-material-dark-v1.0.0-win.zip` — dark themes + Classic
+- `dist/bibata-material-light-v1.0.0-win.zip` — light themes
+
+Each Windows ZIP includes the theme folders with `.cur` files, the
+animated `wait.ani` and `left_ptr_watch.ani` cursors, per-theme
+`Install.inf` files, and a Windows-specific `INSTALL.txt`.
+
+You can filter the themes with `--only-dark`, `--only-light`, or
+`--exclude` when calling `scripts/package_release.sh` directly:
+
+```bash
+bash scripts/package_release.sh v1.0.0 --win --only-dark
+bash scripts/package_release.sh v1.0.0 --exclude Classic
+```
+
+This step is optional for personal use — it is only needed when preparing
+downloadable archives for a release or redistribution.
 
 ---
 

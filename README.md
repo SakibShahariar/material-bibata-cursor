@@ -390,6 +390,11 @@ Add this line to your Niri configuration, normally
 include "cursor-theme.kdl"
 ```
 
+If your `config.kdl` already has a `cursor` block with an `xcursor-theme`
+setting, remove that setting to avoid having the cursor theme configured
+in two places. If the block contains no other settings afterward, you can
+remove the entire `cursor` block; keep any other cursor settings you use.
+
 The generated `cursor-theme.kdl` file must be in the same directory as
 the main Niri configuration. The Matugen hook updates this file whenever
 it runs, selecting the closest installed Bibata Material theme for the

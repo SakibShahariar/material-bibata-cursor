@@ -14,7 +14,7 @@ colored using Material Design 3's tonal system — a dark body paired
 with a vibrant accent outline, tuned independently per theme.
 
 Whatever your setup — X11, Wayland, GNOME 51+, KDE Plasma 6.2+, Hyprland,
-or Windows — choose the matching download or build the formats you need.
+Niri, or Windows — choose the matching download or build the formats you need.
 Pick a variant below, or add your own color — see
 [Adding a color](#adding-a-color).
 
@@ -373,8 +373,45 @@ post_hook = "~/.config/matugen/post-hook-scripts/cursor_matugen.sh"
 ```
 
 A normal `matugen` run then picks your wallpaper's primary color, finds
-the closest built-in theme via `color_match.py`, and rebuilds it with
-`cursor_matugen.sh`.
+the closest built-in theme via `color_match.py`, and updates the active
+cursor theme.
+
+### Niri support
+
+The Matugen post-hook can also update the cursor theme used by
+[Niri](https://github.com/niri-wm/niri).
+
+**One-time setup**
+
+Add this line to your Niri configuration, normally
+`~/.config/niri/config.kdl`:
+
+```kdl
+include "cursor-theme.kdl"
+```
+
+The generated `cursor-theme.kdl` file must be in the same directory as
+the main Niri configuration. The Matugen hook updates this file whenever
+it runs, selecting the closest installed Bibata Material theme for the
+current wallpaper color.
+
+For example, the generated file looks like this:
+
+```kdl
+cursor {
+    xcursor-theme "Bibata-Material-Teal"
+}
+```
+
+The theme name in the generated file changes automatically according to
+the color selected by the Matugen hook; you do not need to edit the
+generated file manually.
+
+**Requirements and notes**
+
+- Install the matching `Bibata-Material-*` cursor themes before running the hook.
+- Keep the `include "cursor-theme.kdl"` line in your main Niri configuration so Niri can load the generated setting.
+- Niri support has not yet been verified on a live Niri session. If you encounter issues, please report them with your Niri version and configuration details.
 
 ## Star History
 

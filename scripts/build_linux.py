@@ -205,7 +205,11 @@ def build_one(
                     raise BuildError(f"upstream source directory is missing: {source}")
                 shutil.copytree(source, work_dir / directory)
             patch_theme_config(work_dir, theme, colors)
-            output_dir = work_dir / "out"
+            # The upstream Hyprcursor generator computes symlink targets
+            # with pathlib.relative_to(..., walk_up=True). Keep --out-dir
+            # relative to cwd so its relative SVG source paths share the same
+            # anchor; an absolute output path raises ValueError on Python 3.12.
+            output_dir = Path("out")
             run(
                 [
                     str(work_dir / "src" / "cursor_utils.py"),
@@ -218,7 +222,7 @@ def build_one(
                 ],
                 cwd=work_dir,
             )
-            compiled_theme = output_dir / "Bibata-Modern-Classic"
+            compiled_theme = work_dir / output_dir / "Bibata-Modern-Classic"
             if not compiled_theme.is_dir():
                 raise BuildError(f"upstream build did not produce {compiled_theme}")
             run(

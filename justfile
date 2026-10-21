@@ -108,7 +108,7 @@ package-win-light version:
 
 # List all theme names defined in themes.json
 list:
-    @python3 -c 'import json; print("\\n".join(json.load(open("themes.json", encoding="utf-8")).keys()))'
+    @python3 -c 'import json; print("\n".join(json.load(open("themes.json", encoding="utf-8")).keys()))'
 
 # Show the Body/Primary/Watch colors for one theme, e.g. `just show Coral`
 show theme:

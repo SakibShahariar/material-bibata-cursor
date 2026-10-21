@@ -106,7 +106,7 @@ MIT License; see LICENSE.
 The generated cursor artwork is derived from Bibata Cursor by rtgiskard:
 https://github.com/rtgiskard/bibata_cursor
 That upstream project identifies its license as GNU GPL version 3 or later.
-The original Bibata_Cursor artwork was designed by Abdulkaïz Khatri and is
+The original Bibata_Cursor artwork was designed by Abdulkaiz Khatri and is
 credited by the upstream project: https://github.com/ful1e5/Bibata_Cursor
 
 The GPL terms apply to redistribution of the derivative cursor artwork;
@@ -348,11 +348,9 @@ EOF
 write_checksums() {
     local checksum_file="$DIST_DIR/SHA256SUMS-$VERSION.txt"
     local archives=()
-    while IFS= read -r -d ''; do
-        archives+=( "${REPLY##*/}" )
-    done < <(find "$DIST_DIR" -maxdepth 1 -type f \\
-        \\( -name "bibata-material-*-$VERSION.tar.gz" \\
-        -o -name "bibata-material-*-$VERSION-win.zip" \\) -print0 | sort -z)
+    while IFS= read -r -d '' archive; do
+        archives+=( "${archive##*/}" )
+    done < <(find "$DIST_DIR" -maxdepth 1 -type f \( -name "bibata-material-*-$VERSION.tar.gz" -o -name "bibata-material-*-$VERSION-win.zip" \) -print0 | sort -z)
 
     if [[ ${#archives[@]} -eq 0 ]]; then
         echo "Warning: no archives found to checksum for version $VERSION" >&2

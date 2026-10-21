@@ -122,19 +122,29 @@ def patch_theme_config(work_dir: Path, theme: str, colors: dict) -> None:
             raise ValueError("cursor_defaults.x11_sizes is missing or invalid")
         merged_sizes = sorted(set(sizes).union(EXTRA_X11_SIZES))
         text = config_path.read_text(encoding="utf-8")
-        pattern = r"(?m)^(\s*x11_sizes\s*=\s*)\[[^\]]*\]"
-        text, replacements = re.subn(
-            pattern,
-            lambda match: match.group(1) + "[" + ", ".join(map(str, merged_sizes)) + "]",
-            text,
-            count=1,
-        )
-        if replacements != 1:
-            raise ValueError("could not locate cursor_defaults.x11_sizes assignment")
-        # Parse the patched TOML too; a regex replacement must never leave
-        # an invalid config that only fails later in upstream code.
-        tomllib.loads(text)
-        config_path.write_text(text, encoding="utf-8", newline="\n")
+        lines = text.splitlines()
+        section = None
+        size_assignments = []
+        for line_number, line in enumerate(lines):
+            stripped = line.strip()
+            section_match = re.fullmatch(r"\\[([^\\]]+)\\](?:\\s*#.*)?", stripped)
+            if section_match:
+                section = section_match.group(1).strip()
+            elif section == "cursor_defaults" and re.match(r"^[ \\t]*x11_sizes[ \\t]*=", line):
+                size_assignments.append(line_number)
+        if len(size_assignments) != 1:
+            raise ValueError(
+                "expected exactly one cursor_defaults.x11_sizes assignment; "
+                f"found {len(size_assignments)}"
+            )
+        line_number = size_assignments[0]
+        indent = lines[line_number][:len(lines[line_number]) - len(lines[line_number].lstrip())]
+        lines[line_number] = indent + "x11_sizes = [" + ", ".join(map(str, merged_sizes)) + "]"
+        patched_text = "\\n".join(lines) + ("\\n" if text.endswith("\\n") else "")
+        # Parse the patched TOML too; malformed config must fail before any
+        # cursor output is generated.
+        tomllib.loads(patched_text)
+        config_path.write_text(patched_text, encoding="utf-8", newline="\\n")
     except (OSError, tomllib.TOMLDecodeError, ValueError, TypeError) as exc:
         raise BuildError(f"could not patch build.toml for {theme}: {exc}") from exc
 

@@ -165,7 +165,7 @@ try:
     merged_sizes = sorted(set(sizes).union(extra_sizes))
     with open(config_path, 'r', encoding='utf-8') as f:
         build_toml = f.read()
-    pattern = r'(?m)^(\\s*x11_sizes\\s*=\\s*)\\[[^\\]]*\\]'
+    pattern = r'(?m)^(\s*x11_sizes\s*=\s*)\[[^\]]*\]'
     build_toml, replacements = re.subn(
         pattern,
         lambda match: match.group(1) + '[' + ', '.join(map(str, merged_sizes)) + ']',

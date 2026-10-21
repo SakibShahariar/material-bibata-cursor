@@ -87,7 +87,25 @@ def ensure_upstream(build_dir: Path) -> None:
             "Move it aside or remove it, then rerun the build."
         )
 
-    # Existing clones must use the same pinned revision as fresh clones.
+    # If the source was supplied by a package builder at the exact pinned
+    # commit, avoid a network fetch. Reject tracked local edits instead of
+    # silently building modified upstream assets.
+    current = subprocess.run(
+        ["git", "-C", str(build_dir), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+    )
+    if current.returncode == 0 and current.stdout.strip() == UPSTREAM_COMMIT:
+        clean = subprocess.run(
+            ["git", "-C", str(build_dir), "diff", "--quiet", "HEAD", "--"]
+        )
+        if clean.returncode == 0:
+            return
+        if clean.returncode == 1:
+            raise BuildError(f"pinned Bibata checkout has local changes: {build_dir}")
+        raise BuildError(f"could not verify pinned Bibata checkout: {build_dir}")
+
+    # Existing clones must use the same known-good revision as fresh clones.
     run(["git", "-C", str(build_dir), "fetch", "--quiet", "origin", UPSTREAM_COMMIT])
     run(["git", "-C", str(build_dir), "checkout", "--quiet", "--detach", UPSTREAM_COMMIT])
 

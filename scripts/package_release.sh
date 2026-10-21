@@ -72,6 +72,11 @@ if ! command -v jq >/dev/null; then
     exit 1
 fi
 
+if [[ ! -f "$REPO_ROOT/LICENSE" || ! -f "$REPO_ROOT/README.md" ]]; then
+    echo "Error: LICENSE and README.md must be present to package release documentation." >&2
+    exit 1
+fi
+
 theme_names=$(jq -r 'keys[]' "$THEMES_JSON")
 if [[ -z "$theme_names" ]]; then
     echo "Error: themes.json contains no themes" >&2
@@ -85,6 +90,30 @@ if [[ -n "${EXCLUDE_LIST:-}" ]]; then
         EXCLUDE_SET["$name"]=1
     done
 fi
+
+# Include project license, repository documentation, and upstream artwork credits
+# in every distributable archive (Linux tarballs and Windows ZIPs).
+write_archive_docs() {
+    local dir="$1"
+    cp "$REPO_ROOT/LICENSE" "$dir/LICENSE"
+    cp "$REPO_ROOT/README.md" "$dir/README.md"
+    cat > "$dir/CREDITS.txt" << 'EOF'
+Material Bibata Cursor
+
+Build and color-matching tooling in this repository, including themes.json:
+MIT License; see LICENSE.
+
+The generated cursor artwork is derived from Bibata Cursor by rtgiskard:
+https://github.com/rtgiskard/bibata_cursor
+That upstream project identifies its license as GNU GPL version 3 or later.
+The original Bibata_Cursor artwork was designed by Abdulkaïz Khatri and is
+credited by the upstream project: https://github.com/ful1e5/Bibata_Cursor
+
+The GPL terms apply to redistribution of the derivative cursor artwork;
+the MIT license for this repository's tooling does not replace them. See
+README.md and the upstream project for further details.
+EOF
+}
 
 # Plain-language install instructions, shared by both archives.
 write_install_txt() {
@@ -178,6 +207,7 @@ package_group() {
     fi
 
     write_install_txt "$stage_dir" "$group_label"
+    write_archive_docs "$stage_dir"
 
     mkdir -p "$DIST_DIR"
     local tar_path="$DIST_DIR/bibata-material-$group_name-$VERSION.tar.gz"
@@ -273,9 +303,11 @@ pack_win_group() {
     fi
 
     write_win_install_txt "$stage_dir" "$group_label (Windows .cur)"
+    write_archive_docs "$stage_dir"
 
     mkdir -p "$DIST_DIR"
     local zip_path="$DIST_DIR/bibata-material-$group_name-$VERSION-win.zip"
+    rm -f "$zip_path"
     (cd "$DIST_DIR" && zip -rq "bibata-material-$group_name-$VERSION-win.zip" \
         "bibata-material-$group_name-$VERSION-win")
     rm -rf "$stage_dir"
@@ -313,8 +345,27 @@ https://github.com/SakibShahariar/material-bibata-cursor
 EOF
 }
 
+write_checksums() {
+    local checksum_file="$DIST_DIR/SHA256SUMS-$VERSION.txt"
+    local archives=()
+    while IFS= read -r -d ''; do
+        archives+=( "${REPLY##*/}" )
+    done < <(find "$DIST_DIR" -maxdepth 1 -type f \\
+        \\( -name "bibata-material-*-$VERSION.tar.gz" \\
+        -o -name "bibata-material-*-$VERSION-win.zip" \\) -print0 | sort -z)
+
+    if [[ ${#archives[@]} -eq 0 ]]; then
+        echo "Warning: no archives found to checksum for version $VERSION" >&2
+        return
+    fi
+
+    (cd "$DIST_DIR" && sha256sum "${archives[@]}" > "$checksum_file")
+    echo "Wrote $checksum_file" >&2
+}
+
 if [[ "$MODE" == "windows" ]]; then
     package_windows
+    write_checksums
     exit 0
 fi
 
@@ -342,3 +393,5 @@ if [[ "$dark_count" -eq 0 && "$light_count" -eq 0 ]]; then
     echo "Error: nothing was packaged at all. Run compile_bibata_material.fish first." >&2
     exit 1
 fi
+
+write_checksums

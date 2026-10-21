@@ -184,6 +184,27 @@ def default_scalable_dir(install_dir: Path) -> Path:
     return xdg_icons
 
 
+def isolate_upstream_temp_file(work_dir: Path) -> None:
+    """Avoid collisions in the pinned upstream renderer's shared /tmp filename."""
+    cursor_utils = work_dir / "src" / "cursor_utils.py"
+    try:
+        source = cursor_utils.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise BuildError(f"could not read upstream cursor utility: {exc}") from exc
+
+    original = "tmp = Path('/tmp/.cursor.0248.svg')"
+    replacement = "tmp = Path(f'/tmp/.cursor.{Path.cwd().name}.svg')"
+    if source.count(original) != 1:
+        raise BuildError(
+            "pinned upstream cursor utility no longer has the expected shared "
+            "temporary SVG path; review the upstream renderer before building"
+        )
+    try:
+        cursor_utils.write_text(source.replace(original, replacement), encoding="utf-8")
+    except OSError as exc:
+        raise BuildError(f"could not isolate upstream renderer temporary file: {exc}") from exc
+
+
 def build_one(
     theme: str,
     colors: dict,
@@ -204,6 +225,7 @@ def build_one(
                 if not source.is_dir():
                     raise BuildError(f"upstream source directory is missing: {source}")
                 shutil.copytree(source, work_dir / directory)
+            isolate_upstream_temp_file(work_dir)
             patch_theme_config(work_dir, theme, colors)
             # The upstream Hyprcursor generator computes symlink targets
             # with pathlib.relative_to(..., walk_up=True). Keep --out-dir

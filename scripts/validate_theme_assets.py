@@ -140,26 +140,56 @@ def validate_windows(theme_dir: Path) -> None:
 def validate_archive(path: Path) -> None:
     require(path.is_file(), f"archive does not exist: {path}")
     try:
-        with tarfile.open(path, "r:gz") as archive:
-            members = archive.getmembers()
-            names = {member.name.rstrip("/") for member in members}
-            require(members, f"empty release archive: {path}")
-            roots = {PurePosixPath(name).parts[0] for name in names if PurePosixPath(name).parts}
-            require(len(roots) == 1, f"archive must contain one top-level directory: {path}")
-            root = next(iter(roots))
-            for doc in ("INSTALL.txt", "LICENSE", "README.md", "CREDITS.txt"):
-                require(f"{root}/{doc}" in names, f"{path} missing {root}/{doc}")
-            themes = sorted(name for name in names if name.startswith(f"{root}/{THEME_PREFIX}")
-                            and len(PurePosixPath(name).parts) == 2)
-            require(themes, f"{path} contains no packaged theme directories")
-            for theme in themes:
-                for required in ("index.theme", "cursors", "hyprcursors", "cursors_scalable"):
-                    prefix = f"{theme}/{required}"
+        if path.suffix.lower() == ".zip":
+            with zipfile.ZipFile(path) as archive:
+                raw_names = archive.namelist()
+                names = {name.rstrip("/") for name in raw_names}
+                require(raw_names, f"empty release archive: {path}")
+                roots = {PurePosixPath(name).parts[0] for name in names if PurePosixPath(name).parts}
+                require(len(roots) == 1, f"archive must contain one top-level directory: {path}")
+                root = next(iter(roots))
+                for doc in ("INSTALL.txt", "LICENSE", "README.md", "CREDITS.txt"):
+                    require(f"{root}/{doc}" in names, f"{path} missing {root}/{doc}")
+                themes = sorted(
+                    name for name in names
+                    if name.startswith(f"{root}/{THEME_PREFIX}")
+                    and len(PurePosixPath(name).parts) == 2
+                )
+                require(themes, f"{path} contains no packaged theme directories")
+                for theme in themes:
                     require(
-                        any(name == prefix or name.startswith(prefix + "/") for name in names),
-                        f"{path} missing {prefix}",
+                        any(name.startswith(theme + "/") and name.endswith(".cur") for name in names),
+                        f"{path} contains no .cur files for {theme}",
                     )
-    except (OSError, tarfile.TarError) as exc:
+                    require(
+                        any(name.startswith(theme + "/") and name.endswith(".ani") for name in names),
+                        f"{path} contains no .ani files for {theme}",
+                    )
+                    require(f"{theme}/install.inf" in names, f"{path} missing {theme}/install.inf")
+        else:
+            with tarfile.open(path, "r:gz") as archive:
+                members = archive.getmembers()
+                names = {member.name.rstrip("/") for member in members}
+                require(members, f"empty release archive: {path}")
+                roots = {PurePosixPath(name).parts[0] for name in names if PurePosixPath(name).parts}
+                require(len(roots) == 1, f"archive must contain one top-level directory: {path}")
+                root = next(iter(roots))
+                for doc in ("INSTALL.txt", "LICENSE", "README.md", "CREDITS.txt"):
+                    require(f"{root}/{doc}" in names, f"{path} missing {root}/{doc}")
+                themes = sorted(
+                    name for name in names
+                    if name.startswith(f"{root}/{THEME_PREFIX}")
+                    and len(PurePosixPath(name).parts) == 2
+                )
+                require(themes, f"{path} contains no packaged theme directories")
+                for theme in themes:
+                    for required in ("index.theme", "cursors", "hyprcursors", "cursors_scalable"):
+                        prefix = f"{theme}/{required}"
+                        require(
+                            any(name == prefix or name.startswith(prefix + "/") for name in names),
+                            f"{path} missing {prefix}",
+                        )
+    except (OSError, tarfile.TarError, zipfile.BadZipFile) as exc:
         raise ValidationError(f"cannot inspect release archive {path}: {exc}") from exc
 
 

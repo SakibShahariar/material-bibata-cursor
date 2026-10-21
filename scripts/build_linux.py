@@ -52,19 +52,32 @@ def load_themes(path: Path) -> dict:
     if not isinstance(themes, dict) or not themes:
         raise BuildError(f"{path} must contain a non-empty JSON object of themes")
     for name, colors in themes.items():
-        if not isinstance(name, str) or not name or not isinstance(colors, dict):
-            raise BuildError(f"invalid theme entry in {path}: {name!r}")
+        if (
+            not isinstance(name, str)
+            or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", name) is None
+            or not isinstance(colors, dict)
+        ):
+            raise BuildError(f"invalid or unsafe theme name/entry in {path}: {name!r}")
         for key in ("body", "primary", "watch"):
             value = colors.get(key)
-            if not isinstance(value, str) or not value.strip() or value == "null":
-                raise BuildError(f"theme {name!r} has a missing or invalid {key!r} color")
+            if not isinstance(value, str) or re.fullmatch(r"#[0-9A-Fa-f]{6}", value) is None:
+                raise BuildError(
+                    f"theme {name!r} has a missing or invalid {key!r} color; expected #RRGGBB"
+                )
     return themes
 
 
 def ensure_upstream(build_dir: Path) -> None:
     if not build_dir.exists():
         print(f"Cloning Bibata source into {build_dir}...")
-        run(["git", "clone", UPSTREAM_URL, str(build_dir)])
+        # Clone away from the final path so an interrupted clone never leaves
+        # a partial directory that subsequent runs mistake for a checkout.
+        with tempfile.TemporaryDirectory(
+            prefix=".bibata_cursor.clone-", dir=build_dir.parent
+        ) as temporary_parent:
+            clone_path = Path(temporary_parent) / "checkout"
+            run(["git", "clone", UPSTREAM_URL, str(clone_path)])
+            clone_path.rename(build_dir)
     elif not (build_dir / ".git").is_dir() or not (build_dir / "src" / "cursor_utils.py").is_file():
         raise BuildError(
             f"{build_dir} exists but is not a complete Bibata checkout. "

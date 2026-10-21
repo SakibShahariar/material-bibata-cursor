@@ -1,6 +1,6 @@
 pkgbase = material-bibata-cursor
 	pkgdesc = Material Design 3 Bibata cursor themes for Xcursor, Hyprcursor, and SVG
-	pkgver = 1.0.0
+	pkgver = 1.5.0
 	pkgrel = 1
 	url = https://github.com/SakibShahariar/material-bibata-cursor
 	arch = any
@@ -12,7 +12,7 @@ pkgbase = material-bibata-cursor
 	makedepends = librsvg
 	makedepends = xorg-xcursorgen
 	makedepends = licenses
-	source = material-bibata-cursor::git+https://github.com/SakibShahariar/material-bibata-cursor.git#tag=v1.0.0
+	source = material-bibata-cursor::git+https://github.com/SakibShahariar/material-bibata-cursor.git#tag=v1.5.0
 	source = bibata_cursor::git+https://github.com/rtgiskard/bibata_cursor.git#commit=f4ccfe8abb63fddc7b3ce51a866fd8378395cb3d
 	sha256sums = SKIP
 	sha256sums = SKIP

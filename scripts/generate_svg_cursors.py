@@ -176,7 +176,14 @@ def generate_for_theme(bibata_dir: Path, install_dir: Path, scalable_dir: Path,
     index = build_name_index(build_cfg)
 
     if scalable_sub.exists():
-        shutil.rmtree(scalable_theme)
+        # For system-wide installs, the scalable and Xcursor formats share
+        # one theme directory. Remove only the generated SVG subtree there;
+        # deleting scalable_theme would also erase the Xcursor fallback.
+        installed_theme = install_dir / theme_name
+        if scalable_theme.resolve() == installed_theme.resolve():
+            shutil.rmtree(scalable_sub)
+        else:
+            shutil.rmtree(scalable_theme)
     scalable_sub.mkdir(parents=True)
 
     ok, failed = 0, 0

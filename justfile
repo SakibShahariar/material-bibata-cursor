@@ -1,8 +1,7 @@
 # Material Bibata Cursor — task runner
 #
-# Wraps the underlying fish/bash/python scripts so you don't need to
-# know which script does what, or be comfortable with fish. Run `just`
-# with no arguments to see this list.
+# Wraps the Python build and supporting scripts. Run `just` with no
+# arguments to see this list.
 
 # List available commands
 default:
@@ -10,15 +9,15 @@ default:
 
 # Build all 57 themes and install to ~/.icons (or $BIBATA_MATERIAL_INSTALL_DIR)
 build:
-    fish scripts/compile_bibata_material.fish
+    python3 scripts/build_linux.py
 
 # Build a single theme by name, e.g. `just build-one Apricot`
 build-one theme:
-    fish scripts/compile_bibata_material.fish {{theme}}
+    python3 scripts/build_linux.py {{theme}}
 
 # Build a comma-separated subset, e.g. `just build-selected Apricot,Coral,Classic`
 build-selected themes:
-    fish scripts/compile_bibata_material.fish --themes {{themes}}
+    python3 scripts/build_linux.py --themes {{themes}}
 
 # Preview removal of selected variants; append --yes to delete them
 remove-selected themes *flags:
@@ -26,11 +25,11 @@ remove-selected themes *flags:
 
 # Build only the 28 dark themes + Classic (skips the -Light set, faster)
 build-dark:
-    fish scripts/compile_bibata_material.fish --only-dark
+    python3 scripts/build_linux.py --only-dark
 
 # Build only the 28 -Light themes (skips the dark set, faster)
 build-light:
-    fish scripts/compile_bibata_material.fish --only-light
+    python3 scripts/build_linux.py --only-light
 
 # (Re)generate cursors_scalable/ SVG cursors for all installed themes (GNOME 51 / KDE Plasma 6.2+)
 svg:
@@ -109,11 +108,11 @@ package-win-light version:
 
 # List all theme names defined in themes.json
 list:
-    @jq -r 'keys[]' themes.json
+    @python3 -c 'import json; print("\\n".join(json.load(open("themes.json", encoding="utf-8")).keys()))'
 
 # Show the Body/Primary/Watch colors for one theme, e.g. `just show Coral`
 show theme:
-    @jq --arg n "{{theme}}" '.[$n] // "not found"' themes.json
+    @python3 -c 'import json, sys; print(json.dumps(json.load(open("themes.json", encoding="utf-8")).get(sys.argv[1], "not found"), indent=2))' "{{theme}}"
 
 # Remove build artifacts: cloned bibata_cursor source, dist/, __pycache__ (leaves ~/.icons untouched)
 clean:
@@ -126,7 +125,7 @@ check-deps:
     #!/usr/bin/env bash
     set -euo pipefail
     missing=0
-    for cmd in fish jq git python3 rsvg-convert xcursorgen; do
+    for cmd in git python3 rsvg-convert xcursorgen; do
         if command -v "$cmd" >/dev/null 2>&1; then
             echo "✓ $cmd"
         else

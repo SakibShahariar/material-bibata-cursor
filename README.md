@@ -15,7 +15,7 @@ with a vibrant accent outline, tuned independently per theme.
 
 Whatever your setup — X11, Wayland, GNOME 51+, KDE Plasma 6.2+, Hyprland,
 Niri, or Windows — choose the matching download or build the formats you need.
-Pick a variant below, or add your own color — see
+Pick a variant below, or compare them in the [interactive cursor gallery](docs/gallery.html), or add your own color — see
 [Adding a color](#adding-a-color).
 
 <div align="center">

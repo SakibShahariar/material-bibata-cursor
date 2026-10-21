@@ -305,9 +305,12 @@ themes.json                       # all theme colors, edit this to add/change on
 scripts/
 ├── bibata_cursor/                # build dependency, cloned on first Linux build
 ├── build_linux.py                # builds themes.json -> ~/.icons (Xcursor + Hyprcursor)
+├── compile_bibata_material.fish  # backwards-compatible wrapper for build_linux.py
 ├── metadata_generator.py         # writes index.theme so GNOME picks it up
 ├── generate_svg_cursors.py       # writes cursors_scalable/ SVG cursors
 ├── build_windows.py              # Windows .cur/.ani themes (see "Windows cursors")
+├── test_build_linux.py           # unit tests for theme selection and config patching
+├── validate_theme_assets.py      # validates cursor outputs and release archives
 ├── color_match.py                # finds the closest theme color to a hex
 ├── cursor_matugen.sh             # matugen post-hook (see "Matugen Setup")
 └── package_release.sh            # packages already-built themes for release

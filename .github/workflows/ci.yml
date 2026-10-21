@@ -1,0 +1,97 @@
+name: Cursor asset validation
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install native cursor build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes librsvg2-bin xcursorgen zip
+
+      - name: Install Windows asset dependency
+        run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Run builder unit tests
+        run: python -m unittest discover -s scripts -p 'test_*.py' -v
+
+      - name: Create a representative theme set
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          source = json.loads(Path("themes.json").read_text(encoding="utf-8"))
+          selected = {name: source[name] for name in ("Coral", "Coral-Light")}
+          Path(os.environ["RUNNER_TEMP"], "themes.json").write_text(
+              json.dumps(selected, indent=2) + "\n", encoding="utf-8"
+          )
+          PY
+
+      - name: Build Linux cursor formats
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          python scripts/build_linux.py \
+            --themes Coral,Coral-Light \
+            --jobs 2 \
+            --themes-json "$RUNNER_TEMP/themes.json" \
+            --install-dir "$RUNNER_TEMP/icons" \
+            --scalable-dir "$RUNNER_TEMP/scalable"
+
+      - name: Build Windows cursor formats
+        run: |
+          python scripts/build_windows.py Coral
+          python scripts/build_windows.py Coral-Light
+
+      - name: Validate generated cursor assets
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          python scripts/validate_theme_assets.py \
+            --themes Coral,Coral-Light \
+            --install-dir "$RUNNER_TEMP/icons" \
+            --scalable-dir "$RUNNER_TEMP/scalable" \
+            --windows-dir out_win
+
+      - name: Smoke-test Linux release archives
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+          BIBATA_MATERIAL_INSTALL_DIR: ${{ runner.temp }}/icons
+          BIBATA_MATERIAL_SCALABLE_DIR: ${{ runner.temp }}/scalable
+          BIBATA_MATERIAL_THEMES_JSON: ${{ runner.temp }}/themes.json
+        run: bash scripts/package_release.sh ci
+
+      - name: Smoke-test Windows release archives
+        env:
+          BIBATA_MATERIAL_THEMES_JSON: ${{ runner.temp }}/themes.json
+        run: bash scripts/package_release.sh ci --win
+
+      - name: Validate release archive contents
+        run: |
+          python scripts/validate_theme_assets.py \
+            --archive dist/bibata-material-dark-ci.tar.gz \
+            --archive dist/bibata-material-light-ci.tar.gz \
+            --archive dist/bibata-material-dark-ci-win.zip \
+            --archive dist/bibata-material-light-ci-win.zip

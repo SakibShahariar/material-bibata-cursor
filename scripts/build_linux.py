@@ -7,7 +7,7 @@ Examples:
     python3 scripts/build_linux.py --themes Coral,Apricot --jobs 4
     python3 scripts/build_linux.py --only-light --exclude Coral-Light
 
-Python 3.11+ is required. The upstream Bibata source is pinned to a known
+Python 3.12+ is required. The upstream Bibata source is pinned to a known
 revision so fresh builds and existing clones use the same source.
 """
 from __future__ import annotations
@@ -281,7 +281,7 @@ def main() -> int:
     )
     args = parser.parse_args()
     if sys.version_info < (3, 11):
-        parser.error("Python 3.11+ is required (the build uses the standard-library tomllib module)")
+        parser.error("Python 3.12+ is required (the build uses the standard-library tomllib module)")
     if args.jobs < 1:
         parser.error("--jobs must be at least 1")
 

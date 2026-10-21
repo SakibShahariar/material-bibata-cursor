@@ -204,26 +204,21 @@ except Exception as e:
     end
 
     if test -d "out/Bibata-Modern-Classic"
-        rm -rf "$install_dir/$theme_name"
-        mv "out/Bibata-Modern-Classic" "$install_dir/$theme_name"
-
-        if python3 "$script_dir/metadata_generator.py" \
+        set -l scalable_dir $BIBATA_MATERIAL_SCALABLE_DIR
+        if test -z "$scalable_dir"
+            set scalable_dir (python3 -c "import os; from pathlib import Path; p=Path('$install_dir').expanduser().resolve(); x=Path(os.environ.get('XDG_DATA_HOME', str(Path.home()/'.local'/'share')))/'icons'; print(p if any(p.is_relative_to(Path(d)) for d in ('/usr/share/icons','/usr/local/share/icons')) else x)")
+        end
+        if python3 "$script_dir/install_staged_theme.py" \
+                --source "$temp_run_dir/out/Bibata-Modern-Classic" \
+                --theme "$NAME" \
                 --install-dir "$install_dir" \
+                --scalable-dir "$scalable_dir" \
                 --themes-json "$themes_json" \
-                --theme "$NAME" >/dev/null 2>metadata_err.log
-            if python3 "$script_dir/generate_svg_cursors.py" \
-                    --theme "$NAME" \
-                    --install-dir "$install_dir" \
-                    --themes-json "$themes_json" >/dev/null 2>svg_err.log
-                set ok_count (math $ok_count + 1)
-            else
-                echo "Theme compiled but generate_svg_cursors.py failed for $NAME:" >&2
-                cat svg_err.log >&2
-                set fail_count (math $fail_count + 1)
-            end
+                --script-dir "$script_dir" >/dev/null 2>install_err.log
+            set ok_count (math $ok_count + 1)
         else
-            echo "Theme compiled but metadata_generator.py failed for $NAME:" >&2
-            cat metadata_err.log >&2
+            echo "Staged installation failed for $NAME:" >&2
+            cat install_err.log >&2
             set fail_count (math $fail_count + 1)
         end
     else

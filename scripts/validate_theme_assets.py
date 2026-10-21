@@ -39,6 +39,8 @@ def validate_xcursor(theme_dir: Path) -> None:
     require(cursors.is_dir(), f"missing Xcursor assets directory: {cursors}")
     cursor_files = [path for path in cursors.iterdir() if path.is_file()]
     require(cursor_files, f"no Xcursor assets in {cursors}")
+    for shape in ("left_ptr", "xterm", "wait", "bottom_right_corner"):
+        require((cursors / shape).exists(), f"missing required Xcursor shape {shape!r} in {cursors}")
     valid = 0
     for path in cursor_files:
         try:
@@ -56,6 +58,8 @@ def validate_xcursor(theme_dir: Path) -> None:
     require(hypr.is_dir(), f"missing Hyprcursor assets directory: {hypr}")
     archives = list(hypr.glob("*.hlc"))
     require(archives, f"no .hlc cursor archives in {hypr}")
+    for shape in ("left_ptr", "xterm", "wait", "bottom_right_corner"):
+        require((hypr / f"{shape}.hlc").is_file(), f"missing required Hyprcursor shape {shape!r} in {hypr}")
     for archive in archives:
         require(zipfile.is_zipfile(archive), f"invalid Hyprcursor archive: {archive}")
         try:
@@ -71,6 +75,8 @@ def validate_scalable(theme_dir: Path) -> None:
     require(scalable.is_dir(), f"missing scalable cursor assets: {scalable}")
     shapes = [path for path in scalable.iterdir() if path.is_dir()]
     require(shapes, f"no scalable cursor shapes in {scalable}")
+    for shape in ("left_ptr", "xterm", "wait", "bottom_right_corner"):
+        require((scalable / shape).is_dir(), f"missing required scalable shape {shape!r} in {scalable}")
     checked = 0
     for shape in shapes:
         metadata_path = shape / "metadata.json"
@@ -115,6 +121,8 @@ def validate_windows(theme_dir: Path) -> None:
     curs = list(theme_dir.glob("*.cur"))
     anis = list(theme_dir.glob("*.ani"))
     require(curs, f"no .cur files in {theme_dir}")
+    for filename in ("left_ptr.cur", "xterm.cur", "bottom_right_corner.cur"):
+        require((theme_dir / filename).is_file(), f"missing required Windows cursor {filename} in {theme_dir}")
     require((theme_dir / "wait.ani").is_file(), f"missing animated wait.ani in {theme_dir}")
     require((theme_dir / "left_ptr_watch.ani").is_file(),
             f"missing animated left_ptr_watch.ani in {theme_dir}")

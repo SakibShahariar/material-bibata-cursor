@@ -74,13 +74,13 @@ clean:
     rm -rf dist
     rm -rf scripts/__pycache__
 
-# Check that required tools (fish, jq, git, python3) are installed
+# Check the tools required for the Linux build
 check-deps:
     #!/usr/bin/env bash
     set -euo pipefail
     missing=0
-    for cmd in fish jq git python3; do
-        if command -v "$cmd" >/dev/null; then
+    for cmd in fish jq git python3 rsvg-convert xcursorgen; do
+        if command -v "$cmd" >/dev/null 2>&1; then
             echo "✓ $cmd"
         else
             echo "✗ $cmd (missing)"
@@ -89,6 +89,8 @@ check-deps:
     done
     if [ "$missing" -eq 1 ]; then
         echo ""
-        echo "Install the missing tool(s) above before running 'just build'."
+        echo "Install the missing tools above before running 'just build'."
+        echo "The upstream Bibata build also requires its documented dependencies:"
+        echo "https://github.com/rtgiskard/bibata_cursor"
         exit 1
     fi

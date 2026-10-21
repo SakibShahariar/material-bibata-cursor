@@ -22,6 +22,9 @@ import json
 import struct
 import subprocess
 import sys
+if sys.version_info < (3, 12):
+    print("Error: Python 3.12+ is required by the pinned upstream Bibata source", file=sys.stderr)
+    raise SystemExit(1)
 import tomllib
 from pathlib import Path
 

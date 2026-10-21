@@ -44,6 +44,11 @@ if not command -v jq >/dev/null
     exit 1
 end
 
+if not python3 -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)" >/dev/null 2>&1
+    echo "Error: Python 3.11+ is required (the build uses the standard-library tomllib module)." >&2
+    exit 1
+end
+
 if not test -f $themes_json
     echo "Error: themes.json not found at $themes_json" >&2
     exit 1

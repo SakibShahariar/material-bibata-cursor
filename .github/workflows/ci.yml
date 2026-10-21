@@ -44,7 +44,7 @@ jobs:
           from pathlib import Path
 
           source = json.loads(Path("themes.json").read_text(encoding="utf-8"))
-          selected = {name: source[name] for name in ("Coral", "Coral-Light")}
+          selected = {name: source[name] for name in ("Peach", "Peach-Light")}
           Path(os.environ["RUNNER_TEMP"], "themes.json").write_text(
               json.dumps(selected, indent=2) + "\n", encoding="utf-8"
           )
@@ -55,7 +55,7 @@ jobs:
           RUNNER_TEMP: ${{ runner.temp }}
         run: |
           python scripts/build_linux.py \
-            --themes Coral,Coral-Light \
+            --themes Peach,Peach-Light \
             --jobs 2 \
             --themes-json "$RUNNER_TEMP/themes.json" \
             --install-dir "$RUNNER_TEMP/icons" \
@@ -63,15 +63,15 @@ jobs:
 
       - name: Build Windows cursor formats
         run: |
-          python scripts/build_windows.py Coral
-          python scripts/build_windows.py Coral-Light
+          python scripts/build_windows.py Peach
+          python scripts/build_windows.py Peach-Light
 
       - name: Validate generated cursor assets
         env:
           RUNNER_TEMP: ${{ runner.temp }}
         run: |
           python scripts/validate_theme_assets.py \
-            --themes Coral,Coral-Light \
+            --themes Peach,Peach-Light \
             --install-dir "$RUNNER_TEMP/icons" \
             --scalable-dir "$RUNNER_TEMP/scalable" \
             --windows-dir out_win

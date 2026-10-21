@@ -385,6 +385,8 @@ def main() -> None:
     parser.add_argument("--only-dark", action="store_true")
     parser.add_argument("--exclude", default=None)
     args = parser.parse_args()
+    if sys.version_info < (3, 12):
+        parser.error("Python 3.12+ is required by the pinned upstream Bibata source")
 
     themes = load_themes()
     names = filter_themes(themes, args)

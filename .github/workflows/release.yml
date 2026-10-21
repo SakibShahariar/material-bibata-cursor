@@ -1,0 +1,83 @@
+name: Build and publish release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install native cursor build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes librsvg2-bin xcursorgen zip
+
+      - name: Install Windows asset dependency
+        run: python -m pip install --disable-pip-version-check Pillow
+
+      - name: Build all Linux cursor themes
+        env:
+          BIBATA_MATERIAL_INSTALL_DIR: ${{ runner.temp }}/icons
+          BIBATA_MATERIAL_SCALABLE_DIR: ${{ runner.temp }}/scalable
+        run: python scripts/build_linux.py --jobs 2
+
+      - name: Build all Windows cursor themes
+        run: python scripts/build_windows.py
+
+      - name: Validate generated assets before packaging
+        env:
+          BIBATA_MATERIAL_INSTALL_DIR: ${{ runner.temp }}/icons
+          BIBATA_MATERIAL_SCALABLE_DIR: ${{ runner.temp }}/scalable
+        run: |
+          THEMES="$(python -c 'import json; print(",".join(json.load(open("themes.json", encoding="utf-8")).keys()))')"
+          python scripts/validate_theme_assets.py \
+            --themes "$THEMES" \
+            --install-dir "$BIBATA_MATERIAL_INSTALL_DIR" \
+            --scalable-dir "$BIBATA_MATERIAL_SCALABLE_DIR" \
+            --windows-dir out_win
+
+      - name: Package Linux release archives
+        env:
+          BIBATA_MATERIAL_INSTALL_DIR: ${{ runner.temp }}/icons
+          BIBATA_MATERIAL_SCALABLE_DIR: ${{ runner.temp }}/scalable
+        run: bash scripts/package_release.sh "${GITHUB_REF_NAME}"
+
+      - name: Package Windows release archives
+        run: bash scripts/package_release.sh "${GITHUB_REF_NAME}" --win
+
+      - name: Validate release archives
+        run: |
+          python scripts/validate_theme_assets.py \
+            --archive "dist/bibata-material-dark-${GITHUB_REF_NAME}.tar.gz" \
+            --archive "dist/bibata-material-light-${GITHUB_REF_NAME}.tar.gz" \
+            --archive "dist/bibata-material-dark-${GITHUB_REF_NAME}-win.zip" \
+            --archive "dist/bibata-material-light-${GITHUB_REF_NAME}-win.zip"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/bibata-material-dark-${{ github.ref_name }}.tar.gz
+            dist/bibata-material-light-${{ github.ref_name }}.tar.gz
+            dist/bibata-material-dark-${{ github.ref_name }}-win.zip
+            dist/bibata-material-light-${{ github.ref_name }}-win.zip
+            dist/SHA256SUMS-${{ github.ref_name }}.txt

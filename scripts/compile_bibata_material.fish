@@ -30,6 +30,8 @@ set -l requested_theme $argv[1]
 set -l script_dir (dirname (readlink -f (status filename)))
 set -l repo_root (dirname $script_dir)
 set -l build_dir "$script_dir/bibata_cursor"
+# Pin the upstream build source so theme output does not change silently.
+set -l upstream_commit "f4ccfe8abb63fddc7b3ce51a866fd8378395cb3d"
 set -l themes_json "$repo_root/themes.json"
 set -l install_dir $BIBATA_MATERIAL_INSTALL_DIR
 if test -z "$install_dir"
@@ -48,7 +50,7 @@ if not test -f $themes_json
 end
 
 if not test -d $build_dir
-    echo "Cloning bibata_cursor source..."
+    echo "Cloning bibata_cursor source at $upstream_commit..."
     if not git clone https://github.com/rtgiskard/bibata_cursor $build_dir
         echo "Error: failed to clone bibata_cursor" >&2
         exit 1
@@ -57,12 +59,23 @@ else if not test -f "$build_dir/src/cursor_utils.py"
     # Directory exists but looks incomplete/empty — likely a previous
     # clone got interrupted. Re-clone instead of failing cryptically
     # later at the cp step.
-    echo "Existing bibata_cursor/ looks incomplete, re-cloning..."
     rm -rf $build_dir
+    echo "Existing bibata_cursor/ looks incomplete, re-cloning..."
     if not git clone https://github.com/rtgiskard/bibata_cursor $build_dir
         echo "Error: failed to clone bibata_cursor" >&2
         exit 1
     end
+end
+
+# Existing clones must use the same known-good revision as fresh clones.
+# Fetching/checking out fails safely if local changes prevent the checkout.
+if not git -C $build_dir fetch --quiet origin $upstream_commit
+    echo "Error: could not fetch pinned bibata_cursor commit $upstream_commit" >&2
+    exit 1
+end
+if not git -C $build_dir checkout --quiet --detach $upstream_commit
+    echo "Error: could not check out pinned bibata_cursor commit. Check for local changes in $build_dir." >&2
+    exit 1
 end
 
 set -l theme_names
@@ -128,7 +141,7 @@ for NAME in $theme_names
     cd $temp_run_dir
 
     set -l py_status (python3 -c "
-import json, sys
+import json, re, sys, tomllib
 try:
     with open('config/render.json') as f:
         d = json.load(f)
@@ -139,21 +152,30 @@ try:
     with open('config/render.json', 'w') as f:
         json.dump(d, f, indent=2)
 
-    # Expand X11 cursor sizes beyond the upstream default so fractional
-    # display scaling (125%, 150%, etc.) gets an exact-match bitmap
-    # instead of a blurry nearest-size scale. Sizes are 24px-base scaled
-    # 0.5x-3x in 0.25x steps, merged with upstream's original list.
-    # See: https://blogs.kde.org/2024/10/09/cursor-size-problems-in-wayland-explained/
-    with open('config/build.toml') as f:
+    # Expand the existing X11 sizes without depending on upstream's exact
+    # formatting or original size list. Keep upstream sizes and add the
+    # values needed for fractional display scaling.
+    config_path = 'config/build.toml'
+    with open(config_path, 'rb') as f:
+        config = tomllib.load(f)
+    sizes = config.get('cursor_defaults', {}).get('x11_sizes')
+    if not isinstance(sizes, list) or not sizes or any(type(n) is not int or n <= 0 for n in sizes):
+        raise ValueError('cursor_defaults.x11_sizes is missing or invalid')
+    extra_sizes = [12, 18, 30, 36, 42, 54, 60, 66]
+    merged_sizes = sorted(set(sizes).union(extra_sizes))
+    with open(config_path, 'r', encoding='utf-8') as f:
         build_toml = f.read()
-    old_sizes = 'x11_sizes = [16, 20, 22, 24, 28, 32, 48, 64, 72, 84, 96]'
-    new_sizes = 'x11_sizes = [12, 16, 18, 20, 22, 24, 28, 30, 32, 36, 42, 48, 54, 60, 64, 66, 72, 84, 96]'
-    if old_sizes not in build_toml:
-        print('build.toml sizes line not found in expected format, skipping size expansion', file=sys.stderr)
-    else:
-        build_toml = build_toml.replace(old_sizes, new_sizes)
-        with open('config/build.toml', 'w') as f:
-            f.write(build_toml)
+    pattern = r'(?m)^(\\s*x11_sizes\\s*=\\s*)\\[[^\\]]*\\]'
+    build_toml, replacements = re.subn(
+        pattern,
+        lambda match: match.group(1) + '[' + ', '.join(map(str, merged_sizes)) + ']',
+        build_toml,
+        count=1,
+    )
+    if replacements != 1:
+        raise ValueError('could not locate cursor_defaults.x11_sizes assignment')
+    with open(config_path, 'w', encoding='utf-8') as f:
+        f.write(build_toml)
 except Exception as e:
     print(f'config patch failed: {e}', file=sys.stderr)
     sys.exit(1)

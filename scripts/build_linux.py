@@ -19,6 +19,9 @@ import re
 import shutil
 import subprocess
 import sys
+if sys.version_info < (3, 12):
+    print("Error: Python 3.12+ is required by the pinned upstream Bibata source", file=sys.stderr)
+    raise SystemExit(1)
 import tempfile
 import tomllib
 from concurrent.futures import ThreadPoolExecutor, as_completed

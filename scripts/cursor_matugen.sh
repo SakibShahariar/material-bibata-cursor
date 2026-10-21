@@ -102,6 +102,24 @@ INSTALL_DIR="$FOUND_DIR"
 echo "Matched cursor theme: $THEME_NAME"
 echo "Theme directory: $INSTALL_DIR/$THEME_NAME"
 
+# Preserve the current cursor size where possible. XCURSOR_SIZE is the
+# common cross-desktop override; Hyprland's live setting and GNOME's
+# configured size are fallbacks. Use 24 only when no valid size is available.
+CURSOR_SIZE="${XCURSOR_SIZE:-}"
+if ! [[ "$CURSOR_SIZE" =~ ^[1-9][0-9]*$ ]] &&
+   command -v hyprctl >/dev/null 2>&1 &&
+   pgrep -x Hyprland >/dev/null 2>&1 &&
+   command -v jq >/dev/null 2>&1; then
+    CURSOR_SIZE="$(hyprctl getoption cursor:size -j 2>/dev/null | jq -r '.int // empty' 2>/dev/null || true)"
+fi
+if ! [[ "$CURSOR_SIZE" =~ ^[1-9][0-9]*$ ]] &&
+   command -v gsettings >/dev/null 2>&1; then
+    CURSOR_SIZE="$(gsettings get org.gnome.desktop.interface cursor-size 2>/dev/null | tr -d "'" || true)"
+fi
+if ! [[ "$CURSOR_SIZE" =~ ^[1-9][0-9]*$ ]]; then
+    CURSOR_SIZE=24
+fi
+
 # --- 4A. GNOME and GTK applications -----------------------------------
 
 if command -v gsettings >/dev/null 2>&1; then
@@ -129,14 +147,25 @@ fi
 
 if command -v hyprctl >/dev/null 2>&1 &&
    pgrep -x Hyprland >/dev/null 2>&1; then
-    if hyprctl setcursor "$THEME_NAME" 24 >/dev/null 2>&1; then
+    if hyprctl setcursor "$THEME_NAME" "$CURSOR_SIZE" >/dev/null 2>&1; then
         echo "✓ Set Hyprland cursor theme: $THEME_NAME"
     else
         echo "Warning: hyprctl setcursor failed" >&2
     fi
 fi
 
-# --- 4D. Niri ----------------------------------------------------------
+# --- 4D. Sway -----------------------------------------------------------
+# Sway's seat command supports changing the active XCursor theme and size.
+if command -v swaymsg >/dev/null 2>&1 &&
+   pgrep -x sway >/dev/null 2>&1; then
+    if swaymsg seat '*' xcursor_theme "$THEME_NAME" "$CURSOR_SIZE" >/dev/null 2>&1; then
+        echo "✓ Set Sway cursor theme: $THEME_NAME (size $CURSOR_SIZE)"
+    else
+        echo "Warning: swaymsg failed to set the cursor theme" >&2
+    fi
+fi
+
+# --- 4E. Niri ----------------------------------------------------------
 #
 # One-time user setup:
 # Add this to the main Niri config:
@@ -172,7 +201,7 @@ if [[ -f "$NIRI_CONFIG_PATH" ]]; then
     fi
 fi
 
-# --- 4E. XCursor fallback ----------------------------------------------
+# --- 4F. XCursor fallback ----------------------------------------------
 #
 # Provides the default cursor theme for applications that consult
 # the XCursor default-theme file.

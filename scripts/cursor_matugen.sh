@@ -111,7 +111,21 @@ if command -v gsettings >/dev/null 2>&1; then
     fi
 fi
 
-# --- 4B. Hyprland ------------------------------------------------------
+# --- 4B. KDE Plasma ---------------------------------------------------
+
+# plasma-apply-cursortheme updates the active Plasma cursor theme and is
+# preferred over editing kcminputrc directly. Only run it in a Plasma
+# session so other desktops with KDE utilities installed are unaffected.
+if [[ -n "${KDE_SESSION_VERSION:-}" ]] &&
+   command -v plasma-apply-cursortheme >/dev/null 2>&1; then
+    if plasma-apply-cursortheme "$THEME_NAME" >/dev/null 2>&1; then
+        echo "✓ Set KDE Plasma cursor theme: $THEME_NAME"
+    else
+        echo "Warning: plasma-apply-cursortheme failed" >&2
+    fi
+fi
+
+# --- 4C. Hyprland ------------------------------------------------------
 
 if command -v hyprctl >/dev/null 2>&1 &&
    pgrep -x Hyprland >/dev/null 2>&1; then
@@ -122,7 +136,7 @@ if command -v hyprctl >/dev/null 2>&1 &&
     fi
 fi
 
-# --- 4C. Niri ----------------------------------------------------------
+# --- 4D. Niri ----------------------------------------------------------
 #
 # One-time user setup:
 # Add this to the main Niri config:
@@ -158,7 +172,7 @@ if [[ -f "$NIRI_CONFIG_PATH" ]]; then
     fi
 fi
 
-# --- 4D. XCursor fallback ----------------------------------------------
+# --- 4E. XCursor fallback ----------------------------------------------
 #
 # Provides the default cursor theme for applications that consult
 # the XCursor default-theme file.

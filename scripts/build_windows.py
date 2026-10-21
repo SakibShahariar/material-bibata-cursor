@@ -289,8 +289,8 @@ WIN_SCHEME = [
     ("No", "crossed_circle"),         # Unavailable-style circle-slash
     ("SizeNS", "sb_v_double_arrow"),  # Vert
     ("SizeWE", "sb_h_double_arrow"),  # Horz
-    ("SizeNWSE", "fd_double_arrow"),  # Dgn2
-    ("SizeNESW", "bd_double_arrow"),  # Dgn1
+    ("SizeNWSE", "bd_double_arrow"),  # Dgn2
+    ("SizeNESW", "fd_double_arrow"),  # Dgn1
     ("SizeAll", "move"),              # Move
     ("UpArrow", "sb_up_arrow"),
     ("Hand", "hand2"),                # Link

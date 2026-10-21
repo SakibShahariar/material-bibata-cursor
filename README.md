@@ -106,14 +106,14 @@ Each light theme's range of cursor shapes:
 
 ## Install
 
-Needs `fish`, `git`, `python3`, `jq`, plus whatever `bibata_cursor`
+Needs `git` and Python 3.11+, plus whatever `bibata_cursor`
 itself needs to build (`librsvg`, `xorg-xcursorgen` — see
 [rtgiskard/bibata_cursor](https://github.com/rtgiskard/bibata_cursor)).
 
 ```bash
 git clone https://github.com/SakibShahariar/material-bibata-cursor
 cd material-bibata-cursor
-fish scripts/compile_bibata_material.fish
+python3 scripts/build_linux.py
 ```
 
 That installs all 57 (28 dark, 28 light, plus Classic) to `~/.icons`.
@@ -128,7 +128,7 @@ From there, pick one through GNOME Settings, GNOME Tweaks, or however
 your desktop/WM selects a cursor theme — the exact menu depends on your
 setup.
 
-Don't want to run fish directly? There's a `justfile`:
+A `justfile` provides convenient commands for the Python builder:
 
 ```bash
 just build              # all 57 (28 dark, 28 light, Classic)
@@ -148,18 +148,20 @@ just check-deps
 ```
 
 For finer control, build a comma-separated subset with `--themes` (or
-`just build-selected`):
+`just build-selected`). Use `--jobs` to build multiple themes concurrently:
 
 ```bash
-fish scripts/compile_bibata_material.fish --themes Apricot,Coral,Classic
+python3 scripts/build_linux.py --themes Apricot,Coral,Classic
+python3 scripts/build_linux.py --themes Apricot,Coral,Classic --jobs 4
 just build-selected Apricot,Coral,Classic
 ```
 
 You can combine `--themes` with `--only-light`/`--only-dark` and
 `--exclude`, for example:
-`fish scripts/compile_bibata_material.fish --themes Ice-Blue-Light,Noir-Light --only-light --exclude Noir-Light`.
-Theme names are validated before any theme is built. With no positional theme
-or `--themes`, the existing all-themes default is unchanged.
+`python3 scripts/build_linux.py --themes Ice-Blue-Light,Noir-Light --only-light --exclude Noir-Light`.
+Theme names and colors are validated before any theme is built. With no positional theme
+or `--themes`, the all-themes default is unchanged. Builds run sequentially by default; use
+`--jobs 4` (or another positive integer) to opt into parallel builds.
 
 To remove selected variants from both the Xcursor/Hyprcursor install root and
 the scalable SVG root, use a dry run first:
@@ -260,7 +262,7 @@ Add an entry to `themes.json`:
 }
 ```
 
-Then `fish scripts/compile_bibata_material.fish Coral` (or
+Then `python3 scripts/build_linux.py Coral` (or
 `just build-one Coral`) to build just that one instead of recompiling
 everything.
 
@@ -302,7 +304,7 @@ consistent across all 28 themes.
 themes.json                       # all theme colors, edit this to add/change one
 scripts/
 ├── bibata_cursor/                # build dependency, cloned on first Linux build
-├── compile_bibata_material.fish  # builds themes.json -> ~/.icons (Xcursor + Hyprcursor)
+├── build_linux.py                # builds themes.json -> ~/.icons (Xcursor + Hyprcursor)
 ├── metadata_generator.py         # writes index.theme so GNOME picks it up
 ├── generate_svg_cursors.py       # writes cursors_scalable/ SVG cursors
 ├── build_windows.py              # Windows .cur/.ani themes (see "Windows cursors")
@@ -311,8 +313,9 @@ scripts/
 └── package_release.sh            # packages already-built themes for release
 ```
 
-Build flow: the Linux compiler clones `bibata_cursor` if needed, patches
-its render config with each theme's colors, then compiles and installs to
+Build flow: the Python Linux builder clones or updates the pinned
+`bibata_cursor` source, patches its render config with each theme's colors,
+then compiles and installs to
 `~/.icons` (Xcursor `cursors/` + Hyprland `hyprcursors/`). `index.theme`
 gets written right after each theme installs, so a broken metadata file
 gets caught immediately instead of at the end of a 28-theme run. The same

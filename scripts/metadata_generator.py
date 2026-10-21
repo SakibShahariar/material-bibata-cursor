@@ -115,7 +115,7 @@ def main():
     if fail_count > 0:
         sys.exit(1)
     if ok_count == 0:
-        print("Nothing was written — did you run compile_bibata_material.fish first?", file=sys.stderr)
+        print("Nothing was written — did you run build_linux.py first?", file=sys.stderr)
         sys.exit(1)
 
 

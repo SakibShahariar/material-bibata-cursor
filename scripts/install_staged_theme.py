@@ -76,12 +76,15 @@ def main():
         # Each rename is same-filesystem. Keep backups until every target has
         # been promoted, then remove them. Roll back earlier promotions on error.
         for staged, target in targets:
+            # Never delete a pre-existing backup from an interrupted earlier
+            # install. Choose a fresh name so recovery data remains intact.
             backup = target.with_name(f".{target.name}.backup-{os.getpid()}")
-            if backup.exists() or backup.is_symlink():
-                if backup.is_dir() and not backup.is_symlink():
-                    shutil.rmtree(backup)
-                else:
-                    backup.unlink()
+            suffix = 1
+            while backup.exists() or backup.is_symlink():
+                backup = target.with_name(
+                    f".{target.name}.backup-{os.getpid()}-{suffix}"
+                )
+                suffix += 1
             if target.exists() or target.is_symlink():
                 target.rename(backup)
                 backups.append((target, backup))

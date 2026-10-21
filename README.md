@@ -310,6 +310,7 @@ scripts/
 ├── generate_svg_cursors.py       # writes cursors_scalable/ SVG cursors
 ├── build_windows.py              # Windows .cur/.ani themes (see "Windows cursors")
 ├── test_build_linux.py           # unit tests for theme selection and config patching
+├── test_install_staged_theme.py  # unit tests for staged asset validation
 ├── validate_theme_assets.py      # validates cursor outputs and release archives
 ├── color_match.py                # finds the closest theme color to a hex
 ├── cursor_matugen.sh             # matugen post-hook (see "Matugen Setup")

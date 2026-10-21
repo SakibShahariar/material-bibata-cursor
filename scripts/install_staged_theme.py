@@ -49,7 +49,7 @@ def main():
         else:
             scalable_stage_root = Path(tempfile.mkdtemp(prefix=f".{name}.stage-", dir=scalable_dir))
             stage_roots.append(scalable_stage_root)
-            staged_scalable = scalable_stage_root / "icons"
+            staged_scalable = scalable_stage_root
             staged_scalable.mkdir(parents=True, exist_ok=True)
 
         run([sys.executable, str(args.script_dir / "metadata_generator.py"),

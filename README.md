@@ -376,10 +376,12 @@ Before running the hook, build/install the cursor themes (for example,
 with `just build`) so the matched preset is available locally. The hook
 does **not** build or install themes: it picks the closest preset in
 `themes.json` using `color_match.py` and applies that already-installed
-theme. When run directly from a repository checkout, it finds
-`themes.json` in the repository root; when installed as a Matugen
-post-hook, keep `themes.json` beside the copied script as described
-above.
+theme. It selects the nearest existing palette using CIEDE2000; it
+does not recolor or rebuild a cursor to match Matugen's exact primary
+hex value, so the result may be close rather than identical. When run
+directly from a repository checkout, it finds `themes.json` in the
+repository root; when installed as a Matugen post-hook, keep
+`themes.json` beside the copied script as described above.
 
 ### Niri support
 

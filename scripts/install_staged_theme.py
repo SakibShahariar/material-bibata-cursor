@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Stage, validate, and safely replace one compiled Bibata-Material theme."""
 import argparse
+import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
+import xml.etree.ElementTree as ET
+import zipfile
 from pathlib import Path
 
 
@@ -13,6 +16,61 @@ def run(command):
     result = subprocess.run(command)
     if result.returncode:
         raise RuntimeError(f"command failed ({result.returncode}): {' '.join(map(str, command))}")
+
+
+
+def validate_compiled_theme(theme_dir: Path, scalable_theme: Path) -> None:
+    """Reject incomplete Xcursor, Hyprcursor, or scalable output before promotion."""
+    required_shapes = ("left_ptr", "xterm", "wait", "bottom_right_corner")
+    cursors_dir = theme_dir / "cursors"
+    for shape in required_shapes:
+        cursor = cursors_dir / shape
+        if not cursor.is_file():
+            raise RuntimeError(f"compiled Xcursor shape is missing: {cursor}")
+        if not cursor.read_bytes().startswith(b"Xcur"):
+            raise RuntimeError(f"compiled Xcursor file has an invalid header: {cursor}")
+
+    manifest = theme_dir / "manifest.hl"
+    hypr_dir = theme_dir / "hyprcursors"
+    if not manifest.is_file():
+        raise RuntimeError(f"compiled Hyprcursor manifest is missing: {manifest}")
+    for shape in required_shapes:
+        archive = hypr_dir / f"{shape}.hlc"
+        if not archive.is_file() or not zipfile.is_zipfile(archive):
+            raise RuntimeError(f"compiled Hyprcursor archive is missing or invalid: {archive}")
+        try:
+            with zipfile.ZipFile(archive) as zipped:
+                entries = zipped.namelist()
+                if "meta.hl" not in entries or len(entries) < 2:
+                    raise RuntimeError(f"compiled Hyprcursor archive is incomplete: {archive}")
+        except zipfile.BadZipFile as exc:
+            raise RuntimeError(f"compiled Hyprcursor archive is invalid: {archive}") from exc
+
+    scalable_dir = scalable_theme / "cursors_scalable"
+    for shape in required_shapes:
+        shape_dir = scalable_dir / shape
+        metadata_path = shape_dir / "metadata.json"
+        if not shape_dir.is_dir() or not metadata_path.is_file():
+            raise RuntimeError(f"compiled scalable cursor shape is missing: {shape_dir}")
+        try:
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise RuntimeError(f"invalid scalable cursor metadata {metadata_path}: {exc}") from exc
+        if not isinstance(metadata, list) or not metadata:
+            raise RuntimeError(f"scalable cursor metadata has no frames: {metadata_path}")
+        for frame in metadata:
+            if not isinstance(frame, dict) or not isinstance(frame.get("filename"), str):
+                raise RuntimeError(f"invalid frame entry in {metadata_path}")
+            filename = Path(frame["filename"])
+            if filename.is_absolute() or ".." in filename.parts:
+                raise RuntimeError(f"unsafe SVG frame path in {metadata_path}: {filename}")
+            svg_path = shape_dir / filename
+            if not svg_path.is_file():
+                raise RuntimeError(f"SVG frame referenced by {metadata_path} is missing: {svg_path}")
+            try:
+                ET.parse(svg_path)
+            except (OSError, ET.ParseError) as exc:
+                raise RuntimeError(f"invalid SVG frame {svg_path}: {exc}") from exc
 
 
 def main():
@@ -68,6 +126,7 @@ def main():
         svg_theme = staged_scalable / name
         if not (svg_theme / "cursors_scalable").is_dir() or not any((svg_theme / "cursors_scalable").iterdir()):
             raise RuntimeError("staged scalable theme has no SVG cursors")
+        validate_compiled_theme(staged_theme, svg_theme)
 
         targets.append((staged_theme, install_dir / name))
         if not same_root:

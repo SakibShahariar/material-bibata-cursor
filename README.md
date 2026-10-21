@@ -135,6 +135,7 @@ just build              # all 57 (28 dark, 28 light, Classic)
 just build-dark         # just the 28 dark themes + Classic
 just build-light        # just the 28 light themes
 just build-one Apricot  # just one, faster for testing a color
+just build-selected Apricot,Coral,Classic  # chosen subset
 just svg                # (re)generate SVG cursors for installed themes
 just svg-one Apricot    # SVG cursors for just one theme
 just build-win          # build Windows .cur/.ani assets
@@ -145,10 +146,19 @@ just show Apricot
 just check-deps
 ```
 
-For finer control (e.g. skipping specific themes, or combining
-`--only-light`/`--only-dark` with `--exclude`), call the fish script
-directly: `fish scripts/compile_bibata_material.fish --only-light
---exclude Noir-Light,Charcoal-Light`.
+For finer control, build a comma-separated subset with `--themes` (or
+`just build-selected`):
+
+```bash
+fish scripts/compile_bibata_material.fish --themes Apricot,Coral,Classic
+just build-selected Apricot,Coral,Classic
+```
+
+You can combine `--themes` with `--only-light`/`--only-dark` and
+`--exclude`, for example:
+`fish scripts/compile_bibata_material.fish --themes Ice-Blue-Light,Noir-Light --only-light --exclude Noir-Light`.
+Theme names are validated before any theme is built. With no positional theme
+or `--themes`, the existing all-themes default is unchanged.
 
 ## SVG cursors
 

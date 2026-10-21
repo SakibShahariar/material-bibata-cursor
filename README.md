@@ -140,7 +140,7 @@ just remove-selected Apricot,Coral  # preview removal of selected variants
 just svg                # (re)generate SVG cursors for installed themes
 just svg-one Apricot    # SVG cursors for just one theme
 just build-win          # build Windows .cur/.ani assets
-just package <version>  # bundle Linux archives, e.g. just package v1.0.0
+just package <version>  # bundle Linux archives, e.g. just package v1.5.0
 just package-win <version>       # bundle Windows .cur/.ani ZIPs
 just list
 just show Apricot
@@ -337,13 +337,13 @@ and package them:
 
 ```bash
 just build
-just package v1.0.0
+just package v1.5.0
 ```
 
 This writes two archives by default:
 
-- `dist/bibata-material-dark-v1.0.0.tar.gz` — the 28 dark themes + Classic
-- `dist/bibata-material-light-v1.0.0.tar.gz` — the 28 `-Light` themes
+- `dist/bibata-material-dark-v1.5.0.tar.gz` — the 28 dark themes + Classic
+- `dist/bibata-material-light-v1.5.0.tar.gz` — the 28 `-Light` themes
 
 Each Linux theme folder contains the Xcursor `cursors/` tree, Hyprland
 `hyprcursors/`, and scalable `cursors_scalable/` SVGs where available.
@@ -356,13 +356,13 @@ themes yet, running `just build` first also fetches the upstream source.
 
 ```bash
 just build-win
-just package-win v1.0.0
+just package-win v1.5.0
 ```
 
 The Windows archives are separate ZIPs:
 
-- `dist/bibata-material-dark-v1.0.0-win.zip` — dark themes + Classic
-- `dist/bibata-material-light-v1.0.0-win.zip` — light themes
+- `dist/bibata-material-dark-v1.5.0-win.zip` — dark themes + Classic
+- `dist/bibata-material-light-v1.5.0-win.zip` — light themes
 
 Each Windows ZIP includes the theme folders with `.cur` files, the
 animated `wait.ani` and `left_ptr_watch.ani` cursors, per-theme
@@ -387,8 +387,8 @@ You can filter the themes with `--only-dark`, `--only-light`, or
 `--exclude` when calling `scripts/package_release.sh` directly:
 
 ```bash
-bash scripts/package_release.sh v1.0.0 --win --only-dark
-bash scripts/package_release.sh v1.0.0 --exclude Classic
+bash scripts/package_release.sh v1.5.0 --win --only-dark
+bash scripts/package_release.sh v1.5.0 --exclude Classic
 ```
 
 This step is optional for personal use — it is only needed when preparing

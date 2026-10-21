@@ -161,7 +161,8 @@ def resolve_css_name(css_name: str, index: dict) -> str | None:
 
 
 def generate_for_theme(bibata_dir: Path, install_dir: Path, scalable_dir: Path,
-                       theme_key: str, body: str, primary: str, watch: str,
+                       fallback_install_dir: Path, theme_key: str,
+                       body: str, primary: str, watch: str,
                        group_name: str = "modern") -> tuple[int, int]:
     theme_name = f"Bibata-Material-{theme_key}"
     scalable_theme = scalable_dir / theme_name
@@ -287,8 +288,8 @@ def generate_for_theme(bibata_dir: Path, install_dir: Path, scalable_dir: Path,
             print(f"  Warning: failed to symlink alias '{alias}': {e}", file=sys.stderr)
 
     # Make the scalable tree a complete, recognizable theme for KDE/tools:
-    # symlink the Xcursor fallback and index.theme from the compiled theme.
-    installed_theme = install_dir / theme_name
+    # symlink the Xcursor fallback and index.theme from the final install.
+    installed_theme = fallback_install_dir / theme_name
     for entry in ("cursors", "index.theme"):
         src = installed_theme / entry
         dst = scalable_theme / entry
@@ -331,6 +332,8 @@ def main():
                         help="Where the compiled Xcursor themes live (used for fallback symlinks)")
     parser.add_argument("--scalable-dir", default=None,
                         help="Where to write cursors_scalable/ (default: $XDG_DATA_HOME/icons, or install-dir if system-wide)")
+    parser.add_argument("--fallback-install-dir", default=None,
+                        help="Final Xcursor install path for fallback symlinks when generating in a staging directory")
     parser.add_argument("--themes-json", default=str(default_themes_json))
     parser.add_argument("--bibata-dir", default=str(bibata_dir))
     args = parser.parse_args()
@@ -351,6 +354,7 @@ def main():
     theme_keys = [args.theme] if args.theme else list(all_themes.keys())
     install_dir = Path(args.install_dir).expanduser()
     scalable_dir = Path(args.scalable_dir).expanduser() if args.scalable_dir else default_scalable_dir(install_dir)
+    fallback_install_dir = Path(args.fallback_install_dir).expanduser() if args.fallback_install_dir else install_dir
 
     total_ok, total_failed, themes_done = 0, 0, 0
     for key in theme_keys:
@@ -365,7 +369,7 @@ def main():
             continue
         print(f"Processing {key}...")
         ok, failed = generate_for_theme(
-            bibata_dir, install_dir, scalable_dir, key,
+            bibata_dir, install_dir, scalable_dir, fallback_install_dir, key,
             body, primary, watch,
         )
         total_ok += ok

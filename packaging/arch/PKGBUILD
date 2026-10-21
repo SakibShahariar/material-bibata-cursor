@@ -2,7 +2,7 @@
 pkgname=material-bibata-cursor
 pkgver=1.0.0
 pkgrel=1
-pkgdesc='Material Design 3 color variants of Bibata cursors for Xcursor, Hyprcursor, and scalable SVG'
+pkgdesc='Material Design 3 Bibata cursor themes for Xcursor, Hyprcursor, and SVG'
 arch=('any')
 url='https://github.com/SakibShahariar/material-bibata-cursor'
 license=('MIT' 'GPL3')

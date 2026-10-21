@@ -340,7 +340,7 @@ def main():
 
     bibata_dir = Path(args.bibata_dir)
     if not bibata_dir.is_dir():
-        print(f"Error: {bibata_dir} not found — run compile_bibata_material.fish at least once first "
+        print(f"Error: {bibata_dir} not found — run build_linux.py at least once first "
               "(it clones bibata_cursor as a build dependency).", file=sys.stderr)
         sys.exit(1)
 

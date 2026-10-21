@@ -27,7 +27,7 @@ elif [[ "$INSTALL_DIR" == /usr/share/icons || "$INSTALL_DIR" == /usr/local/share
 else
     SCALABLE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/icons"
 fi
-THEMES_JSON="$REPO_ROOT/themes.json"
+THEMES_JSON="${BIBATA_MATERIAL_THEMES_JSON:-$REPO_ROOT/themes.json}"
 DIST_DIR="$REPO_ROOT/dist"
 OUT_WIN="$REPO_ROOT/out_win"
 

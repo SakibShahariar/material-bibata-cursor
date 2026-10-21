@@ -8,8 +8,8 @@ package's files on uninstall.
 
 ## Build and install
 
-The initial `pkgver` is `1.0.0` and expects the corresponding
-`v1.0.0` tag in the main repository. Once that release tag exists:
+The PKGBUILD currently targets release `v1.5.0` (`pkgver=1.5.0`). From an
+Arch Linux system with `base-devel` installed, run:
 
 ```bash
 cd packaging/arch
@@ -29,6 +29,5 @@ repository's tooling and the GPL-3 license for the derived cursor artwork.
 4. Copy `PKGBUILD` and `.SRCINFO` into the AUR package repository and publish
    the update only after the tagged release and package build are available.
 
-The package has not yet been built in an Arch Linux environment; keep issue
-#11 open until a tagged release exists and a real `makepkg` build/install/
-upgrade/removal check succeeds.
+The package has not yet been built in an Arch Linux environment. Keep issue
+#11 open until a real `makepkg` build and install/upgrade/removal checks pass.

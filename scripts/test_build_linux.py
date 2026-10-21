@@ -133,6 +133,39 @@ class ThemeSelectionTests(unittest.TestCase):
             )
 
 
+class UpstreamTempFileTests(unittest.TestCase):
+    def test_isolates_shared_renderer_temp_file_per_build_directory(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            work_dir = Path(temporary)
+            source_dir = work_dir / "src"
+            source_dir.mkdir()
+            utility = source_dir / "cursor_utils.py"
+            utility.write_text(
+                "tmp = Path('/tmp/.cursor.0248.svg')\n",
+                encoding="utf-8",
+            )
+
+            build_linux.isolate_upstream_temp_file(work_dir)
+
+            self.assertEqual(
+                utility.read_text(encoding="utf-8"),
+                "tmp = Path(f'/tmp/.cursor.{Path.cwd().name}.svg')\n",
+            )
+
+    def test_rejects_unrecognized_upstream_temp_file_implementation(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            work_dir = Path(temporary)
+            source_dir = work_dir / "src"
+            source_dir.mkdir()
+            (source_dir / "cursor_utils.py").write_text(
+                "tmp = Path('/tmp/changed.svg')\n",
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(build_linux.BuildError):
+                build_linux.isolate_upstream_temp_file(work_dir)
+
+
 class ConfigPatchTests(unittest.TestCase):
     def test_patches_colors_and_adds_sizes_without_losing_existing_sizes(self):
         with tempfile.TemporaryDirectory() as temporary:

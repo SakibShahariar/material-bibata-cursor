@@ -136,6 +136,7 @@ just build-dark         # just the 28 dark themes + Classic
 just build-light        # just the 28 light themes
 just build-one Apricot  # just one, faster for testing a color
 just build-selected Apricot,Coral,Classic  # chosen subset
+just remove-selected Apricot,Coral  # preview removal of selected variants
 just svg                # (re)generate SVG cursors for installed themes
 just svg-one Apricot    # SVG cursors for just one theme
 just build-win          # build Windows .cur/.ani assets
@@ -159,6 +160,21 @@ You can combine `--themes` with `--only-light`/`--only-dark` and
 `fish scripts/compile_bibata_material.fish --themes Ice-Blue-Light,Noir-Light --only-light --exclude Noir-Light`.
 Theme names are validated before any theme is built. With no positional theme
 or `--themes`, the existing all-themes default is unchanged.
+
+To remove selected variants from both the Xcursor/Hyprcursor install root and
+the scalable SVG root, use a dry run first:
+
+```bash
+just remove-selected Apricot,Coral
+just remove-selected Apricot,Coral --yes
+```
+
+The command only accepts exact names from `themes.json`, removes only the
+matching `Bibata-Material-<Name>` directories, and does not follow a theme
+directory symlink. The first command only lists what would be removed; pass
+`--yes` to perform the deletion. Set `BIBATA_MATERIAL_INSTALL_DIR` and
+`BIBATA_MATERIAL_SCALABLE_DIR` to override the install roots, as with the
+build command.
 
 ## SVG cursors
 

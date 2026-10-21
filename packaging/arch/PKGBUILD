@@ -17,16 +17,26 @@ sha256sums=('SKIP' 'SKIP')
 
 prepare() {
   # The Linux builder consumes the pinned upstream checkout from this source
-  # package. It verifies the exact commit and avoids network access in package().
+  # package. It verifies the exact commit and avoids network access in build().
   cp -a "$srcdir/bibata_cursor" "$srcdir/$pkgname/scripts/bibata_cursor"
+}
+
+build() {
+  cd "$srcdir/$pkgname"
+
+  # Build into a disposable staging root; package() only copies completed assets.
+  rm -rf "$srcdir/package-root"
+  python scripts/build_linux.py \
+    --jobs 2 \
+    --install-dir "$srcdir/package-root/usr/share/icons" \
+    --scalable-dir "$srcdir/package-root/usr/share/icons"
 }
 
 package() {
   cd "$srcdir/$pkgname"
-  python scripts/build_linux.py \
-    --jobs 2 \
-    --install-dir "$pkgdir/usr/share/icons" \
-    --scalable-dir "$pkgdir/usr/share/icons"
+
+  install -d "$pkgdir/usr/share/icons"
+  cp -a "$srcdir/package-root/usr/share/icons/." "$pkgdir/usr/share/icons/"
 
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
   install -Dm644 /usr/share/licenses/common/GPL3 "$pkgdir/usr/share/licenses/$pkgname/GPL3"

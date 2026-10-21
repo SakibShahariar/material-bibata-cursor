@@ -335,6 +335,11 @@ Each Windows ZIP includes the theme folders with `.cur` files, the
 animated `wait.ani` and `left_ptr_watch.ani` cursors, per-theme
 `Install.inf` files, and a Windows-specific `INSTALL.txt`.
 
+All Linux archives and Windows ZIPs also include `LICENSE`, `README.md`,
+and `CREDITS.txt`, documenting the MIT-licensed tooling and GPLv3-or-later
+upstream cursor artwork. The packager writes `dist/SHA256SUMS-<version>.txt`
+with SHA-256 checksums for the archives produced for that version.
+
 You can filter the themes with `--only-dark`, `--only-light`, or
 `--exclude` when calling `scripts/package_release.sh` directly:
 

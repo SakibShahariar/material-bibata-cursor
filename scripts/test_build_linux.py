@@ -152,7 +152,7 @@ class ConfigPatchTests(unittest.TestCase):
                 encoding="utf-8",
             )
             (config_dir / "build.toml").write_text(
-                "[cursor_defaults]\nx11_sizes = [24, 32, 48]\n",
+                "[other]\nx11_sizes = [1]\n\n[cursor_defaults]\nx11_sizes = [24, 32, 48]\n",
                 encoding="utf-8",
             )
 
@@ -168,6 +168,7 @@ class ConfigPatchTests(unittest.TestCase):
                 ["#112233", "#AABBCC", "#000000"],
             )
             config = tomllib.loads((config_dir / "build.toml").read_text(encoding="utf-8"))
+            self.assertEqual(config["other"]["x11_sizes"], [1])
             sizes = config["cursor_defaults"]["x11_sizes"]
             self.assertTrue({12, 18, 24, 30, 32, 36, 42, 48, 54, 60, 66}.issubset(sizes))
             self.assertEqual(sizes, sorted(set(sizes)))

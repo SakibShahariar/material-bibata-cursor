@@ -1,0 +1,20 @@
+pkgbase = material-bibata-cursor
+	pkgdesc = Material Design 3 color variants of Bibata cursors for Xcursor, Hyprcursor, and scalable SVG
+	pkgver = 1.0.0
+	pkgrel = 1
+	url = https://github.com/SakibShahariar/material-bibata-cursor
+	arch = any
+	license = MIT
+	license = GPL3
+	depends = hicolor-icon-theme
+	makedepends = git
+	makedepends = python>=3.12
+	makedepends = librsvg
+	makedepends = xcursorgen
+	makedepends = licenses
+	source = material-bibata-cursor::git+https://github.com/SakibShahariar/material-bibata-cursor.git#tag=v1.0.0
+	source = bibata_cursor::git+https://github.com/rtgiskard/bibata_cursor.git#commit=f4ccfe8abb63fddc7b3ce51a866fd8378395cb3d
+	sha256sums = SKIP
+	sha256sums = SKIP
+
+pkgname = material-bibata-cursor

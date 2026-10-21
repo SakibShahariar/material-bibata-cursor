@@ -372,6 +372,16 @@ and `CREDITS.txt`, documenting the MIT-licensed tooling and GPLv3-or-later
 upstream cursor artwork. The packager writes `dist/SHA256SUMS-<version>.txt`
 with SHA-256 checksums for the archives produced for that version.
 
+### Automated releases
+
+Pushing a version tag such as `v1.1.0` runs
+`.github/workflows/release.yml`. It builds and validates the Linux and Windows
+cursor assets, packages all four archives, checks their contents, and only then
+creates or updates the matching GitHub Release. A failed build or validation
+step prevents the publish step from running. The workflow uses the repository's
+`GITHUB_TOKEN` with the `contents: write` permission to upload release assets;
+GitHub Actions must be enabled for the repository.
+
 You can filter the themes with `--only-dark`, `--only-light`, or
 `--exclude` when calling `scripts/package_release.sh` directly:
 

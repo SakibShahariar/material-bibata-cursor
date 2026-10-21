@@ -358,6 +358,11 @@ downloadable archives for a release or redistribution.
 Get a theme that matches your wallpaper with
 [matugen](https://github.com/InioX/matugen) and the included post-hook:
 
+The hook supports GNOME/GTK, KDE Plasma, Hyprland, Sway, and an opt-in Niri
+configuration include. It preserves `XCURSOR_SIZE` when set and otherwise
+tries to read the active Hyprland or GNOME cursor size before using 24 as a
+fallback.
+
 1. Copy `scripts/cursor_matugen.sh`, `scripts/color_match.py`, and the
    repo's root `themes.json` (looked up next to the script) into
    `~/.config/matugen/post-hook-scripts/`.

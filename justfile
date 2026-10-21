@@ -62,9 +62,9 @@ check-win-deps:
     done
     if command -v python3 >/dev/null 2>&1; then
         if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)'; then
-            echo "✓ Python 3.11+"
+            echo "✓ Python 3.12+"
         else
-            echo "✗ Python 3.11+ required (tomllib is part of the standard library)"
+            echo "✗ Python 3.12+ required (tomllib is part of the standard library)"
             missing=1
         fi
         if python3 -c 'from PIL import Image' >/dev/null 2>&1; then
@@ -135,9 +135,9 @@ check-deps:
     done
     if command -v python3 >/dev/null 2>&1; then
         if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)'; then
-            echo "✓ Python 3.11+"
+            echo "✓ Python 3.12+"
         else
-            echo "✗ Python 3.11+ required (tomllib is part of the standard library)"
+            echo "✗ Python 3.12+ required (tomllib is part of the standard library)"
             missing=1
         fi
     fi

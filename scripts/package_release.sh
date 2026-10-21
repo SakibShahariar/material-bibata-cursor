@@ -388,7 +388,7 @@ echo "Done: dark=$dark_count theme(s), light=$light_count theme(s)."
 echo "These are the files to attach to a GitHub Release or upload to GNOME-Look.org."
 
 if [[ "$dark_count" -eq 0 && "$light_count" -eq 0 ]]; then
-    echo "Error: nothing was packaged at all. Run compile_bibata_material.fish first." >&2
+    echo "Error: nothing was packaged at all. Run scripts/build_linux.py first." >&2
     exit 1
 fi
 

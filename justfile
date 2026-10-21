@@ -16,6 +16,10 @@ build:
 build-one theme:
     fish scripts/compile_bibata_material.fish {{theme}}
 
+# Build a comma-separated subset, e.g. `just build-selected Apricot,Coral,Classic`
+build-selected themes:
+    fish scripts/compile_bibata_material.fish --themes {{themes}}
+
 # Build only the 28 dark themes + Classic (skips the -Light set, faster)
 build-dark:
     fish scripts/compile_bibata_material.fish --only-dark

@@ -90,13 +90,20 @@ def main():
             staged.rename(target)
             promoted.append(target)
 
+        print(f"Installed {name} with Xcursor and scalable files.")
+        # Promotion is complete. Backup cleanup is best-effort: a cleanup
+        # error must never trigger rollback after another backup was deleted.
         for _, backup in backups:
-            if backup is not None and (backup.exists() or backup.is_symlink()):
+            if backup is None or not (backup.exists() or backup.is_symlink()):
+                continue
+            try:
                 if backup.is_dir() and not backup.is_symlink():
                     shutil.rmtree(backup)
                 else:
                     backup.unlink()
-        print(f"Installed {name} with Xcursor and scalable files.")
+            except OSError as cleanup_error:
+                print(f"Warning: could not remove old theme backup {backup}: {cleanup_error}",
+                      file=sys.stderr)
     except Exception as exc:
         for target in reversed(promoted):
             if target.exists() or target.is_symlink():

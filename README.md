@@ -106,7 +106,7 @@ Each light theme's range of cursor shapes:
 
 ## Install
 
-Needs `git` and Python 3.11+, plus whatever `bibata_cursor`
+Needs `git` and Python 3.12+, plus whatever `bibata_cursor`
 itself needs to build (`librsvg`, `xorg-xcursorgen` — see
 [rtgiskard/bibata_cursor](https://github.com/rtgiskard/bibata_cursor)).
 
@@ -219,7 +219,7 @@ change anything about how you use the themes.
 ## Windows cursors
 
 Windows `.cur`/`.ani` cursor files are generated separately using
-`scripts/build_windows.py`. This requires Python 3.11 or newer,
+`scripts/build_windows.py`. This requires Python 3.12 or newer,
 `rsvg-convert` (librsvg), and the Python Pillow package. The upstream
 Bibata source must also be present in `scripts/bibata_cursor/`; running
 the Linux build first clones it automatically. Windows archive packaging

@@ -90,19 +90,19 @@ check-win-deps:
 clean-win:
     rm -rf out_win
 
-# Package already-compiled themes into a release archive, e.g. `just package v1.0.0`
+# Package already-compiled themes into a release archive, e.g. `just package v1.5.0`
 package version:
     bash scripts/package_release.sh {{version}}
 
-# Package Windows .cur themes for release, e.g. `just package-win v1.0.0`
+# Package Windows .cur themes for release, e.g. `just package-win v1.5.0`
 package-win version:
     bash scripts/package_release.sh {{version}} --win
 
-# Package Windows .cur themes for release (dark only), e.g. `just package-win-dark v1.0.0`
+# Package Windows .cur themes for release (dark only), e.g. `just package-win-dark v1.5.0`
 package-win-dark version:
     bash scripts/package_release.sh {{version}} --win --only-dark
 
-# Package Windows .cur themes for release (light only), e.g. `just package-win-light v1.0.0`
+# Package Windows .cur themes for release (light only), e.g. `just package-win-light v1.5.0`
 package-win-light version:
     bash scripts/package_release.sh {{version}} --win --only-light
 

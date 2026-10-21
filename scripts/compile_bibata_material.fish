@@ -2,11 +2,12 @@
 # Compiles themes from themes.json into installed Bibata cursor packs.
 #
 # Usage:
-#   compile_bibata_material.fish [theme-name] [--exclude Name1,Name2] [--only-light] [--only-dark]
+#   compile_bibata_material.fish [theme-name] [--themes Name1,Name2] [--exclude Name1,Name2] [--only-light] [--only-dark]
 #
 #   No argument: compiles every theme in themes.json.
 #   With a theme name (e.g. "Coral"): compiles only that one — much
 #   faster when testing a new color you just added.
+#   --themes: comma-separated list of themes to build, e.g. --themes Coral,Apricot.
 #   --exclude: comma-separated theme names to skip.
 #   --only-light / --only-dark: only build "-Light" themes, or only
 #   the non-"-Light" set (includes Classic). Mutually exclusive.
@@ -17,7 +18,7 @@
 #   (override with BIBATA_MATERIAL_SCALABLE_DIR), since GNOME only
 #   searches data dirs for SVG cursors, never ~/.icons.
 
-argparse 'exclude=' 'only-light' 'only-dark' -- $argv
+argparse 'exclude=' 'themes=' 'only-light' 'only-dark' -- $argv
 or exit 1
 
 if set -q _flag_only_light; and set -q _flag_only_dark
@@ -26,6 +27,11 @@ if set -q _flag_only_light; and set -q _flag_only_dark
 end
 
 set -l requested_theme $argv[1]
+
+if set -q _flag_themes; and test -n "$requested_theme"
+    echo "Error: use either a positional theme name or --themes, not both." >&2
+    exit 1
+end
 
 set -l script_dir (dirname (readlink -f (status filename)))
 set -l repo_root (dirname $script_dir)
@@ -84,7 +90,19 @@ if not git -C $build_dir checkout --quiet --detach $upstream_commit
 end
 
 set -l theme_names
-if test -n "$requested_theme"
+if set -q _flag_themes
+    set theme_names (string split ',' -- $_flag_themes)
+    if test (count $theme_names) -eq 0
+        echo "Error: --themes requires at least one theme name." >&2
+        exit 1
+    end
+    for selected_theme in $theme_names
+        if test -z "$selected_theme"; or not jq -e --arg n "$selected_theme" 'has($n)' $themes_json >/dev/null
+            echo "Error: invalid theme in --themes: '$selected_theme'" >&2
+            exit 1
+        end
+    end
+else if test -n "$requested_theme"
     if not jq -e --arg n "$requested_theme" 'has($n)' $themes_json >/dev/null
         echo "Error: '$requested_theme' not found in themes.json" >&2
         exit 1

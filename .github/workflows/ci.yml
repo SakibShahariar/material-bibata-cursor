@@ -25,7 +25,8 @@ jobs:
       - name: Install native cursor build tools
         run: |
           sudo apt-get update
-          sudo apt-get install --yes librsvg2-bin xcursorgen zip
+          # Ubuntu 24.04 ships xcursorgen in x11-apps, not a standalone package.
+          sudo apt-get install --yes librsvg2-bin x11-apps zip
 
       - name: Install Windows asset dependency
         run: python -m pip install --disable-pip-version-check Pillow

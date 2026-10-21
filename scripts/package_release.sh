@@ -67,17 +67,12 @@ if [[ ! -f "$THEMES_JSON" ]]; then
     exit 1
 fi
 
-if ! command -v jq >/dev/null; then
-    echo "Error: jq is required." >&2
-    exit 1
-fi
-
 if [[ ! -f "$REPO_ROOT/LICENSE" || ! -f "$REPO_ROOT/README.md" ]]; then
     echo "Error: LICENSE and README.md must be present to package release documentation." >&2
     exit 1
 fi
 
-theme_names=$(jq -r 'keys[]' "$THEMES_JSON")
+theme_names=$(python3 -c 'import json, sys; print("\\n".join(json.load(open(sys.argv[1], encoding="utf-8")).keys()))' "$THEMES_JSON")
 if [[ -z "$theme_names" ]]; then
     echo "Error: themes.json contains no themes" >&2
     exit 1

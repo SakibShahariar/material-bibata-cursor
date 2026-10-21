@@ -127,10 +127,10 @@ def patch_theme_config(work_dir: Path, theme: str, colors: dict) -> None:
         size_assignments = []
         for line_number, line in enumerate(lines):
             stripped = line.strip()
-            section_match = re.fullmatch(r"\\[([^\\]]+)\\](?:\\s*#.*)?", stripped)
+            section_match = re.fullmatch(r"\[([^\]]+)\](?:\s*#.*)?", stripped)
             if section_match:
                 section = section_match.group(1).strip()
-            elif section == "cursor_defaults" and re.match(r"^[ \\t]*x11_sizes[ \\t]*=", line):
+            elif section == "cursor_defaults" and re.match(r"^[ \t]*x11_sizes[ \t]*=", line):
                 size_assignments.append(line_number)
         if len(size_assignments) != 1:
             raise ValueError(
@@ -140,11 +140,11 @@ def patch_theme_config(work_dir: Path, theme: str, colors: dict) -> None:
         line_number = size_assignments[0]
         indent = lines[line_number][:len(lines[line_number]) - len(lines[line_number].lstrip())]
         lines[line_number] = indent + "x11_sizes = [" + ", ".join(map(str, merged_sizes)) + "]"
-        patched_text = "\\n".join(lines) + ("\\n" if text.endswith("\\n") else "")
+        patched_text = "\n".join(lines) + ("\n" if text.endswith("\n") else "")
         # Parse the patched TOML too; malformed config must fail before any
         # cursor output is generated.
         tomllib.loads(patched_text)
-        config_path.write_text(patched_text, encoding="utf-8", newline="\\n")
+        config_path.write_text(patched_text, encoding="utf-8", newline="\n")
     except (OSError, tomllib.TOMLDecodeError, ValueError, TypeError) as exc:
         raise BuildError(f"could not patch build.toml for {theme}: {exc}") from exc
 

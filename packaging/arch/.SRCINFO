@@ -1,5 +1,5 @@
 pkgbase = material-bibata-cursor
-	pkgdesc = Material Design 3 color variants of Bibata cursors for Xcursor, Hyprcursor, and scalable SVG
+	pkgdesc = Material Design 3 Bibata cursor themes for Xcursor, Hyprcursor, and SVG
 	pkgver = 1.0.0
 	pkgrel = 1
 	url = https://github.com/SakibShahariar/material-bibata-cursor

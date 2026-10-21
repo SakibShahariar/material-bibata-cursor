@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Material Bibata Cursor Gallery</title>
+<style>
+:root{font:16px/1.5 system-ui,sans-serif;color-scheme:light dark;--bg:#f4f6f8;--panel:#fff;--ink:#17212b;--muted:#5c6873;--line:#d9e0e6}
+@media(prefers-color-scheme:dark){:root{--bg:#11171c;--panel:#1b242b;--ink:#edf3f7;--muted:#b0bdc6;--line:#34434e}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}main{max-width:1000px;margin:auto;padding:clamp(1rem,4vw,3rem)}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1}p{color:var(--muted)}a{color:inherit}.controls{display:flex;gap:.6rem;flex-wrap:wrap;margin:1.5rem 0}button,select,input{font:inherit;border:1px solid var(--line);border-radius:.7rem;padding:.65rem .85rem;background:var(--panel);color:var(--ink)}button{cursor:pointer}button[aria-pressed=true]{background:#356b82;color:white}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:1rem}.card{overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:1rem}.sample{height:140px;display:flex;align-items:center;justify-content:space-evenly;background:var(--body)}.sample svg{width:30px;height:40px;filter:drop-shadow(0 1px 2px #0005)}.sample path{fill:var(--body);stroke:var(--primary);stroke-width:2;stroke-linejoin:round}.sample .wait{fill:none;stroke:var(--primary);stroke-width:4;stroke-dasharray:20 10;transform-origin:center;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.cardbody{padding:1rem}.colors{display:flex;gap:.5rem;margin:1rem 0}.color{flex:1;min-width:0}.color i{display:block;height:1.4rem;border-radius:.3rem;border:1px solid #8885}.color code{font-size:.65rem;overflow-wrap:anywhere;color:var(--muted)}.empty{padding:2rem;text-align:center;grid-column:1/-1}@media(prefers-reduced-motion:reduce){.wait{animation:none}}
+</style>
+</head>
+<body><main>
+<p>Material Design 3 · Bibata Cursor</p><h1>Find your cursor color.</h1>
+<p>Switch between 57 dark and light palettes, inspect their colors, and preview representative cursor shapes.</p>
+<p><a href="https://github.com/SakibShahariar/material-bibata-cursor/releases/latest">Download latest release</a> · <a href="https://github.com/SakibShahariar/material-bibata-cursor">Source repository</a></p>
+<div class="controls" aria-label="Gallery filters"><button type="button" data-mode="all" aria-pressed="true">All themes</button><button type="button" data-mode="dark" aria-pressed="false">Dark</button><button type="button" data-mode="light" aria-pressed="false">Light</button><input id="search" type="search" placeholder="Search themes" aria-label="Search themes"></div>
+<p id="status" role="status">Loading theme data…</p><section class="grid" id="gallery" aria-label="Cursor themes"></section>
+<p>These shape illustrations are illustrative previews, not actual rendered cursor files. Test the installed theme in your desktop environment.</p>
+<script>
+const gallery=document.getElementById('gallery');
+const status=document.getElementById('status');
+const search=document.getElementById('search');
+let themes={};
+let mode='all';
+function svgShape(kind){
+ const ns='http://www.w3.org/2000/svg';
+ const svg=document.createElementNS(ns,'svg');
+ svg.setAttribute('viewBox','0 0 40 48');svg.setAttribute('aria-hidden','true');
+ if(kind==='wait'){svg.setAttribute('viewBox','0 0 40 40');const c=document.createElementNS(ns,'circle');c.setAttribute('class','wait');c.setAttribute('cx','20');c.setAttribute('cy','20');c.setAttribute('r','13');svg.append(c);return svg}
+ const p=document.createElementNS(ns,'path');
+ const shapes={pointer:'M5 2 33 26 21 28 27 40 21 43 15 31 7 38Z',text:'M7 6H33V12H23V36H29V42H11V36H17V12H7Z',resize:'M4 41V30L29 5 36 12 11 37Z',drag:'M20 2 26 9H22V18H31V14L38 20 31 26V22H22V31H26L20 38 14 31H18V22H9V26L2 20 9 14V18H18V9H14Z'};
+ p.setAttribute('d',shapes[kind]);svg.append(p);return svg
+}
+function render(){
+ const query=search.value.toLowerCase().trim();
+ const entries=Object.entries(themes).filter(([name])=>mode==='all'||(mode==='light'?name.endsWith('-Light'):!name.endsWith('-Light'))).filter(([name])=>name.toLowerCase().includes(query)).sort(([a],[b])=>a.localeCompare(b));
+ gallery.replaceChildren();
+ if(!entries.length){const p=document.createElement('p');p.className='empty';p.textContent='No themes match your search.';gallery.append(p)}
+ for(const [name,palette] of entries){
+  const article=document.createElement('article');article.className='card';
+  const sample=document.createElement('div');sample.className='sample';sample.style.setProperty('--body',palette.body);sample.style.setProperty('--primary',palette.primary);
+  for(const kind of ['pointer','text','resize','drag','wait'])sample.append(svgShape(kind));
+  const body=document.createElement('div');body.className='cardbody';
+  const title=document.createElement('h2');title.textContent=name.replaceAll('-',' ');body.append(title);
+  const colors=document.createElement('div');colors.className='colors';
+  for(const [label,value] of [['Body',palette.body],['Primary',palette.primary],['Watch',palette.watch]]){
+   const swatch=document.createElement('div');swatch.className='color';const block=document.createElement('i');block.style.background=value;
+   const code=document.createElement('code');code.textContent=label+' '+value;swatch.append(block,code);colors.append(swatch)
+  }
+  const link=document.createElement('a');link.href='https://github.com/SakibShahariar/material-bibata-cursor/releases/latest';link.textContent='Download release ↗';
+  body.append(colors,link);article.append(sample,body);gallery.append(article)
+ }
+ status.textContent=entries.length+' theme'+(entries.length===1?'':'s')+' shown';
+ document.querySelectorAll('[data-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.mode===mode)))
+}
+document.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.mode;render()}));
+search.addEventListener('input',render);
+fetch('../themes.json').then(response=>{if(!response.ok)throw Error('Palette request failed');return response.json()}).then(data=>{themes=data;render()}).catch(()=>{status.textContent='Could not load themes.json. Serve the repository root with a local web server.'});
+</script></main></body></html>

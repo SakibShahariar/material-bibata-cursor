@@ -126,6 +126,14 @@ check-deps:
             missing=1
         fi
     done
+    if command -v python3 >/dev/null 2>&1; then
+        if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)'; then
+            echo "✓ Python 3.11+"
+        else
+            echo "✗ Python 3.11+ required (tomllib is part of the standard library)"
+            missing=1
+        fi
+    fi
     if [ "$missing" -eq 1 ]; then
         echo ""
         echo "Install the missing tools above before running 'just build'."

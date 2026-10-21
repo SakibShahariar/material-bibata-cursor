@@ -293,7 +293,7 @@ def generate_for_theme(bibata_dir: Path, install_dir: Path, scalable_dir: Path,
     for entry in ("cursors", "index.theme"):
         src = installed_theme / entry
         dst = scalable_theme / entry
-        if src.exists() and not dst.exists() and (installed_theme.resolve() != scalable_theme.resolve()):
+        if (src.exists() or fallback_install_dir.resolve() != install_dir.resolve()) and not dst.exists() and (installed_theme.resolve() != scalable_theme.resolve()):
             try:
                 dst.symlink_to(str(src))
             except OSError as e:
@@ -379,7 +379,7 @@ def main():
 
     print(f"\nDone: {themes_done} theme(s), {total_ok} shapes written, {total_failed} skipped/failed.")
     print(f"SVG cursors installed to: {scalable_dir}")
-    if themes_done == 0:
+    if themes_done == 0 or total_failed > 0:
         sys.exit(1)
 
 

@@ -20,6 +20,10 @@ build-one theme:
 build-selected themes:
     fish scripts/compile_bibata_material.fish --themes {{themes}}
 
+# Preview removal of selected variants; append --yes to delete them
+remove-selected themes *flags:
+    python3 scripts/remove_themes.py --themes "{{themes}}" {{flags}}
+
 # Build only the 28 dark themes + Classic (skips the -Light set, faster)
 build-dark:
     fish scripts/compile_bibata_material.fish --only-dark

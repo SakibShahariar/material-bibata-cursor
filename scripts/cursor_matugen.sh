@@ -4,6 +4,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 THEMES_JSON="$SCRIPT_DIR/themes.json"
+if [[ ! -f "$THEMES_JSON" ]]; then
+    THEMES_JSON="$SCRIPT_DIR/../themes.json"
+fi
 COLOR_MATCH_PY="$SCRIPT_DIR/color_match.py"
 
 INSTALL_DIR="${BIBATA_MATUGEN_INSTALL_DIR:-$HOME/.icons}"

@@ -40,6 +40,45 @@ build-win:
 build-win-one theme:
     python3 scripts/build_windows.py {{theme}}
 
+# Check prerequisites for building and packaging Windows cursor themes
+check-win-deps:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    missing=0
+    for cmd in python3 rsvg-convert zip; do
+        if command -v "$cmd" >/dev/null 2>&1; then
+            echo "✓ $cmd"
+        else
+            echo "✗ $cmd (missing)"
+            missing=1
+        fi
+    done
+    if command -v python3 >/dev/null 2>&1; then
+        if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)'; then
+            echo "✓ Python 3.11+"
+        else
+            echo "✗ Python 3.11+ required (tomllib is part of the standard library)"
+            missing=1
+        fi
+        if python3 -c 'from PIL import Image' >/dev/null 2>&1; then
+            echo "✓ Pillow"
+        else
+            echo "✗ Pillow (install with: python3 -m pip install Pillow)"
+            missing=1
+        fi
+    fi
+    if [ ! -f scripts/bibata_cursor/config/build.toml ] || [ ! -d scripts/bibata_cursor/svg ]; then
+        echo "✗ upstream Bibata source missing (run 'just build' first)"
+        missing=1
+    else
+        echo "✓ upstream Bibata source"
+    fi
+    if [ "$missing" -eq 1 ]; then
+        echo ""
+        echo "Install the missing prerequisites before running 'just build-win'."
+        exit 1
+    fi
+
 # Remove Windows build artifacts (out_win/)
 clean-win:
     rm -rf out_win

@@ -191,9 +191,12 @@ change anything about how you use the themes.
 ## Windows cursors
 
 Windows `.cur`/`.ani` cursor files are generated separately using
-`scripts/build_windows.py`. This requires the upstream Bibata source to
-be present in `scripts/bibata_cursor/` (the Linux build clones it on first
-run) and requires `rsvg-convert` and Python's Pillow package.
+`scripts/build_windows.py`. This requires Python 3.11 or newer,
+`rsvg-convert` (librsvg), and the Python Pillow package. The upstream
+Bibata source must also be present in `scripts/bibata_cursor/`; running
+the Linux build first clones it automatically. Windows archive packaging
+additionally requires `zip`. Check these prerequisites with
+`just check-win-deps` before building or packaging Windows themes.
 
 ```bash
 python3 scripts/build_windows.py             # all themes

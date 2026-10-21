@@ -178,19 +178,27 @@ fi
 # the XCursor default-theme file.
 
 mkdir -p "$HOME/.icons/default"
+DEFAULT_CURSOR_FILE="$HOME/.icons/default/index.theme"
 
-DEFAULT_CURSOR_TMP="$(mktemp "$HOME/.icons/default/index.theme.XXXXXX")"
+# Do not silently replace a user's custom XCursor fallback configuration.
+# The Comment marker identifies the file managed by this hook.
+if [[ -f "$DEFAULT_CURSOR_FILE" ]] &&
+   ! grep -Fqx 'Comment=Default Cursor Theme' "$DEFAULT_CURSOR_FILE"; then
+    echo "Warning: preserving existing $DEFAULT_CURSOR_FILE; it is not managed by this hook" >&2
+else
+    DEFAULT_CURSOR_TMP="$(mktemp "$HOME/.icons/default/index.theme.XXXXXX")"
 
-if cat > "$DEFAULT_CURSOR_TMP" <<EOF
+    if cat > "$DEFAULT_CURSOR_TMP" <<EOF
 [Icon Theme]
 Name=Default
 Comment=Default Cursor Theme
 Inherits=$THEME_NAME
 EOF
-then
-    mv -f -- "$DEFAULT_CURSOR_TMP" "$HOME/.icons/default/index.theme"
-    echo "✓ Updated ~/.icons/default/index.theme"
-else
-    rm -f -- "$DEFAULT_CURSOR_TMP"
-    echo "Warning: failed to update XCursor fallback configuration" >&2
+    then
+        mv -f -- "$DEFAULT_CURSOR_TMP" "$DEFAULT_CURSOR_FILE"
+        echo "✓ Updated ~/.icons/default/index.theme"
+    else
+        rm -f -- "$DEFAULT_CURSOR_TMP"
+        echo "Warning: failed to update XCursor fallback configuration" >&2
+    fi
 fi

@@ -209,7 +209,7 @@ def build_one(
                 ]
             )
         return theme, True, f"Installed {theme_name}"
-    except (BuildError, OSError, subprocess.SubprocessError) as exc:
+    except Exception as exc:
         return theme, False, f"Failed {theme_name}: {exc}"
 
 

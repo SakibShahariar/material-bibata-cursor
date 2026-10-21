@@ -57,5 +57,5 @@ function render(){
 }
 document.querySelectorAll('[data-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.mode;render()}));
 search.addEventListener('input',render);
-fetch('../themes.json').then(response=>{if(!response.ok)throw Error('Palette request failed');return response.json()}).then(data=>{themes=data;render()}).catch(()=>{status.textContent='Could not load themes.json. Serve the repository root with a local web server.'});
+fetch('./themes.json').then(response=>{if(!response.ok)throw Error('Palette request failed');return response.json()}).then(data=>{themes=data;render()}).catch(()=>{status.textContent='Could not load themes.json. Check that docs/themes.json is present and served alongside this page.'});
 </script></main></body></html>

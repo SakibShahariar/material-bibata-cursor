@@ -174,6 +174,10 @@ def validate_archive(path: Path) -> None:
                         f"{path} contains no .ani files for {theme}",
                     )
                     require(f"{theme}/install.inf" in names, f"{path} missing {theme}/install.inf")
+                    for filename in ("left_ptr.cur", "xterm.cur", "bottom_right_corner.cur",
+                                     "wait.ani", "left_ptr_watch.ani"):
+                        require(f"{theme}/{filename}" in names,
+                                f"{path} missing {theme}/{filename}")
         else:
             with tarfile.open(path, "r:gz") as archive:
                 members = archive.getmembers()
@@ -197,6 +201,14 @@ def validate_archive(path: Path) -> None:
                             any(name == prefix or name.startswith(prefix + "/") for name in names),
                             f"{path} missing {prefix}",
                         )
+                    for shape in ("left_ptr", "xterm", "wait", "bottom_right_corner"):
+                        for relative in (
+                            f"cursors/{shape}",
+                            f"hyprcursors/{shape}.hlc",
+                            f"cursors_scalable/{shape}/metadata.json",
+                        ):
+                            require(f"{theme}/{relative}" in names,
+                                    f"{path} missing {theme}/{relative}")
     except (OSError, tarfile.TarError, zipfile.BadZipFile) as exc:
         raise ValidationError(f"cannot inspect release archive {path}: {exc}") from exc
 

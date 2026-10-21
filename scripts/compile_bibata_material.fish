@@ -206,7 +206,7 @@ except Exception as e:
     if test -d "out/Bibata-Modern-Classic"
         set -l scalable_dir $BIBATA_MATERIAL_SCALABLE_DIR
         if test -z "$scalable_dir"
-            set scalable_dir (python3 -c "import os; from pathlib import Path; p=Path('$install_dir').expanduser().resolve(); x=Path(os.environ.get('XDG_DATA_HOME', str(Path.home()/'.local'/'share')))/'icons'; print(p if any(p.is_relative_to(Path(d)) for d in ('/usr/share/icons','/usr/local/share/icons')) else x)")
+            set scalable_dir (python3 -c 'import os, sys; from pathlib import Path; p=Path(sys.argv[1]).expanduser().resolve(); x=Path(os.environ.get("XDG_DATA_HOME", str(Path.home()/".local"/"share")))/"icons"; print(p if any(p.is_relative_to(Path(d)) for d in ("/usr/share/icons", "/usr/local/share/icons")) else x)' "$install_dir")
         end
         if python3 "$script_dir/install_staged_theme.py" \
                 --source "$temp_run_dir/out/Bibata-Modern-Classic" \

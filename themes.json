@@ -44,7 +44,7 @@
   "Teal": {
     "label": "Teal",
     "body": "#002020",
-    "primary": "#008080",
+    "primary": "#009797",
     "watch": "#001010"
   },
   "Peach": {
@@ -152,7 +152,7 @@
   "Slate": {
     "label": "Slate",
     "body": "#1f262b",
-    "primary": "#708090",
+    "primary": "#7f93a5",
     "watch": "#121619"
   },
   "Noir": {

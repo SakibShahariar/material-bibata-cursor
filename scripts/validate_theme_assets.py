@@ -37,6 +37,10 @@ CSS_LEFT_PTR_ALLOWED = {
     "zoom-out",
 }
 
+# Animated shapes must retain a usable animation after recoloring: multiple
+# frames, a consistent frame delay, and a hotspot that does not move.
+ANIMATED_SHAPES = ("wait", "left_ptr_watch")
+
 
 class ValidationError(RuntimeError):
     pass
@@ -45,6 +49,31 @@ class ValidationError(RuntimeError):
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValidationError(message)
+
+
+def validate_animation_metadata(metadata: list, shape_path: Path) -> None:
+    """QA animated cursors after recoloring (#39).
+
+    Checks that wait/left_ptr_watch remain real animations: at least two
+    frames, one consistent non-negative delay, and a hotspot that stays
+    fixed across the full sequence.
+    """
+    require(len(metadata) >= 2,
+            f"{shape_path}: animated cursor needs at least 2 frames, found {len(metadata)}")
+
+    delays = []
+    hotspots = []
+    for index, frame in enumerate(metadata):
+        delay = frame.get("delay")
+        require(isinstance(delay, int) and delay >= 0,
+                f"{shape_path}: frame {index} has invalid delay {delay!r}")
+        delays.append(delay)
+        hotspots.append((frame["hotspot_x"], frame["hotspot_y"]))
+
+    require(len(set(delays)) == 1,
+            f"{shape_path}: frame delays differ across the animation: {delays}")
+    require(len(set(hotspots)) == 1,
+            f"{shape_path}: hotspot moves between animation frames: {hotspots}")
 
 
 def validate_xcursor(theme_dir: Path) -> None:
@@ -90,7 +119,7 @@ def validate_xcursor(theme_dir: Path) -> None:
                 require("meta.hl" in zipped.namelist(), f"{archive} has no meta.hl")
                 require(len(zipped.namelist()) > 1, f"{archive} contains no cursor frames")
         except (OSError, zipfile.BadZipFile) as exc:
-            raise ValidationError(f"cannot inspect Hyprcursor archive {archive}: {exc}") from exc
+            raise ValidationError(f"cannot inspect Hyprcursor archive: {exc}") from exc
 
 
 def validate_scalable(theme_dir: Path) -> None:
@@ -145,6 +174,8 @@ def validate_scalable(theme_dir: Path) -> None:
             except (OSError, ET.ParseError) as exc:
                 raise ValidationError(f"invalid SVG {svg_path}: {exc}") from exc
             checked += 1
+        if shape.name in ANIMATED_SHAPES:
+            validate_animation_metadata(metadata, shape)
     require(checked > 0, f"no SVG frames validated in {scalable}")
 
 
@@ -169,8 +200,7 @@ def validate_windows(theme_dir: Path) -> None:
         for index in range(count):
             entry_offset = 6 + index * 16
             size, offset = struct.unpack_from("<II", data, entry_offset + 8)
-            require(size > 0 and offset >= 6 + count * 16 and offset + size <= len(data),
-                    f"invalid image offset/size in {path}")
+            require(size > 0 and offset >= 6 + count * 16 and offset + size <= len(data), f"invalid image offset/size in {path}")
     for path in anis:
         data = path.read_bytes()
         require(len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"ACON",

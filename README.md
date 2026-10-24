@@ -97,6 +97,7 @@ See [Packaging for redistribution](docs/PACKAGING.md) to create release archives
 |---|---|
 | [Supported desktops](docs/SUPPORT.md) | Platform support and CI test matrix |
 | [SVG cursors](docs/SVG_CURSORS.md) | Scalable SVG format, aliases, and build flow |
+| [Cursor shapes](docs/CURSOR_SHAPES.md) | Full shape inventory and name resolution |
 | [Windows cursors](docs/WINDOWS.md) | Windows build, installation, and packaging notes |
 | [Adding a color](docs/COLORS.md) | Create a theme and understand body/primary colors |
 | [Matugen setup](docs/MATUGEN.md) | Match the cursor theme to your wallpaper |

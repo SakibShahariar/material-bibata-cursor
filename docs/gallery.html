@@ -35,7 +35,7 @@ function svgShape(kind){
 }
 function render(){
  const query=search.value.toLowerCase().trim();
- const entries=Object.entries(themes).filter(([name])=>mode==='all'||(mode==='light'?name.endsWith('-Light'):!name.endsWith('-Light'))).filter(([name])=>name.toLowerCase().includes(query)).sort(([a],[b])=>a.localeCompare(b));
+ const entries=Object.entries(themes).filter(([name,palette])=>mode==='all'||(mode==='light'?name.endsWith('-Light'):!name.endsWith('-Light'))).filter(([name,palette])=>`${name} ${palette.label||''}`.toLowerCase().includes(query)).sort(([a],[b])=>a.localeCompare(b));
  gallery.replaceChildren();
  if(!entries.length){const p=document.createElement('p');p.className='empty';p.textContent='No themes match your search.';gallery.append(p)}
  for(const [name,palette] of entries){
@@ -43,7 +43,7 @@ function render(){
   const sample=document.createElement('div');sample.className='sample';sample.style.setProperty('--body',palette.body);sample.style.setProperty('--primary',palette.primary);
   for(const kind of ['pointer','text','resize','drag','wait'])sample.append(svgShape(kind));
   const body=document.createElement('div');body.className='cardbody';
-  const title=document.createElement('h2');title.textContent=name.replaceAll('-',' ');body.append(title);
+  const title=document.createElement('h2');title.textContent=palette.label||name.replaceAll('-',' ');body.append(title);
   const colors=document.createElement('div');colors.className='colors';
   for(const [label,value] of [['Body',palette.body],['Primary',palette.primary],['Watch',palette.watch]]){
    const swatch=document.createElement('div');swatch.className='color';const block=document.createElement('i');block.style.background=value;

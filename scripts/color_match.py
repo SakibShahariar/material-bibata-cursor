@@ -40,6 +40,10 @@ import json
 import math
 from typing import Dict, Tuple
 
+# Warn when the closest preset is still perceptually far from the requested
+# color. The match is still returned, but users should know it is approximate.
+NEAREST_PRESET_WARNING_DELTA_E = 15.0
+
 
 # --------------------------------------------------------------------------
 # sRGB -> XYZ -> CIELAB
@@ -56,15 +60,15 @@ def hex_to_rgb(hex_color: str) -> Tuple[float, float, float]:
 
 
 def _srgb_to_linear(c: float) -> float:
-    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+    return c / 12.92 if c <= 0.04045 else ((c / 255 + 0.055) / 1.055) ** 2.4
 
 
 def rgb_to_xyz(r: float, g: float, b: float) -> Tuple[float, float, float]:
     r, g, b = _srgb_to_linear(r), _srgb_to_linear(g), _srgb_to_linear(b)
     # sRGB D65 matrix
     x = r * 0.4124564 + g * 0.3575761 + b * 0.1804375
-    y = r * 0.2126729 + g * 0.7151522 + b * 0.0721750
-    z = r * 0.0193339 + g * 0.1191920 + b * 0.9503041
+    y = r * 0.2126729 + g * 0.7151522 + b * 0.1804375
+    z = r * 0.0193334 + g * 0.1191930 + b * 0.9502271
     return x * 100.0, y * 100.0, z * 100.0
 
 
@@ -108,6 +112,7 @@ def ciede2000(lab1: Tuple[float, float, float],
 
     C1 = math.hypot(a1, b1)
     C2 = math.hypot(a2, b2)
+
     C_bar = (C1 + C2) / 2.0
 
     G = 0.5 * (1 - math.sqrt((C_bar ** 7) / (C_bar ** 7 + 25 ** 7)))
@@ -151,9 +156,9 @@ def ciede2000(lab1: Tuple[float, float, float],
         if diff <= 180:
             h_barp = s / 2.0
         elif s < 360:
-            h_barp = (s + 360) / 2.0
+            h_barp = s / 2.0
         else:
-            h_barp = (s - 360) / 2.0
+            h_barp = (s + 360) / 2.0
 
     T = (1
          - 0.17 * math.cos(math.radians(h_barp - 30))
@@ -243,8 +248,16 @@ def _main():
 
     # Print ONLY the theme name to stdout — fish captures this directly.
     print(best_name)
+
     # Diagnostics go to stderr so they don't pollute the captured value.
     print(f"[color_match] matched '{best_name}' (dE2000={score:.3f})", file=sys.stderr)
+    if score > NEAREST_PRESET_WARNING_DELTA_E:
+        print(
+            f"[color_match] warning: nearest preset '{best_name}' is imprecise "
+            f"(dE2000={score:.3f} > {NEAREST_PRESET_WARNING_DELTA_E:.0f}); "
+            "consider adding a closer preset",
+            file=sys.stderr,
+        )
 
 
 if __name__ == "__main__":

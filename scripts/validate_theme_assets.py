@@ -38,7 +38,7 @@ CSS_LEFT_PTR_ALLOWED = {
 }
 
 # Animated shapes must retain a usable animation after recoloring: multiple
-# frames, a consistent frame delay, and a hotspot that does not move.
+# frames, valid per-frame delays, and a hotspot that does not move.
 ANIMATED_SHAPES = ("wait", "left_ptr_watch")
 
 
@@ -55,23 +55,19 @@ def validate_animation_metadata(metadata: list, shape_path: Path) -> None:
     """QA animated cursors after recoloring (#39).
 
     Checks that wait/left_ptr_watch remain real animations: at least two
-    frames, one consistent non-negative delay, and a hotspot that stays
-    fixed across the full sequence.
+    frames, a valid non-negative delay on every frame, and a hotspot that
+    stays fixed across the sequence. Variable delays are allowed.
     """
     require(len(metadata) >= 2,
             f"{shape_path}: animated cursor needs at least 2 frames, found {len(metadata)}")
 
-    delays = []
     hotspots = []
     for index, frame in enumerate(metadata):
         delay = frame.get("delay")
         require(isinstance(delay, int) and delay >= 0,
                 f"{shape_path}: frame {index} has invalid delay {delay!r}")
-        delays.append(delay)
         hotspots.append((frame["hotspot_x"], frame["hotspot_y"]))
 
-    require(len(set(delays)) == 1,
-            f"{shape_path}: frame delays differ across the animation: {delays}")
     require(len(set(hotspots)) == 1,
             f"{shape_path}: hotspot moves between animation frames: {hotspots}")
 

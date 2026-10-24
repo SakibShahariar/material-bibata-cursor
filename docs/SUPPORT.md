@@ -1,67 +1,59 @@
 # Supported desktops and test matrix
 
-This document describes the platforms Material Bibata Cursor targets, the cursor formats each platform uses, and what is automatically tested by CI.
+This documents which platforms Material Bibata targets, where each format
+installs, and what CI actually validates versus what is best-effort.
 
-## Support levels
+## Formats and desktops
 
-| Platform | Cursor format | Support | CI coverage |
+| Format | Desktop / stack | Install location | Status |
 |---|---|---|---|
-| GNOME Shell 51+ | `cursors_scalable/` SVG cursors from XDG icon paths | Supported | Asset and archive validation |
-| KDE Plasma 6.2+ | `cursors_scalable/` SVG cursors | Supported | Asset and archive validation |
-| Hyprland | `hyprcursors/` Hyprcursor archives | Supported | Asset and archive validation |
-| X11 | `cursors/` Xcursor themes | Supported | Asset and archive validation |
-| Windows | `.cur`, animated `.ani`, and `Install.inf` | Supported | Windows build and archive validation |
-| Niri | Xcursor theme via Matugen-generated configuration | Best effort | Not CI-tested |
-| Sway | Xcursor theme via Matugen hook | Best effort | Not CI-tested |
+| Xcursor (`cursors/`) | X11 apps, X11 desktops | `~/.icons` (user) or `/usr/share/icons` (system) | Supported; built and validated in CI |
+| Hyprcursor (`hyprcursors/`) | Hyprland | `~/.icons` (alongside Xcursor) | Supported; built and validated in CI |
+| Scalable SVG (`cursors_scalable/`) | GNOME 51+, KDE Plasma 6.2+ | `$XDG_DATA_HOME/icons` (default `~/.local/share/icons`) or system icon dirs | Supported; built and validated in CI |
+| Windows `.cur` / `.ani` | Windows | `C:\Windows\Cursors\<theme>\` via `Install.inf` | Supported; built and validated in CI |
 
-## GNOME Shell 51+
+GNOME's compositor only scans XDG icon directories for `cursors_scalable/`
+— `~/.icons` is not on that path — which is why the scalable tree installs
+to `~/.local/share/icons` while the Xcursor/Hyprcursor packs stay in
+`~/.icons`.
 
-GNOME uses the scalable SVG cursor tree under an XDG icon path. The build writes `cursors_scalable/` and generates freedesktop/CSS alias directories so GNOME requests resolve to the intended Bibata shapes.
+## What CI validates
 
-CI builds representative dark and light themes, validates the scalable metadata and SVG frames, and smoke-tests the Linux release archives.
+The `Cursor asset validation` workflow builds a representative theme set
+(Peach dark + Peach-Light) and checks:
 
-## KDE Plasma 6.2+
+- Linux Xcursor, Hyprcursor, and scalable SVG assets build cleanly.
+- Windows `.cur` and animated `.ani` assets build cleanly.
+- Generated assets pass `validate_theme_assets.py` (structure, hotspots,
+  animation metadata).
+- Release archives (Linux tarballs and Windows ZIPs) build and their
+  contents validate.
+- Every freedesktop/CSS cursor name resolves to the intended shape — no
+  unexpected `left_ptr` fallbacks — and `docs/COMPATIBILITY.md` stays in
+  sync with the generator mappings.
 
-KDE Plasma uses the same `cursors_scalable/` SVG format. Real shape directories are accompanied by symlinked alias directories, with `metadata.json` describing frames, delays, hotspots, and the 256-unit nominal canvas.
+## Best-effort / not CI-tested
 
-CI validates the generated scalable tree and ensures release archives contain the expected SVG assets.
+- **Live desktop sessions**: CI does not run GNOME Shell, KDE Plasma,
+  Hyprland, or X11 sessions, so visual rendering and cursor pickup on real
+  desktops is best-effort.
+- **Niri**: the Matugen post-hook can write a `cursor-theme.kdl` include,
+  but Niri support has not been verified on a live Niri session.
+- **Fractional scaling hotspots**: hotspot correctness at 125% / 150% /
+  200% is tracked separately in #38, not asserted in CI.
+- **Windows `person` / `pin`**: upstream Windows-only names with no Linux
+  `x11_name`; Linux parity is tracked in #37.
 
-## Hyprland
+## Known limitations
 
-Hyprland uses the `hyprcursors/` Hyprcursor archives produced during the Linux build.
+- `all-resize` is the only CSS name resolved through the legacy fallback
+  (to `move` art) rather than dedicated or aliased theme art.
+- Theming relies on Bibata source SVGs using only the three recolor slots
+  (`body`, `primary`, `watch`); any future shape with hardcoded colors
+  outside those slots would not be recolored.
 
-CI validates that each theme has a Hyprcursor manifest and `.hlc` archives, including the required core shapes.
+## Related docs
 
-## X11
-
-X11 applications use the compiled Xcursor theme in `cursors/`. This remains the fallback format for environments and applications that do not use scalable cursors or Hyprcursor.
-
-CI validates Xcursor magic bytes, required core shapes, and the presence of valid cursor files.
-
-## Windows
-
-Windows uses separately generated `.cur` and animated `.ani` files, registered through each theme’s `Install.inf`.
-
-CI builds representative Windows themes, validates cursor-file structure and ANI animation chunks, and smoke-tests the Windows release ZIP archives.
-
-## Niri and Sway
-
-Niri and Sway are supported on a best-effort basis through the Matugen post-hook, which can update the active Xcursor theme.
-
-These environments are not exercised by CI. Before relying on them, install the themes and verify that the generated cursor configuration selects the expected `Bibata-Material-*` theme.
-
-## What CI does not test
-
-CI does not perform interactive desktop testing. In particular, it does not verify:
-
-- Live cursor rendering in GNOME, KDE, Hyprland, Niri, Sway, or Windows.
-- Visual appearance after recoloring.
-- Hotspot accuracy under fractional display scaling.
-- Desktop-specific theme-selection UI behavior.
-
-For those checks, install a built theme in the target environment and test the pointer, text, resize, grab, busy, and animated cursors.
-
-## Related documentation
-
-- [SVG-first cursor authoring](AUTHORING.md)
-- [Release checklist](RELEASE.md)
+- [Compatibility matrix](COMPATIBILITY.md) — per-name art/alias/gap detail
+- [SVG cursors](SVG_CURSORS.md) — scalable format and build flow
+- [Windows cursors](WINDOWS.md) — Windows build and install

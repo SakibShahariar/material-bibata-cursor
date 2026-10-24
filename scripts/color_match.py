@@ -60,14 +60,14 @@ def hex_to_rgb(hex_color: str) -> Tuple[float, float, float]:
 
 
 def _srgb_to_linear(c: float) -> float:
-    return c / 12.92 if c <= 0.04045 else ((c / 255 + 0.055) / 1.055) ** 2.4
+    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
 
 
 def rgb_to_xyz(r: float, g: float, b: float) -> Tuple[float, float, float]:
     r, g, b = _srgb_to_linear(r), _srgb_to_linear(g), _srgb_to_linear(b)
     # sRGB D65 matrix
     x = r * 0.4124564 + g * 0.3575761 + b * 0.1804375
-    y = r * 0.2126729 + g * 0.7151522 + b * 0.1804375
+    y = r * 0.2126729 + g * 0.7151522 + b * 0.0721750
     z = r * 0.0193334 + g * 0.1191930 + b * 0.9502271
     return x * 100.0, y * 100.0, z * 100.0
 

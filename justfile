@@ -39,6 +39,10 @@ svg:
 svg-one theme:
     python3 scripts/generate_svg_cursors.py --theme {{theme}}
 
+# Set an installed theme as the active cursor, e.g. `just apply Apricot`
+apply theme:
+    python3 scripts/apply_theme.py {{theme}}
+
 # Build Windows .cur cursor themes (all 57)
 build-win:
     python3 scripts/build_windows.py

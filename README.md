@@ -84,6 +84,7 @@ just build              # all themes
 just build-dark         # dark themes + Classic
 just build-light        # light themes
 just build-one Apricot  # one theme
+just apply Apricot      # set an installed theme as the active cursor
 just svg                # regenerate scalable SVG cursors
 just build-win          # Windows .cur/.ani assets
 just list

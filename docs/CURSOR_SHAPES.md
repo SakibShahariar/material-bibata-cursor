@@ -19,7 +19,7 @@ exact match (an `x11_name` or `x11_symlink` in Bibata's build config). If
 not, it falls back to the legacy X11 name from Mutter's
 `meta_cursor_get_legacy_name()`. This means a CSS name can render different
 art than its legacy fallback when the theme provides a dedicated shape — for
-example, `cell` uses the plus-shaped `cell` art rather than `crosshair`.
+example, `cell` uses the plus-shaped `plus` art rather than `crosshair`.
 
 ## Pointer and selection
 
@@ -90,7 +90,5 @@ tree, with per-frame delay metadata.
 - `person` and `pin` are Windows-oriented upstream cursor names and are not
   part of the freedesktop/CSS set generated for Linux. See issue #37 for the
   Linux parity decision.
-- `zoom-in` and `zoom-out` currently fall back to the plain `left_ptr` art;
-  dedicated zoom art would be a candidate for issue #44.
-- `all-scroll` falls back to `left_ptr`; a dedicated scroll art shape would
-  also be a candidate for issue #44.
+- See the [compatibility matrix](COMPATIBILITY.md) for which names have
+dedicated art versus aliases; only `all-resize` uses the legacy fallback.

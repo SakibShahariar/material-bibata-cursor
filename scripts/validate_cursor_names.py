@@ -57,22 +57,38 @@ def classify(css_name, shape_key, shape_x11, shape_symlinks):
 
 
 def parse_docs():
-    """Tolerantly parse matrix rows: | `name` | status | `shape` | ... |"""
+    """Parse only CSS compatibility tables, excluding Qt and Wayland tables."""
     rows = {}
+    in_css_table = False
+
     for line in DOCS_MATRIX.read_text(encoding="utf-8").splitlines():
         if not line.strip().startswith("|"):
+            in_css_table = False
             continue
-        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
         if len(cells) < 3:
+            in_css_table = False
             continue
+
+        # CSS cursor tables repeat this header under several topic headings.
+        # Other tables in this document (Qt and Wayland) use different headers.
+        header = [cell.strip().casefold() for cell in cells[:3]]
+        if header == ["css name", "status", "underlying shape"]:
+            in_css_table = True
+            continue
+
+        if not in_css_table:
+            continue
+
         name = cells[0].strip("`").strip()
-        if not name or name in {"CSS name", "---", "--"}:
+        if not name or set(name) <= {"-", ":"}:
             continue
-        if set(name) <= {"-", ":"}:
-            continue
+
         status = cells[1].strip()
         shape = cells[2].strip("`").strip()
         rows[name] = (status, shape)
+
     return rows
 
 

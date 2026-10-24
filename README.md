@@ -6,7 +6,6 @@
 </picture>
 
 </div>
-
 # Material Bibata Cursor
 
 57 Bibata cursor themes (28 dark + 28 `-Light` + the original Classic),
@@ -15,7 +14,7 @@ with a vibrant accent outline, tuned independently per theme.
 
 Whatever your setup — X11, Wayland, GNOME 51+, KDE Plasma 6.2+, Hyprland,
 Niri, or Windows — choose the matching download or build the formats you need.
-Pick a variant below, or compare them in the [interactive cursor gallery](docs/gallery.html), or add your own color — see
+Pick a variant below, or compare them in the [interactive cursor gallery](https://sakibshahariar.github.io/material-bibata-cursor/), or add your own color — see
 [Adding a color](#adding-a-color).
 
 <div align="center">
@@ -84,10 +83,9 @@ Each theme's actual range of cursor shapes:
 
 Every one of the 28 also has a `-Light` counterpart (e.g. `Ice-Blue-Light`)
 — same hue, tone-swapped: a pale/light body instead of a dark one, and a
-darker, saturated outline instead of a light one. This mirrors how
-Material Design 3 actually defines light vs dark surfaces (it's not a
-simple color inversion — light and dark mode swap which tone from the
-same palette plays which role). All 28 light variants meet the same
+darker, saturated outline instead of a light one. This mirrors how Material Design 3 actually defines light vs dark surfaces (it's not a
+simple color inversion — light and dark mode swap which tone from
+the same palette plays which role). All 28 light variants meet the same
 ≥4.5 contrast bar as the dark set.
 
 <div align="center">
@@ -156,8 +154,7 @@ python3 scripts/build_linux.py --themes Apricot,Coral,Classic --jobs 4
 just build-selected Apricot,Coral,Classic
 ```
 
-You can combine `--themes` with `--only-light`/`--only-dark` and
-`--exclude`, for example:
+You can combine `--themes` with `--only-light`/`--only-dark` and `--exclude`, for example:
 `python3 scripts/build_linux.py --themes Ice-Blue-Light,Noir-Light --only-light --exclude Noir-Light`.
 Theme names and colors are validated before any theme is built. With no positional theme
 or `--themes`, the all-themes default is unchanged. Builds run sequentially by default; use
@@ -383,8 +380,7 @@ step prevents the publish step from running. The workflow uses the repository's
 `GITHUB_TOKEN` with the `contents: write` permission to upload release assets;
 GitHub Actions must be enabled for the repository.
 
-You can filter the themes with `--only-dark`, `--only-light`, or
-`--exclude` when calling `scripts/package_release.sh` directly:
+You can filter the themes with `--only-dark`, `--only-light`, or `--exclude` when calling `scripts/package_release.sh` directly:
 
 ```bash
 bash scripts/package_release.sh v1.5.0 --win --only-dark
@@ -467,7 +463,7 @@ For example, the generated file looks like this:
 
 ```kdl
 cursor {
-    xcursor-theme "Bibata-Material-Teal"
+  xcursor-theme "Bibata-Material-Teal"
 }
 ```
 

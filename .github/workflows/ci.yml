@@ -61,6 +61,9 @@ jobs:
             --install-dir "$RUNNER_TEMP/icons" \
             --scalable-dir "$RUNNER_TEMP/scalable"
 
+      - name: Validate CSS cursor name resolution
+        run: python scripts/validate_cursor_names.py
+
       - name: Build Windows cursor formats
         run: |
           python scripts/build_windows.py Peach

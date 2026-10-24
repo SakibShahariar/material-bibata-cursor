@@ -32,7 +32,9 @@ just build-one Coral
 - **Body**: dark and desaturated, roughly 10–25% lightness. This is the
   neutral fill, not a darker copy of your accent.
 - **Primary**: the vibrant color. This carries the actual hue.
-- **Watch**: near-black; it sits behind the busy spinner.
+- **Watch**: derived for dark themes by setting its CIELAB lightness to
+  50% of the body lightness while preserving the body hue and chroma.
+  `Classic` is exempt and keeps its original upstream colors.
 
 ## Why body and primary are separate
 
@@ -41,7 +43,7 @@ fine against some wallpapers, invisible against others. Picking body and
 primary independently keeps the cursor legible no matter how bright or
 saturated the accent is.
 
-For Ice Blue: `Body #1a333d` · `Primary #a8cbe2` · `Watch #0a1f26`.
+For Ice Blue: `Body #1a333d` · `Primary #a8cbe2` · `Watch #001e27`.
 
 The same treatment is applied to every palette, so contrast stays consistent
 across all 28 themes.

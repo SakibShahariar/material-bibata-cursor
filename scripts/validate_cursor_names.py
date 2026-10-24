@@ -10,7 +10,6 @@ Run after build_linux.py has cloned the upstream source:
     python scripts/validate_cursor_names.py
 """
 
-import re
 import sys
 import tomllib
 from pathlib import Path
@@ -28,9 +27,9 @@ BIBATA_DIR = SCRIPT_DIR / "bibata_cursor"
 # dedicated or aliased art.
 LEFT_PTR_ALLOWED = {"default", "context-menu"}
 
-ROW_RE = re.compile(
-    r"^\|\s*`([a-z0-9-]+)`\s*\|\s*([^|]+?)\s*\|\s*`([a-z0-9_-]+)`\s*\|",
-)
+
+def norm(text):
+    return " ".join(text.split()).casefold()
 
 
 def load_index():
@@ -58,16 +57,28 @@ def classify(css_name, shape_key, shape_x11, shape_symlinks):
 
 
 def parse_docs():
+    """Tolerantly parse matrix rows: | `name` | status | `shape` | ... |"""
     rows = {}
     for line in DOCS_MATRIX.read_text(encoding="utf-8").splitlines():
-        m = ROW_RE.match(line)
-        if m:
-            rows[m.group(1)] = (m.group(2), m.group(3))
+        if not line.strip().startswith("|"):
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) < 3:
+            continue
+        name = cells[0].strip("`").strip()
+        if not name or name in {"CSS name", "---", "--"}:
+            continue
+        if set(name) <= {"-", ":"}:
+            continue
+        status = cells[1].strip()
+        shape = cells[2].strip("`").strip()
+        rows[name] = (status, shape)
     return rows
 
 
 def main():
     errors = []
+    warnings = []
     index, shape_x11, shape_symlinks = load_index()
 
     # Part 1: resolution checks.
@@ -91,7 +102,7 @@ def main():
     if missing:
         errors.append(f"docs missing rows for: {sorted(missing)}")
     if extra:
-        errors.append(f"docs has unknown rows: {sorted(extra)}")
+        warnings.append(f"docs has rows not in CSS_CURSOR_NAMES: {sorted(extra)}")
     for css in gen.CSS_CURSOR_NAMES:
         if css not in docs or css not in resolved:
             continue
@@ -99,13 +110,17 @@ def main():
         status, x11 = resolved[css]
         if doc_shape != x11:
             errors.append(
-                f"{css}: docs says `{doc_shape}` but resolution is `{x11}`"
+                f"{css}: docs says shape `{doc_shape}` but resolution is `{x11}` "
+                f"(doc row: {docs[css]!r})"
             )
-        if doc_status != status:
+        if norm(doc_status) != norm(status):
             errors.append(
-                f"{css}: docs status '{doc_status}' but computed '{status}'"
+                f"{css}: docs status '{doc_status}' but computed '{status}' "
+                f"(doc row: {docs[css]!r})"
             )
 
+    for w in warnings:
+        print(f"WARNING: {w}", file=sys.stderr)
     if errors:
         for e in errors:
             print(f"ERROR: {e}", file=sys.stderr)

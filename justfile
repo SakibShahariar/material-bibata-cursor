@@ -1,1 +1,158 @@
-<full updated justfile: existing recipes unchanged, plus a new `vendor *flags:` recipe calling `python3 scripts/vendor_bibata.py {{flags}}`; check-win-deps message updated to suggest `just vendor`>
+# Material Bibata Cursor — task runner
+#
+# Wraps the Python build and supporting scripts. Run `just` with no
+# arguments to see this list.
+
+# List available commands
+default:
+    @just --list
+
+# Vendor the pinned upstream Bibata SVG/config tree into scripts/bibata_cursor
+vendor *flags:
+    python3 scripts/vendor_bibata.py {{flags}}
+
+# Build all 57 themes and install to ~/.icons (or $BIBATA_MATERIAL_INSTALL_DIR)
+build:
+    python3 scripts/build_linux.py
+
+# Build a single theme by name, e.g. `just build-one Apricot`
+build-one theme:
+    python3 scripts/build_linux.py {{theme}}
+
+# Build a comma-separated subset, e.g. `just build-selected Apricot,Coral,Classic`
+build-selected themes:
+    python3 scripts/build_linux.py --themes {{themes}}
+
+# Preview removal of selected variants; append --yes to delete them
+remove-selected themes *flags:
+    python3 scripts/remove_themes.py --themes "{{themes}}" {{flags}}
+
+# Build only the 28 dark themes + Classic (skips the -Light set, faster)
+build-dark:
+    python3 scripts/build_linux.py --only-dark
+
+# Build only the 28 -Light themes (skips the dark set, faster)
+build-light:
+    python3 scripts/build_linux.py --only-light
+
+# (Re)generate cursors_scalable/ SVG cursors for all installed themes (GNOME 51 / KDE Plasma 6.2+)
+svg:
+    python3 scripts/generate_svg_cursors.py
+
+# Regenerate SVG cursors for one installed theme, e.g. `just svg-one Apricot`
+svg-one theme:
+    python3 scripts/generate_svg_cursors.py --theme {{theme}}
+
+# Set an installed theme as the active cursor, e.g. `just apply Apricot`
+apply theme:
+    python3 scripts/apply_theme.py {{theme}}
+
+# Build Windows .cur cursor themes (all 57)
+build-win:
+    python3 scripts/build_windows.py
+
+# Build a single Windows theme, e.g. `just build-win-one Coral`
+build-win-one theme:
+    python3 scripts/build_windows.py {{theme}}
+
+# Check prerequisites for building and packaging Windows cursor themes
+check-win-deps:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    missing=0
+    for cmd in python3 rsvg-convert zip; do
+        if command -v "$cmd" >/dev/null; then
+            echo "✓ $cmd"
+        else
+            echo "✗ $cmd (missing)"
+            missing=1
+        fi
+    done
+    if command -v python3 >/dev/null; then
+        if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)'; then
+            echo "✓ Python 3.12+"
+        else
+            echo "✗ Python 3.12+ required (tomllib is part of the standard library)"
+            missing=1
+        fi
+        if python3 -c 'from PIL import Image' >/dev/null; then
+            echo "✓ Pillow"
+        else
+            echo "✗ Pillow (install with: python3 -m pip install Pillow)"
+            missing=1
+        fi
+    fi
+    if [ ! -f scripts/bibata_cursor/config/build.toml ] || [ ! -d scripts/bibata_cursor/svg ]; then
+        echo "✗ Bibata source missing (run 'just vendor' first)"
+        missing=1
+    else
+        echo "✓ Bibata source"
+    fi
+    if [ "$missing" -eq 1 ]; then
+        echo ""
+        echo "Install the missing prerequisites before running 'just build-win'."
+        exit 1
+    fi
+
+# Remove Windows build artifacts (out_win/)
+clean-win:
+    rm -rf out_win
+
+# Package already-compiled themes into a release archive, e.g. `just package v1.5.0`
+package version:
+    bash scripts/package_release.sh {{version}}
+
+# Package Windows .cur themes for release, e.g. `just package-win v1.5.0`
+package-win version:
+    bash scripts/package_release.sh {{version}} --win
+
+# Package Windows .cur themes for release (dark only), e.g. `just package-win-dark v1.5.0`
+package-win-dark version:
+    bash scripts/package_release.sh {{version}} --win --only-dark
+
+# Package Windows .cur themes for release (light only), e.g. `just package-win-light v1.5.0`
+package-win-light version:
+    bash scripts/package_release.sh {{version}} --win --only-light
+
+# List all theme names defined in themes.json
+list:
+    @python3 -c 'import json; print("\n".join(json.load(open("themes.json", encoding="utf-8")).keys()))'
+
+# Show the Body/Primary/Watch colors for one theme, e.g. `just show Coral`
+show theme:
+    @python3 -c 'import json, sys; print(json.dumps(json.load(open("themes.json", encoding="utf-8")).get(sys.argv[1], "not found"), indent=2))' "{{theme}}"
+
+# Remove build artifacts: cloned bibata_cursor source, dist/, __pycache__ (leaves ~/.icons untouched)
+clean:
+    rm -rf scripts/bibata_cursor
+    rm -rf dist
+    rm -rf scripts/__pycache__
+
+# Check the tools required for the Linux build
+check-deps:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    missing=0
+    for cmd in git python3 rsvg-convert xcursorgen; do
+        if command -v "$cmd" >/dev/null; then
+            echo "✓ $cmd"
+        else
+            echo "✗ $cmd (missing)"
+            missing=1
+        fi
+    done
+    if command -v python3 >/dev/null; then
+        if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)'; then
+            echo "✓ Python 3.12+"
+        else
+            echo "✗ Python 3.12+ required (tomllib is part of the standard library)"
+            missing=1
+        fi
+    fi
+    if [ "$missing" -eq 1 ]; then
+        echo ""
+        echo "Install the missing tools above before running 'just build'."
+        echo "The upstream Bibata build also requires its documented dependencies:"
+        echo "https://github.com/rtgiskard/bibata_cursor"
+        exit 1
+    fi

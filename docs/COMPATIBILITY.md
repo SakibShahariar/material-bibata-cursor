@@ -62,7 +62,7 @@ from Mutter's mapping is used.
 | `nwse-resize` | Alias | `bd_double_arrow` | Diagonal resize (NW-SE) |
 | `col-resize` | Alias | `sb_h_double_arrow` | Column resize |
 | `row-resize` | Alias | `sb_v_double_arrow` | Row resize |
-| `all-resize` | Legacy fallback | `move` | Only name without exact theme art; falls back via `dnd-move` |
+| `all-resize` | Legacy fallback | `grabbing` | Resolves through the theme name index to the grabbing cursor art |
 
 ## Zoom
 
@@ -76,7 +76,7 @@ from Mutter's mapping is used.
 - `person` and `pin` are Windows-oriented upstream cursor names with no
   `x11_name`, so they are not generated for Linux. See issue #37 for the
   Linux parity decision.
-- `all-resize` is the only CSS name resolved through the legacy fallback
-  rather than dedicated or aliased theme art.
+- `all-resize` is classified as a legacy fallback by the validator, but its
+  current name-index resolution selects `grabbing` art.
 - Every other CSS name has either dedicated art or an explicit alias,
   so no name renders as an unintended plain arrow.

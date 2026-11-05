@@ -67,10 +67,13 @@ jobs:
       - name: Validate CSS cursor name resolution
         run: python scripts/validate_cursor_names.py
 
-      - name: Build Windows cursor formats
+      - name: Build Windows cursor formats (parallel and serial comparison)
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
         run: |
-          python scripts/build_windows.py Peach
-          python scripts/build_windows.py Peach-Light
+          python scripts/build_windows.py --themes Peach,Peach-Light --jobs 2 --output-dir out_win
+          python scripts/build_windows.py --themes Peach,Peach-Light --jobs 1 --output-dir "$RUNNER_TEMP/windows-serial"
+          diff -qr out_win "$RUNNER_TEMP/windows-serial"
 
       - name: Validate generated cursor assets
         env:

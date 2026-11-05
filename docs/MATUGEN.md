@@ -132,29 +132,24 @@ representative wallpaper corpus. Real wallpaper-based coverage remains a
 separate validation requirement.
 The workflow also checks a pinned snapshot of the CC0-1.0
 [Rosé Pine Wallpapers](https://github.com/rose-pine/wallpapers) repository.
-It analyzes supported JPG, PNG, and WebP images from its photography folder.
+It analyzes supported JPG, PNG, and WebP images from its Generative,
+Illustration, Photography, Minecraft, Miscellaneous, and OS folders (79 images
+in the pinned snapshot). Anime and Manga folders are intentionally excluded.
 This is a small, curated real-image sample—not a random or representative
 wallpaper population—and its palette is community-curated. The report keeps
 this exploratory corpus separate from the synthetic Smart fixtures and
 controlled seed grid. All reports are uploaded as a workflow artifact.
 
-The pinned photography sample contains 18 images. Matugen Smart selected
-Neutral for 6 and Tonal Spot for 12; 14 outputs were Dark and 4 Light. No
-Monochrome or Vibrant decisions occurred in this small photo set, which is why
-the synthetic fixtures remain useful for exercising those branches.
-
-For these 18 images, nearest-palette primary-only ΔE00 was median **4.55**,
-p90 **9.52**, p95 **9.76**, and worst **10.84**. The live 75/25 matcher score
-was median **17.61**; the selected theme's primary error was median **4.77**,
-p90 **9.52**, and worst **10.84**. The matcher chose a different theme from
-the primary-only winner once (1/18). The worst primary match was rocks.jpg
-(#f1be6d) to Sunset (ΔE00 10.84); the differing selection was moon.jpg,
-where the primary-only winner was Lilac (3.23) and the live matcher chose
-Soft-Blue (5.27).
+The first successful run used only the 18 photography images. It selected
+Neutral for 6 and Tonal Spot for 12; 14 outputs were Dark and 4 Light. The
+nearest-primary ΔE00 median was **4.55**, p90 **9.52**, p95 **9.76**, and worst
+**10.84**. The expanded 79-image run now covers the additional categories
+listed above and will replace this photo-only snapshot as the main exploratory
+corpus report once its CI run completes.
 
 The source snapshot is pinned to
-ee39a37b24ab7700cc4d52f50b01a5d13df6a865. These results are exploratory:
-the wallpapers are a small, curated Rosé Pine collection, not a random
+ee39a37b24ab7700cc4d52f50b01a5d13df6a865. Even with the broader category mix,
+these wallpapers remain a small, curated Rosé Pine collection, not a random
 population, and the sample does not establish general wallpaper coverage.
  This
 sampling is a reproducible coverage study of Matugen's color-generation

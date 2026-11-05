@@ -4,6 +4,7 @@ on:
   push:
     branches: [master]
     paths:
+      - ".github/workflows/matugen-coverage.yml"
       - "scripts/analyze_matugen_coverage.py"
       - "scripts/test_matugen_coverage.py"
       - "scripts/analyze_matugen_smart_coverage.py"

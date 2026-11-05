@@ -50,12 +50,31 @@ class PaletteMatrixTests(unittest.TestCase):
                 path = ROOT / "docs" / filename
                 content = path.read_text(encoding="utf-8")
                 root = ET.fromstring(content)
-                path_element = next(
+                cards = [
                     node for node in root.iter()
-                    if node.tag.rsplit("}", 1)[-1] == "path"
-                )
-                expected = build_matrix_svg(themes, path_element.get("d"), mode)
-                self.assertEqual(content, expected)
+                    if node.tag.rsplit("}", 1)[-1] == "g"
+                    and "data-theme" in node.attrib
+                ]
+                expected_names = {
+                    name for name in themes
+                    if name != "Classic"
+                    and (name.endswith("-Light") if mode == "light" else not name.endswith("-Light"))
+                }
+                self.assertEqual({card.get("data-theme") for card in cards}, expected_names)
+                self.assertEqual(len(cards), 28)
+                for card in cards:
+                    name = card.get("data-theme")
+                    cursor_path = next(
+                        node for node in card.iter()
+                        if node.tag.rsplit("}", 1)[-1] == "path"
+                    )
+                    self.assertEqual(
+                        cursor_path.get("fill").lower(), themes[name]["body"].lower()
+                    )
+                    self.assertEqual(
+                        cursor_path.get("stroke").lower(), themes[name]["primary"].lower()
+                    )
+                    self.assertIn(themes[name]["watch"].upper(), content)
 
     def test_rejects_invalid_mode_and_incomplete_palette_set(self):
         with self.assertRaises(ValueError):

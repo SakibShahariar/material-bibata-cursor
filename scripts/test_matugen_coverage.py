@@ -25,6 +25,9 @@ class MatugenCoverageTests(unittest.TestCase):
         self.assertEqual(len(samples), 216)
         self.assertEqual({hue for hue, _ in samples}, set(range(0, 360, 15)))
         self.assertEqual(len({color for _, color in samples}), 216)
+        from .analyze_matugen_coverage import SCHEME_TYPES
+        self.assertEqual(len(SCHEME_TYPES), 9)
+        self.assertNotIn("scheme-smart", SCHEME_TYPES)
 
     def test_extracts_both_generated_semantic_primary_roles(self):
         payload = {

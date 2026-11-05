@@ -3,7 +3,10 @@
 
 import unittest
 
-from analyze_matugen_coverage import extract_primary_colors, percentile, source_colors
+try:
+    from .analyze_matugen_coverage import extract_primary_colors, percentile, source_colors
+except ImportError:
+    from analyze_matugen_coverage import extract_primary_colors, percentile, source_colors
 
 
 class MatugenCoverageTests(unittest.TestCase):

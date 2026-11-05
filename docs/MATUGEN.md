@@ -72,7 +72,8 @@ Two measurements are reported separately:
   including Classic.
 
 The report includes overall and per-scheme/mode distributions, source-hue
-bands, the matcher's selection counts, and the worst primary-color matches.
+bands, generated-primary CIELAB hue/chroma regions, the matcher's selection
+counts, and the worst primary-color matches.
 A dedicated GitHub Actions workflow runs this analysis when its inputs or
 methodology change and uploads the full JSON report as an artifact. This
 sampling is a reproducible coverage study of Matugen's color-generation

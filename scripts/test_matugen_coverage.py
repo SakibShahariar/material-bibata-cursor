@@ -4,9 +4,19 @@
 import unittest
 
 try:
-    from .analyze_matugen_coverage import (\n        extract_primary_colors, percentile, primary_hue_chroma_region, source_colors\n    )
+    from .analyze_matugen_coverage import (
+        extract_primary_colors,
+        percentile,
+        primary_hue_chroma_region,
+        source_colors,
+    )
 except ImportError:
-    from analyze_matugen_coverage import (\n        extract_primary_colors, percentile, primary_hue_chroma_region, source_colors\n    )
+    from analyze_matugen_coverage import (
+        extract_primary_colors,
+        percentile,
+        primary_hue_chroma_region,
+        source_colors,
+    )
 
 
 class MatugenCoverageTests(unittest.TestCase):

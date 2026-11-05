@@ -87,6 +87,15 @@ The color-seed report includes overall and per-scheme/mode distributions,
 source-hue bands, generated-primary CIELAB hue/chroma regions, matcher
 selection counts, and the worst primary-color matches.
 
+The successful Matugen 4.2.0 Smart regression run selected the expected
+variant and mode for all eight fixtures. Across the selected-mode primary
+colors, the median nearest-palette distance was ΔE00 8.91 and the worst was
+18.50 (Monochrome Light, `#000000`, nearest `Cloud-Light`). The other fixtures
+matched as follows: Neutral Dark 8.91, Neutral Light 13.38, Tonal Spot Dark
+2.09, Tonal Spot Light 5.99, Vibrant Dark 0.00, and Vibrant Light 1.55.
+These are nearest-primary measurements, not the live weighted matcher's
+selection score. They should not be generalized to wallpaper populations.
+
 A separate Smart-mode check generates eight deterministic solid-color PNG
 fixtures. They cover Matugen's four Smart variants (Monochrome, Neutral,
 Tonal Spot, and Vibrant) in both Dark and Light mode. The workflow verifies

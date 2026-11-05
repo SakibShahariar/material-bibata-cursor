@@ -20,6 +20,7 @@ Niri, or Windows — choose the matching download or build the formats you need.
 [![Latest release](https://img.shields.io/github/v/release/SakibShahariar/material-bibata-cursor?sort=semver&style=flat&labelColor=%231a333d&color=%23a8cbe2)](https://github.com/SakibShahariar/material-bibata-cursor/releases/latest)
 [![GitHub stars](https://img.shields.io/github/stars/SakibShahariar/material-bibata-cursor?sort=semver&style=flat&labelColor=%231a333d&color=%23a8cbe2)](https://github.com/SakibShahariar/material-bibata-cursor)
 [![GitHub issues](https://img.shields.io/github/issues/SakibShahariar/material-bibata-cursor?style=flat&labelColor=%231a333d&color=%23a8cbe2)](https://github.com/SakibShahariar/material-bibata-cursor/issues)
+[![CI](https://github.com/SakibShahariar/material-bibata-cursor/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/SakibShahariar/material-bibata-cursor/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/static/v1?label=license&message=MIT&style=flat&labelColor=%231a333d&color=%23a8cbe2)](LICENSE)
 
 </div>
@@ -105,6 +106,18 @@ just list
 ```
 
 See [Packaging for redistribution](docs/PACKAGING.md) to create release archives.
+
+## Quality checks
+
+The [Cursor asset validation workflow](.github/workflows/ci.yml) runs on pushes to
+`master`, pull requests, and manual dispatch. It checks builder unit tests,
+theme contrast, CSS cursor-name resolution, representative Linux and Windows
+builds, generated cursor assets, and Linux/Windows release-archive contents.
+
+For platform coverage and checks that need real desktop or hardware validation,
+see the [support matrix](docs/SUPPORT.md), [cursor compatibility matrix](docs/COMPATIBILITY.md),
+and [hotspot QA guide](docs/HOTSPOT_QA.md). The [release checklist](docs/RELEASE.md)
+collects the broader pre-release checks.
 
 ## Documentation
 

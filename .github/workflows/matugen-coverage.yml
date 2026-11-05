@@ -6,6 +6,7 @@ on:
     paths:
       - "scripts/analyze_matugen_coverage.py"
       - "scripts/test_matugen_coverage.py"
+      - "scripts/analyze_matugen_smart_coverage.py"
       - "scripts/color_match.py"
       - "themes.json"
   workflow_dispatch:
@@ -41,9 +42,17 @@ jobs:
             --matugen matugen \
             --json-output "$RUNNER_TEMP/matugen-coverage.json"
 
-      - name: Upload coverage report
+      - name: Analyze Smart mode with controlled images
+        run: |
+          python scripts/analyze_matugen_smart_coverage.py \\
+            --matugen matugen \\
+            --json-output "$RUNNER_TEMP/matugen-smart-coverage.json"
+
+      - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
           name: matugen-coverage-report
-          path: ${{ runner.temp }}/matugen-coverage.json
+          path: |
+            ${{ runner.temp }}/matugen-coverage.json
+            ${{ runner.temp }}/matugen-smart-coverage.json
           if-no-files-found: error

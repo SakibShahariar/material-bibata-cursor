@@ -83,9 +83,18 @@ Three measurements are reported separately:
   primary-fidelity regret. This distinguishes palette coverage limitations
   from choices made by the current weighting formula.
 
-The report includes overall and per-scheme/mode distributions, source-hue
-bands, generated-primary CIELAB hue/chroma regions, the matcher's selection
-counts, and the worst primary-color matches.
+The color-seed report includes overall and per-scheme/mode distributions,
+source-hue bands, generated-primary CIELAB hue/chroma regions, matcher
+selection counts, and the worst primary-color matches.
+
+A separate Smart-mode check generates eight deterministic solid-color PNG
+fixtures. They cover Matugen's four Smart variants (Monochrome, Neutral,
+Tonal Spot, and Vibrant) in both Dark and Light mode. The workflow verifies
+that Matugen selects the expected variant and mode, then measures the selected
+mode's primary against all 56 cursor palettes. These fixtures validate the
+Smart decision paths; they are synthetic regression inputs, **not** a
+representative wallpaper corpus. Real wallpaper-based coverage remains a
+separate validation requirement.
 The manually triggered GitHub Actions workflow runs this analysis and uploads
 the full JSON report as an artifact. Start it from the repository's Actions tab
 when the palette data or analysis methodology changes. This

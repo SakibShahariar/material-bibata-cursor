@@ -95,11 +95,12 @@ def run_smart_fixture(
             f"{completed.stdout[:300]!r}; stderr={completed.stderr[:300]!r}"
         ) from exc
 
-    variant_match = re.search(r"variant=(Scheme[A-Za-z]+)", completed.stderr)
+    plain_stderr = re.sub(r"\\x1b\\[[0-?]*[ -/]*[@-~]", "", completed.stderr)
+    variant_match = re.search(r"variant=(Scheme[A-Za-z]+)", plain_stderr)
     if not variant_match:
         raise RuntimeError(
             f"Matugen did not report its resolved Smart variant for "
-            f"{image_path.name}: stderr={completed.stderr!r}"
+            f"{image_path.name}: stderr={plain_stderr!r}"
         )
     payload["_matugen_detected_variant"] = variant_match.group(1)
     return payload

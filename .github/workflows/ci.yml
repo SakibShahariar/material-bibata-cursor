@@ -102,3 +102,9 @@ jobs:
             --archive dist/bibata-material-light-ci.tar.gz \
             --archive dist/bibata-material-dark-ci-win.zip \
             --archive dist/bibata-material-light-ci-win.zip
+
+      - name: Smoke-test Debian package
+        run: |
+          bash packaging/debian/build-deb.sh 1.5.0 --archive-tag ci --archives-dir dist --output-dir "$RUNNER_TEMP/deb"
+          dpkg-deb --field "$RUNNER_TEMP/deb/material-bibata-cursor_1.5.0_all.deb" Package Version Architecture
+          dpkg-deb --contents "$RUNNER_TEMP/deb/material-bibata-cursor_1.5.0_all.deb" | grep -q 'usr/share/icons/Bibata-Material-Classic/index.theme'

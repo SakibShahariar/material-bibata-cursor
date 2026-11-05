@@ -28,7 +28,8 @@ post_hook = "~/.config/matugen/post-hook-scripts/cursor_matugen.sh"
 {
     "colors": {
         "color13": "{{colors.primary.default.hex}}"
-    }
+    },
+    "mode": "{{mode}}"
 }
 ```
 
@@ -37,9 +38,12 @@ with `just build`) so the matched preset is available locally.
 
 The hook does **not** build or install themes: it picks the closest preset
 in `themes.json` using `color_match.py` and applies that already-installed
-theme. It selects the nearest existing palette using CIEDE2000; it does not
-recolor or rebuild a cursor to match Matugen's exact primary hex value, so
-the result may be close rather than identical.
+theme. It uses Matugen's resolved `mode` to compare only dark presets for
+Dark mode or `-Light` presets for Light mode. If a custom/older template omits
+`mode`, it falls back to matching across all presets for compatibility.
+Matching uses CIEDE2000; it does not recolor or rebuild a cursor to match
+Matugen's exact primary hex value, so the result may be close rather than
+identical.
 
 When run directly from a repository checkout, it finds `themes.json` in the
 repository root. When installed as a Matugen post-hook, keep `themes.json`
@@ -100,11 +104,18 @@ neutral low-chroma outputs (C* below 10).
 The current live matcher score (75% primary / 25% body) was median **18.72**,
 p90 **24.53**, p95 **34.83**, worst **34.83**. This score is not primary
 fidelity: both components are compared with the same Matugen primary input.
-The live matcher selected a different theme from the primary-only winner in
-**710/3,888 (18.3%)** samples. The selected theme's primary-color error was
-median **8.01**, p90 **15.34**, p95/worst **44.60**; the extreme case was
-Monochrome Light (`#000000`), where body weighting selected `Noir` rather
-than the nearest primary-only candidate `Cloud-Light` (ΔE00 18.50).
+The live weighted matcher selected a different theme from the primary-only
+winner in **710/3,888 (18.3%)** samples. Its selected theme's primary-color
+error was median **8.01**, p90 **15.34**, and worst **44.60**. The extreme case
+was Monochrome Light (`#000000`), where body weighting selected `Noir`
+instead of the nearest primary-only candidate `Cloud-Light` (ΔE00 18.50).
+
+Restricting the same 75/25 score to the mode Matugen actually resolved
+eliminated all **231 cross-mode selections**. Selected-primary ΔE00 improved
+to median **8.01**, p90 **15.32**, p95 **18.50**, and worst **22.17**; samples
+above ΔE00 15 fell slightly from 436 to 431. The matcher still differs from
+the primary-only winner in 479/3,888 cases, so mode filtering addresses
+cross-mode mistakes but does not eliminate body-weighting trade-offs.
 
 These are reproducible controlled seed-color measurements, not a
 representative sample of real wallpapers. The Smart fixtures described below
@@ -140,19 +151,21 @@ wallpaper population—and its palette is community-curated. The report keeps
 this exploratory corpus separate from the synthetic Smart fixtures and
 controlled seed grid. All reports are uploaded as a workflow artifact.
 
-The first successful run used only the 18 photography images. It selected
-Neutral for 6 and Tonal Spot for 12; 14 outputs were Dark and 4 Light. The
-nearest-primary ΔE00 median was **4.55**, p90 **9.52**, p95 **9.76**, and worst
-**10.84**. The expanded 79-image run now covers the additional categories
-listed above and will replace this photo-only snapshot as the main exploratory
-corpus report once its CI run completes.
+The pinned 79-image run selected Matugen Smart variants as follows:
+Neutral **45**, Tonal Spot **29**, Monochrome **4**, and Vibrant **1**; 62
+outputs were Dark and 17 Light. Nearest-primary ΔE00 was median **6.78**,
+p90 **11.82**, p95 **12.79**, and worst **18.50**. The live weighted matcher
+selected a different theme from the primary-only winner in **5/79** cases;
+its selected-primary median was **6.78**, p90 **11.87**, and worst **44.60**.
+Mode-aware matching reduced the mismatch count to **3/79**, preserved the
+median/p90, and reduced the worst selected-primary error to **18.50** with no
+cross-mode selections.
 
 The source snapshot is pinned to
 ee39a37b24ab7700cc4d52f50b01a5d13df6a865. Even with the broader category mix,
 these wallpapers remain a small, curated Rosé Pine collection, not a random
 population, and the sample does not establish general wallpaper coverage.
- This
-sampling is a reproducible coverage study of Matugen's color-generation
+This sampling is a reproducible coverage study of Matugen's color-generation
 pipeline; it is not a claim that every possible wallpaper or source color has
 been sampled.
 

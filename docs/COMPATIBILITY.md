@@ -159,3 +159,9 @@ as gaps rather than silently mapped to unrelated art.
   explicit aliases through #44 if these become important.
 - Every CSS and Wayland cursor-shape-v1 name has either dedicated art or an
   explicit alias, so no name renders as an unintended plain arrow.
+
+
+## Reference audit
+
+For a one-time comparison of Breeze, Adwaita, Capitaine, Rosé Pine Hyprcursor,
+and the pinned Bibata baseline, see the [modern cursor theme reference audit](REFERENCE_THEMES.md).

@@ -53,7 +53,7 @@ jobs:
           )
           PY
 
-      - name: Build Linux cursor formats
+      - name: Build Linux cursor formats (parallel and serial comparison)
         env:
           RUNNER_TEMP: ${{ runner.temp }}
         run: |
@@ -63,6 +63,14 @@ jobs:
             --themes-json "$RUNNER_TEMP/themes.json" \
             --install-dir "$RUNNER_TEMP/icons" \
             --scalable-dir "$RUNNER_TEMP/scalable"
+          python scripts/build_linux.py \
+            --themes Peach,Peach-Light \
+            --jobs 1 \
+            --themes-json "$RUNNER_TEMP/themes.json" \
+            --install-dir "$RUNNER_TEMP/linux-serial/icons" \
+            --scalable-dir "$RUNNER_TEMP/linux-serial/scalable"
+          diff -qr "$RUNNER_TEMP/icons" "$RUNNER_TEMP/linux-serial/icons"
+          diff -qr "$RUNNER_TEMP/scalable" "$RUNNER_TEMP/linux-serial/scalable"
 
       - name: Validate CSS cursor name resolution
         run: python scripts/validate_cursor_names.py

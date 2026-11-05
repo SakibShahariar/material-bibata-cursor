@@ -6,6 +6,7 @@ import sys
 import tempfile
 import tomllib
 import unittest
+from unittest import mock
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -206,6 +207,71 @@ class ConfigPatchTests(unittest.TestCase):
             self.assertTrue({12, 18, 24, 30, 32, 36, 42, 48, 54, 60, 66}.issubset(sizes))
             self.assertEqual(sizes, sorted(set(sizes)))
 
+class UpstreamSourceMountTests(unittest.TestCase):
+    def make_source_tree(self, root: Path) -> Path:
+        build_dir = root / "bibata_cursor"
+        for directory in ("src", "svg", "config"):
+            (build_dir / directory).mkdir(parents=True, exist_ok=True)
+        (build_dir / "src" / "cursor_utils.py").write_text(
+            "tmp = Path('/tmp/.cursor.0248.svg')\\n", encoding="utf-8"
+        )
+        (build_dir / "src" / "renderer_helper.py").write_text(
+            "VALUE = 1\\n", encoding="utf-8"
+        )
+        (build_dir / "src" / "assets").mkdir()
+        (build_dir / "src" / "assets" / "shape.svg").write_text(
+            "<svg/>\\n", encoding="utf-8"
+        )
+        (build_dir / "svg" / "pointer.svg").write_text("<svg/>\\n", encoding="utf-8")
+        (build_dir / "config" / "render.json").write_text("{}\\n", encoding="utf-8")
+        return build_dir
+
+    def test_symlinks_immutable_assets_and_copies_mutable_files(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            build_dir = self.make_source_tree(root)
+            work_dir = root / "work"
+            work_dir.mkdir()
+
+            build_linux.mount_upstream_sources(build_dir, work_dir)
+
+            self.assertFalse((work_dir / "src" / "cursor_utils.py").is_symlink())
+            self.assertTrue((work_dir / "src" / "renderer_helper.py").is_symlink())
+            self.assertTrue((work_dir / "src" / "assets").is_symlink())
+            self.assertTrue((work_dir / "svg").is_symlink())
+            self.assertFalse((work_dir / "config").is_symlink())
+            build_linux.isolate_upstream_temp_file(work_dir)
+            self.assertIn("Path.cwd().name", (work_dir / "src" / "cursor_utils.py").read_text())
+            self.assertIn(".cursor.0248.svg", (build_dir / "src" / "cursor_utils.py").read_text())
+            (work_dir / "config" / "render.json").write_text("changed", encoding="utf-8")
+            self.assertEqual((build_dir / "config" / "render.json").read_text(), "{}\\n")
+
+    def test_copies_when_symlinks_are_restricted(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            build_dir = self.make_source_tree(root)
+            work_dir = root / "work"
+            work_dir.mkdir()
+
+            with mock.patch.object(Path, "symlink_to", side_effect=OSError("symlinks disabled")):
+                build_linux.mount_upstream_sources(build_dir, work_dir)
+
+            self.assertFalse((work_dir / "src" / "renderer_helper.py").is_symlink())
+            self.assertFalse((work_dir / "src" / "assets").is_symlink())
+            self.assertFalse((work_dir / "svg").is_symlink())
+            self.assertEqual(
+                (work_dir / "svg" / "pointer.svg").read_text(encoding="utf-8"),
+                "<svg/>\\n",
+            )
+
+    def test_temporary_cleanup_does_not_delete_shared_sources(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            build_dir = self.make_source_tree(root)
+            with tempfile.TemporaryDirectory(dir=root) as work:
+                build_linux.mount_upstream_sources(build_dir, Path(work))
+            self.assertTrue((build_dir / "svg" / "pointer.svg").is_file())
+            self.assertTrue((build_dir / "src" / "cursor_utils.py").is_file())
 
 if __name__ == "__main__":
     unittest.main()

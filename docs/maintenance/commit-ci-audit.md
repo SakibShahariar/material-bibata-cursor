@@ -24,10 +24,10 @@ Persistent repository-specific record of commit-level CI checks and red-cross in
 
 - Repository: `SakibShahariar/material-bibata-cursor`
 - Default branch: `master`
-- Checkpoint SHA: `d08c069306d6e80dac59ce8dff3b6e94a52f4930`
+- Checkpoint SHA: `55c1b2ee0010097939d00209ca3cc6b573b442bc`
 - Reviewed: 2026-11-05
-- Range: `1de2bbb6c7ea2ed234538ff8bf232a1ea7b92742` through `d08c069306d6e80dac59ce8dff3b6e94a52f4930`.
-- Summary: asset validation, SVG indexing, Debian package build/install/removal, and representative serial/parallel Windows build comparison are green. Failed intermediate commits are preserved with diagnoses and corrective commits below. Gallery deployment remains blocked by the repository Pages setting; its workflow is manual-only until the owner enables Pages.
+- Range: `1de2bbb6c7ea2ed234538ff8bf232a1ea7b92742` through `55c1b2ee0010097939d00209ca3cc6b573b442bc`.
+- Summary: asset validation, SVG indexing, Debian package build/install/removal, representative serial/parallel Windows output comparison, and real-renderer recolor-once PNG equivalence are green. Failed intermediate commits are preserved with diagnoses and corrective commits below. Gallery deployment remains blocked by the repository Pages setting; its workflow is manual-only until the owner enables Pages.
 - Next session: review commits after this checkpoint and continue full-theme Windows performance validation.
 
 ## Initial baseline
@@ -67,7 +67,7 @@ Persistent repository-specific record of commit-level CI checks and red-cross in
 | `83d2100a17b18fce0bd3862fda48dfbfbc1d1c4c` | fix(packaging): restore Debian builder and CI smoke test (#33) | red | [41947529558](https://github.com/SakibShahariar/material-bibata-cursor/actions/runs/41947529558) | Tree snapshot also omitted the parallel builder implementation; restored in `d08c069306d6e80dac59ce8dff3b6e94a52f4930`. |
 | `d08c069306d6e80dac59ce8dff3b6e94a52f4930` | fix(build-windows): retain parallel rendering implementation (#64) | green | [41947606522](https://github.com/SakibShahariar/material-bibata-cursor/actions/runs/41947606522) | All builder tests passed; parallel and serial Windows outputs matched byte-for-byte for Peach and Peach-Light; Debian package built, installed, and removed in an isolated dpkg root while preserving an unrelated theme. |
 
-## Historical red-cross investigations
+| `55c1b2ee0010097939d00209ca3cc6b573b442bc` | test(build-windows): verify recolor-once PNG equivalence (#64) | green | [41947968986](https://github.com/SakibShahariar/material-bibata-cursor/actions/runs/41947968986) | Unit tests, real-renderer PNG byte comparisons at all six sizes, serial/parallel Windows output comparison, and Debian install/remove smoke test passed. |\n\n## Historical red-cross investigations
 
 ### 2026-10-21 — 24 failed validation runs
 
@@ -108,4 +108,4 @@ No red result was confirmed from the status data retrieved during setup.
 | Date | Reviewed range / checkpoint | Result summary |
 |---|---|---|
 | 2026-11-02 | Initial checkpoint: `1de2bbb6c7ea2ed234538ff8bf232a1ea7b92742` | Latest commit queried; empty status response recorded as unavailable. Earlier history not retroactively audited. |
-| 2026-11-05 | Reviewed through `d08c069306d6e80dac59ce8dff3b6e94a52f4930` | Reviewed every commit after the previous checkpoint. Failed intermediate CI runs are recorded with causes and corrective commits; latest exact-SHA run is green. Gallery deployment remains blocked by Pages settings. |
+| 2026-11-05 | Reviewed through `55c1b2ee0010097939d00209ca3cc6b573b442bc` | Reviewed every commit after the previous checkpoint. Failed intermediate CI runs are recorded with causes and corrective commits; latest exact-SHA run is green. Gallery deployment remains blocked by Pages settings. |

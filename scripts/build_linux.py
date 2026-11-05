@@ -204,6 +204,54 @@ def isolate_upstream_temp_file(work_dir: Path) -> None:
         raise BuildError(f"could not isolate upstream renderer temporary file: {exc}") from exc
 
 
+def link_or_copy(source: Path, destination: Path) -> bool:
+    """Symlink an immutable upstream asset, falling back to an isolated copy.
+
+    Returns True when a symlink was created and False when a copy was needed.
+    """
+    try:
+        destination.symlink_to(source.resolve(), target_is_directory=source.is_dir())
+        return True
+    except (OSError, NotImplementedError):
+        if source.is_dir():
+            shutil.copytree(source, destination)
+        else:
+            shutil.copy2(source, destination)
+        return False
+
+
+def mount_upstream_sources(build_dir: Path, work_dir: Path) -> dict[str, str]:
+    """Mount shared read-only source trees while isolating files patched per theme.
+
+    The renderer script is always a real per-theme copy because
+    isolate_upstream_temp_file() edits it. Other src assets and the SVG tree
+    are symlinked where supported, with safe copy fallbacks. Config is copied
+    because patch_theme_config() mutates it.
+    """
+    strategies: dict[str, str] = {}
+    for directory in ("src", "svg", "config"):
+        source = build_dir / directory
+        if not source.is_dir():
+            raise BuildError(f"upstream source directory is missing: {source}")
+        destination = work_dir / directory
+        if directory == "config":
+            shutil.copytree(source, destination)
+            strategies[directory] = "copy"
+        elif directory == "svg":
+            strategies[directory] = "symlink" if link_or_copy(source, destination) else "copy-fallback"
+        else:
+            destination.mkdir()
+            for item in sorted(source.iterdir(), key=lambda path: path.name):
+                target = destination / item.name
+                if item.name == "cursor_utils.py":
+                    shutil.copy2(item, target)
+                else:
+                    link_or_copy(item, target)
+            strategies[directory] = "isolated-renderer-and-shared-assets"
+    if not (work_dir / "src" / "cursor_utils.py").is_file():
+        raise BuildError(f"upstream renderer is missing: {work_dir / 'src' / 'cursor_utils.py'}")
+    return strategies
+
 def build_one(
     theme: str,
     colors: dict,
@@ -219,11 +267,7 @@ def build_one(
     try:
         with tempfile.TemporaryDirectory(prefix=f"run-{theme}-", dir=build_dir) as temp:
             work_dir = Path(temp)
-            for directory in ("src", "svg", "config"):
-                source = build_dir / directory
-                if not source.is_dir():
-                    raise BuildError(f"upstream source directory is missing: {source}")
-                shutil.copytree(source, work_dir / directory)
+            mount_upstream_sources(build_dir, work_dir)
             isolate_upstream_temp_file(work_dir)
             patch_theme_config(work_dir, theme, colors)
             # The upstream Hyprcursor generator computes symlink targets

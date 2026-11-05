@@ -1,0 +1,51 @@
+name: Matugen palette coverage
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "docs/MATUGEN.md"
+      - "scripts/analyze_matugen_coverage.py"
+      - "scripts/test_matugen_coverage.py"
+      - "scripts/color_match.py"
+      - "themes.json"
+      - ".github/workflows/matugen-coverage.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install pinned Matugen
+        run: cargo install matugen --version 4.2.0 --locked
+
+      - name: Test coverage analyzer
+        run: python -m unittest scripts.test_matugen_coverage -v
+
+      - name: Analyze generated Matugen primary colors
+        run: |
+          python scripts/analyze_matugen_coverage.py \
+            --matugen matugen \
+            --json-output "$RUNNER_TEMP/matugen-coverage.json"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: matugen-coverage-report
+          path: ${{ runner.temp }}/matugen-coverage.json
+          if-no-files-found: error

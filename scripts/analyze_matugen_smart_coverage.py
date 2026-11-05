@@ -95,7 +95,7 @@ def run_smart_fixture(
             f"{completed.stdout[:300]!r}; stderr={completed.stderr[:300]!r}"
         ) from exc
 
-    plain_stderr = re.sub(r"\\x1b\\[[0-?]*[ -/]*[@-~]", "", completed.stderr)
+    plain_stderr = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", completed.stderr)
     variant_match = re.search(r"variant=(Scheme[A-Za-z]+)", plain_stderr)
     if not variant_match:
         raise RuntimeError(

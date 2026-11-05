@@ -1,6 +1,13 @@
 name: Matugen palette coverage
 
 on:
+  push:
+    branches: [master]
+    paths:
+      - "scripts/analyze_matugen_coverage.py"
+      - "scripts/test_matugen_coverage.py"
+      - "scripts/color_match.py"
+      - "themes.json"
   workflow_dispatch:
 
 permissions:

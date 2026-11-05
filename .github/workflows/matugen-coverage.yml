@@ -44,8 +44,8 @@ jobs:
 
       - name: Analyze Smart mode with controlled images
         run: |
-          python scripts/analyze_matugen_smart_coverage.py \\
-            --matugen matugen \\
+          python scripts/analyze_matugen_smart_coverage.py \
+            --matugen matugen \
             --json-output "$RUNNER_TEMP/matugen-smart-coverage.json"
 
       - name: Upload coverage reports

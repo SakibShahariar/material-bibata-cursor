@@ -195,6 +195,7 @@ def find_closest_theme(
     themes: Dict[str, Dict[str, str]],
     primary_weight: float = 0.75,
     body_weight: float = 0.25,
+    mode: str | None = None,
 ) -> Tuple[str, float]:
     """
     themes: {theme_name: {"body": "#hex", "primary": "#hex"}}
@@ -209,13 +210,30 @@ def find_closest_theme(
     A score below ~2.3 is generally "not perceptibly different" to a
     typical viewer; below ~1.0 is "indistinguishable."
     """
+    if mode not in (None, "dark", "light"):
+        raise ValueError("mode must be 'dark', 'light', or None")
+    if mode == "light":
+        candidates = {
+            name: cols for name, cols in themes.items()
+            if name.endswith("-Light")
+        }
+    elif mode == "dark":
+        candidates = {
+            name: cols for name, cols in themes.items()
+            if not name.endswith("-Light")
+        }
+    else:
+        candidates = themes
+    if not candidates:
+        raise ValueError(f"No themes available for mode {mode!r}")
+
     target_lab = hex_to_lab(target_hex)
     total_w = primary_weight + body_weight
 
     best_name = None
     best_score = math.inf
 
-    for name, cols in themes.items():
+    for name, cols in candidates.items():
         primary_de = ciede2000(target_lab, hex_to_lab(cols["primary"]))
         score = (primary_de * primary_weight) / total_w
         if "body" in cols and body_weight > 0:
@@ -234,17 +252,21 @@ def find_closest_theme(
 # --------------------------------------------------------------------------
 
 def _main():
-    if len(sys.argv) != 3:
-        print("usage: color_match.py <target_hex> <themes.json>", file=sys.stderr)
+    if len(sys.argv) not in (3, 5) or (len(sys.argv) == 5 and sys.argv[3] != "--mode"):
+        print(
+            "usage: color_match.py <target_hex> <themes.json> [--mode dark|light]",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     target_hex = sys.argv[1]
     themes_path = sys.argv[2]
+    mode = sys.argv[4] if len(sys.argv) == 5 else None
 
     with open(themes_path, "r") as f:
         themes = json.load(f)
 
-    best_name, score = find_closest_theme(target_hex, themes)
+    best_name, score = find_closest_theme(target_hex, themes, mode=mode)
 
     # Print ONLY the theme name to stdout — fish captures this directly.
     print(best_name)

@@ -118,6 +118,8 @@ jobs:
             --archive dist/bibata-material-light-ci-win.zip
 
       - name: Smoke-test published Debian package inputs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           bash packaging/debian/build-deb.sh v1.5.0 --output-dir "$RUNNER_TEMP/deb-published"
           package="$RUNNER_TEMP/deb-published/material-bibata-cursor_1.5.0_all.deb"

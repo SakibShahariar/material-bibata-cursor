@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -20,13 +21,14 @@ SHA256_RE = re.compile(r"^sha256:([0-9a-f]{64})$")
 def release_archive_checksums(tag: str, opener=urlopen) -> dict[str, str]:
     """Return the two Linux archive SHA-256 values advertised by GitHub."""
     url = f"https://api.github.com/repos/{REPOSITORY}/releases/tags/{tag}"
-    request = Request(
-        url,
-        headers={
-            "Accept": "application/vnd.github+json",
-            "User-Agent": "material-bibata-cursor-debian-packager",
-        },
-    )
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "material-bibata-cursor-debian-packager",
+    }
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    request = Request(url, headers=headers)
     try:
         with opener(request, timeout=30) as response:
             payload = json.load(response)

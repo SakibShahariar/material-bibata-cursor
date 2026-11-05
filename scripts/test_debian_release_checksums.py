@@ -53,6 +53,21 @@ class ReleaseChecksumTests(unittest.TestCase):
             },
         )
 
+    def test_uses_github_token_for_release_metadata_requests(self):
+        encoded = json.dumps(release_payload()).encode("utf-8")
+
+        def opener(request, timeout):
+            self.assertEqual(
+                request.get_header("Authorization"), "Bearer test-token"
+            )
+            return io.BytesIO(encoded)
+
+        with patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"}):
+            checksums = release_checksums.release_archive_checksums(
+                "v1.5.0", opener=opener
+            )
+        self.assertEqual(len(checksums), 2)
+
     def test_writes_sha256sum_compatible_manifest(self):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / "checksums.txt"

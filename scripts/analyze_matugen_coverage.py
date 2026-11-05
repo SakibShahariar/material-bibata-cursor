@@ -18,12 +18,20 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
-from color_match import (
-    NEAREST_PRESET_WARNING_DELTA_E,
-    delta_e_hex,
-    find_closest_theme,
-    hex_to_lab,
-)
+try:
+    from .color_match import (
+        NEAREST_PRESET_WARNING_DELTA_E,
+        delta_e_hex,
+        find_closest_theme,
+        hex_to_lab,
+    )
+except ImportError:
+    from color_match import (
+        NEAREST_PRESET_WARNING_DELTA_E,
+        delta_e_hex,
+        find_closest_theme,
+        hex_to_lab,
+    )
 
 MATUGEN_VERSION = "4.2.0"
 SCHEME_TYPES = (

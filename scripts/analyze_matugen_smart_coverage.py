@@ -163,6 +163,12 @@ def analyze_smart_images(matugen: str, themes_path: Path) -> dict[str, Any]:
             matcher_primary_delta = delta_e_hex(
                 primary_hex, themes[matcher_name]["primary"]
             )
+            mode_matcher_name, mode_matcher_score = find_closest_theme(
+                primary_hex, themes, mode=actual_mode
+            )
+            mode_matcher_primary_delta = delta_e_hex(
+                primary_hex, themes[mode_matcher_name]["primary"]
+            )
             results.append(
                 {
                     "fixture": name,
@@ -177,6 +183,9 @@ def analyze_smart_images(matugen: str, themes_path: Path) -> dict[str, Any]:
                     "matcher_theme": matcher_name,
                     "matcher_score": matcher_score,
                     "matcher_primary_delta_e00": matcher_primary_delta,
+                    "mode_matcher_theme": mode_matcher_name,
+                    "mode_matcher_score": mode_matcher_score,
+                    "mode_matcher_primary_delta_e00": mode_matcher_primary_delta,
                 }
             )
 
@@ -186,6 +195,12 @@ def analyze_smart_images(matugen: str, themes_path: Path) -> dict[str, Any]:
     )
     mismatches = sum(
         item["matcher_theme"] != item["nearest_theme"] for item in results
+    )
+    mode_selected_values = sorted(
+        item["mode_matcher_primary_delta_e00"] for item in results
+    )
+    mode_mismatches = sum(
+        item["mode_matcher_theme"] != item["nearest_theme"] for item in results
     )
     return {
         "matugen_version": version,
@@ -221,6 +236,19 @@ def analyze_smart_images(matugen: str, themes_path: Path) -> dict[str, Any]:
             "selected_primary_delta_e00_worst": selected_values[-1],
             "different_from_primary_only_winner": mismatches,
             "selection_mismatch_rate": mismatches / len(results),
+        },
+        "mode_aware_matcher": {
+            "formula": "75% primary + 25% body; candidates restricted to Matugen mode",
+            "selected_primary_delta_e00_median": mode_selected_values[
+                len(mode_selected_values) // 2
+            ],
+            "selected_primary_delta_e00_worst": mode_selected_values[-1],
+            "different_from_primary_only_winner": mode_mismatches,
+            "mode_mismatch_count": sum(
+                item["mode_matcher_theme"].endswith("-Light")
+                != (item["selected_mode"] == "light")
+                for item in results
+            ),
         },
         "results": results,
     }
@@ -271,6 +299,12 @@ def analyze_wallpaper_corpus(
         matcher_primary_delta = delta_e_hex(
             primary_hex, themes[matcher_name]["primary"]
         )
+        mode_matcher_name, mode_matcher_score = find_closest_theme(
+            primary_hex, themes, mode=mode
+        )
+        mode_matcher_primary_delta = delta_e_hex(
+            primary_hex, themes[mode_matcher_name]["primary"]
+        )
         results.append({
             "image": image_path.relative_to(wallpaper_dir).as_posix(),
             "variant": variant,
@@ -281,11 +315,24 @@ def analyze_wallpaper_corpus(
             "matcher_theme": matcher_name,
             "matcher_score": matcher_score,
             "matcher_primary_delta_e00": matcher_primary_delta,
+            "mode_matcher_theme": mode_matcher_name,
+            "mode_matcher_score": mode_matcher_score,
+            "mode_matcher_primary_delta_e00": mode_matcher_primary_delta,
         })
 
     primary_values = [item["primary_delta_e00"] for item in results]
     selected_values = [item["matcher_primary_delta_e00"] for item in results]
     matcher_scores = [item["matcher_score"] for item in results]
+    mode_selected_values = [
+        item["mode_matcher_primary_delta_e00"] for item in results
+    ]
+    mode_mismatches = sum(
+        item["nearest_theme"] != item["mode_matcher_theme"] for item in results
+    )
+    mode_errors = sum(
+        item["mode_matcher_theme"].endswith("-Light") != (item["mode"] == "light")
+        for item in results
+    )
     mismatches = sum(
         item["nearest_theme"] != item["matcher_theme"] for item in results
     )
@@ -321,6 +368,14 @@ def analyze_wallpaper_corpus(
             "selected_primary_delta_e00_worst": max(selected_values),
             "different_from_primary_only_winner": mismatches,
             "selection_mismatch_rate": mismatches / len(results),
+        },
+        "mode_aware_matcher": {
+            "selected_primary_delta_e00_median": percentile(mode_selected_values, 0.5),
+            "selected_primary_delta_e00_p90": percentile(mode_selected_values, 0.9),
+            "selected_primary_delta_e00_worst": max(mode_selected_values),
+            "different_from_primary_only_winner": mode_mismatches,
+            "selection_mismatch_rate": mode_mismatches / len(results),
+            "mode_mismatch_count": mode_errors,
         },
         "results": results,
     }

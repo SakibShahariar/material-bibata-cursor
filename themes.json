@@ -170,7 +170,7 @@
   "Charcoal": {
     "label": "Charcoal",
     "body": "#0f1519",
-    "primary": "#7591a3",
+    "primary": "#6790a4",
     "watch": "#000d12"
   },
   "Ice-Blue-Light": {
@@ -182,7 +182,7 @@
   "Sky-Blue-Light": {
     "label": "Sky Blue Light",
     "body": "#dfeaf3",
-    "primary": "#0567b4",
+    "primary": "#1557bd",
     "watch": "#f3f5f6"
   },
   "Deep-Blue-Light": {
@@ -242,7 +242,7 @@
   "Salmon-Light": {
     "label": "Salmon Light",
     "body": "#f2e0de",
-    "primary": "#ad1806",
+    "primary": "#a0131c",
     "watch": "#f6f4f3"
   },
   "Pink-Pastel-Light": {
@@ -332,7 +332,7 @@
   "Midnight-Light": {
     "label": "Midnight Light",
     "body": "#e3eedc",
-    "primary": "#3a7714",
+    "primary": "#226d1e",
     "watch": "#f4f6f3"
   },
   "Charcoal-Light": {

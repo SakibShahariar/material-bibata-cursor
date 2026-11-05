@@ -17,6 +17,7 @@ except ImportError:
         percentile,
         primary_hue_chroma_region,
         source_colors,
+        SCHEME_TYPES,
     )
 
 

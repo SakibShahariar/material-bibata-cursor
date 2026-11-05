@@ -33,10 +33,12 @@ fi
 # --- 1. Extract active wallpaper hex color -----------------------------
 
 hex_input=""
+matugen_mode=""
 
 if command -v jq >/dev/null 2>&1 && jq empty "$COLORS_FILE" 2>/dev/null; then
     hex_input="$(jq -r "$MATUGEN_KEY // ." "$COLORS_FILE" 2>/dev/null \
         | tr '[:upper:]' '[:lower:]')"
+    matugen_mode="$(jq -r '.mode // empty' "$COLORS_FILE" 2>/dev/null)"
 fi
 
 # Support files containing only a raw hex color as well.
@@ -57,8 +59,18 @@ echo "Active wallpaper color: $hex_input"
 
 match_stderr="$(mktemp)"
 
+if [[ "$matugen_mode" == "dark" || "$matugen_mode" == "light" ]]; then
+    echo "Matugen mode: $matugen_mode"
+    match_args=(--mode "$matugen_mode")
+else
+    # Keep compatibility with older/custom Matugen templates that only emit a
+    # color value and do not include the resolved mode.
+    echo "Matugen mode not provided; matching across all presets" >&2
+    match_args=()
+fi
+
 if ! nearest_theme="$(python3 "$COLOR_MATCH_PY" "$hex_input" "$THEMES_JSON" \
-    2>"$match_stderr")"; then
+    "${match_args[@]}" 2>"$match_stderr")"; then
     echo "Error: color_match.py failed:" >&2
     cat "$match_stderr" >&2
     rm -f "$match_stderr"

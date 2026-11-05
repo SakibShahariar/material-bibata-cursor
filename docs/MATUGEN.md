@@ -87,6 +87,30 @@ The color-seed report includes overall and per-scheme/mode distributions,
 source-hue bands, generated-primary CIELAB hue/chroma regions, matcher
 selection counts, and the worst primary-color matches.
 
+### Matugen 4.2.0 controlled-grid results
+
+The successful 216-seed run produced 3,888 generated primary samples across
+the nine hex-compatible schemes and both modes. Against the 56 Material
+palettes, primary-only ΔE00 was median **8.00**, p90 **15.25**, p95 **18.50**,
+and worst **21.72**. The worst matches were dark, low-chroma red outputs in
+Light mode (for example `#4c1d1d`, nearest `Pink-Pastel-Light`). Other weaker
+regions included high-chroma yellow/green (CIELAB hue 60–120°, C* 55+) and
+neutral low-chroma outputs (C* below 10).
+
+The current live matcher score (75% primary / 25% body) was median **18.72**,
+p90 **24.53**, p95 **34.83**, worst **34.83**. This score is not primary
+fidelity: both components are compared with the same Matugen primary input.
+The live matcher selected a different theme from the primary-only winner in
+**710/3,888 (18.3%)** samples. The selected theme's primary-color error was
+median **8.01**, p90 **15.34**, p95/worst **44.60**; the extreme case was
+Monochrome Light (`#000000`), where body weighting selected `Noir` rather
+than the nearest primary-only candidate `Cloud-Light` (ΔE00 18.50).
+
+These are reproducible controlled seed-color measurements, not a
+representative sample of real wallpapers. The Smart fixtures described below
+verify the Smart decision branches but likewise do not estimate real wallpaper
+frequency. Do not recolor or merge palettes based on these grids alone.
+
 The successful Matugen 4.2.0 Smart regression run selected the expected
 variant and mode for all eight fixtures. Across the selected-mode primary
 colors, the median nearest-palette distance was ΔE00 8.91 and the worst was

@@ -69,7 +69,7 @@ check-win-deps:
         fi
     done
     if command -v python3 >/dev/null; then
-        if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)'; then
+        if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)'; then
             echo "✓ Python 3.12+"
         else
             echo "✗ Python 3.12+ required (tomllib is part of the standard library)"
@@ -78,7 +78,7 @@ check-win-deps:
         if python3 -c 'from PIL import Image' >/dev/null; then
             echo "✓ Pillow"
         else
-            echo "✗ Pillow (install with: python3 -m pip install Pillow)"
+            echo "✗ Pillow (install with: python3 -m pip install -r requirements-win.txt)"
             missing=1
         fi
     fi
@@ -142,7 +142,7 @@ check-deps:
         fi
     done
     if command -v python3 >/dev/null; then
-        if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)'; then
+        if python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)'; then
             echo "✓ Python 3.12+"
         else
             echo "✗ Python 3.12+ required (tomllib is part of the standard library)"

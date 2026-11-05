@@ -2,10 +2,16 @@
 
 Windows `.cur`/`.ani` cursor files are generated separately using
 `scripts/build_windows.py`. This requires Python 3.12 or newer,
-`rsvg-convert` (librsvg), and the Python Pillow package. The upstream
-Bibata source must also be present in `scripts/bibata_cursor/`; running
-the Linux build first clones it automatically. Windows archive packaging
-additionally requires `zip`.
+`rsvg-convert` (librsvg), and the Python Pillow package. Install the Python
+dependency from the Windows-only requirements file:
+
+```bash
+python3 -m pip install -r requirements-win.txt
+```
+
+The upstream Bibata source must also be present in `scripts/bibata_cursor/`;
+running the Linux build first clones it automatically. Windows archive
+packaging additionally requires `zip`.
 
 ```bash
 python3 scripts/build_windows.py             # all themes

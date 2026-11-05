@@ -70,6 +70,8 @@ def run_smart_fixture(
         "smart",
         "--fallback-color",
         fallback_hex,
+        "--source-color-index",
+        "0",
         "--json",
         "hex",
         "--dry-run",

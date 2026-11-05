@@ -85,13 +85,38 @@ def render_svg_to_png(svg_path: Path, png_path: Path, size: int) -> None:
     )
 
 
-def find_svg(cursor_name: str) -> Path:
-    candidates = [cursor_name, cursor_name.replace("_", "-")]
+def build_svg_index(svg_dir: Path = SVG_DIR) -> tuple[dict[str, Path], dict[str, list[Path]]]:
+    """Index SVG paths once, preserving the old sorted-rglob selection order.
+
+    Exact basenames map to their lexicographically first path. Wildcard
+    lookups are indexed by the literal prefix before the trailing star;
+    each candidate list retains the same sorted-path precedence as rglob.
+    """
+    exact: dict[str, Path] = {}
+    prefixed: dict[str, list[Path]] = {}
+    for path in sorted(svg_dir.rglob("*.svg")):
+        exact.setdefault(path.name, path)
+        stem = path.stem
+        for position, character in enumerate(stem):
+            if character == "-":
+                prefixed.setdefault(stem[:position + 1], []).append(path)
+    return exact, prefixed
+
+
+def find_svg(
+    cursor_name: str,
+    svg_index: tuple[dict[str, Path], dict[str, list[Path]]] | None = None,
+) -> Path | None:
+    """Resolve a cursor SVG using the original exact-then-wildcard precedence."""
+    exact, prefixed = svg_index if svg_index is not None else build_svg_index()
+    candidates = (cursor_name, cursor_name.replace("_", "-"))
     for name in candidates:
-        for pat in (f"{name}.svg", f"{name}-*.svg"):
-            matches = sorted(SVG_DIR.rglob(pat))
-            if matches:
-                return matches[0]
+        match = exact.get(f"{name}.svg")
+        if match is not None:
+            return match
+        matches = prefixed.get(f"{name}-")
+        if matches:
+            return matches[0]
     return None
 
 
@@ -173,8 +198,12 @@ def render_frame_icon(svg_path: Path, colors: list[dict], tmp_dir: Path,
     return single_cur_icon(png_tmp.read_bytes(), w, h, hx, hy)
 
 
-def build_theme(theme_key: str, themes: dict,
-                out_base: Path) -> int:
+def build_theme(
+    theme_key: str,
+    themes: dict,
+    out_base: Path,
+    svg_index: tuple[dict[str, Path], dict[str, list[Path]]] | None = None,
+) -> int:
     theme = themes[theme_key]
     body, primary, watch = theme["body"], theme["primary"], theme["watch"]
 
@@ -197,7 +226,7 @@ def build_theme(theme_key: str, themes: dict,
 
         x_hot = get_hotspot(params, defaults, "x_hotspot")
         y_hot = get_hotspot(params, defaults, "y_hotspot")
-        svg_path = find_svg(cursor_name)
+        svg_path = find_svg(cursor_name, svg_index)
         is_animated = "*" in params.get("png", "")
 
         if svg_path is None:
@@ -397,13 +426,18 @@ def main() -> None:
         print("Error: no themes to build", file=sys.stderr)
         sys.exit(1)
 
+    try:
+        svg_index = build_svg_index()
+    except OSError as exc:
+        parser.error(f"could not index SVG sources under {SVG_DIR}: {exc}")
+
     out_base = REPO_ROOT / "out_win"
     out_base.mkdir(parents=True, exist_ok=True)
 
     total_ok, total_fail = 0, 0
     for name in names:
         print(f"Building {name}...")
-        fail = build_theme(name, themes, out_base)
+        fail = build_theme(name, themes, out_base, svg_index)
         total_ok += 1
         total_fail += fail
 

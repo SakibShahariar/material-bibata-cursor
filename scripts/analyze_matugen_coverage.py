@@ -18,7 +18,11 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
-from color_match import delta_e_hex, find_closest_theme
+from color_match import (
+    NEAREST_PRESET_WARNING_DELTA_E,
+    delta_e_hex,
+    find_closest_theme,
+)
 
 MATUGEN_VERSION = "4.2.0"
 SCHEME_TYPES = (
@@ -217,9 +221,9 @@ def analyze(
         },
         "primary_fidelity_delta_e00": summarize(primary_values),
         "current_matcher_score": summarize(matcher_values),
-        "matcher_warning_threshold": 15.0,
+        "matcher_warning_threshold": NEAREST_PRESET_WARNING_DELTA_E,
         "matcher_samples_above_warning_threshold": sum(
-            score > 15.0 for score in matcher_values
+            score > NEAREST_PRESET_WARNING_DELTA_E for score in matcher_values
         ),
         "primary_fidelity_by_scheme_and_mode": {
             key: summarize(values) for key, values in sorted(by_scheme_mode.items())

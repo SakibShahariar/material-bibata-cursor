@@ -22,6 +22,7 @@ from color_match import (
     NEAREST_PRESET_WARNING_DELTA_E,
     delta_e_hex,
     find_closest_theme,
+    hex_to_lab,
 )
 
 MATUGEN_VERSION = "4.2.0"
@@ -145,6 +146,31 @@ def primary_hue_chroma_region(color_hex: str) -> str:
     return f"{hue_band} / C* {chroma_band}"
 
 
+
+def primary_hue_chroma_region(color_hex: str) -> str:
+    """Bucket a generated primary by CIELAB hue angle and chroma."""
+    _, a, b = hex_to_lab(color_hex)
+    chroma = math.hypot(a, b)
+    if chroma < 10:
+        hue_band = "neutral"
+    else:
+        hue = math.degrees(math.atan2(b, a)) % 360
+        lower = int(hue // 30) * 30
+        hue_band = f"{lower:03d}-{lower + 30:03d}°"
+
+    if chroma < 10:
+        chroma_band = "0-10"
+    elif chroma < 25:
+        chroma_band = "10-25"
+    elif chroma < 40:
+        chroma_band = "25-40"
+    elif chroma < 55:
+        chroma_band = "40-55"
+    else:
+        chroma_band = "55+"
+    return f"{hue_band} / C* {chroma_band}"
+
+
 def summarize(values: list[float]) -> dict[str, float]:
     return {
         "median": percentile(values, 0.50),
@@ -214,12 +240,16 @@ def analyze(
     matcher_values = [item["matcher_score"] for item in samples]
     by_scheme_mode: dict[str, list[float]] = defaultdict(list)
     by_hue: dict[str, list[float]] = defaultdict(list)
+    by_generated_region: dict[str, list[float]] = defaultdict(list)
     matcher_winners: Counter[str] = Counter()
     for item in samples:
         by_scheme_mode[f'{item["scheme_type"]}/{item["mode"]}'].append(
             item["primary_delta_e00"]
         )
         by_hue[f'{(item["source_hue"] // 30) * 30:03d}°'].append(
+            item["primary_delta_e00"]
+        )
+        by_generated_region[primary_hue_chroma_region(item["primary_hex"])].append(
             item["primary_delta_e00"]
         )
         matcher_winners[item["matcher_theme"]] += 1
@@ -254,6 +284,10 @@ def analyze(
         },
         "primary_fidelity_by_source_hue_band": {
             key: summarize(values) for key, values in sorted(by_hue.items())
+        },
+        "primary_fidelity_by_generated_hue_chroma_region": {
+            key: summarize(values)
+            for key, values in sorted(by_generated_region.items())
         },
         "matcher_theme_selection_counts": dict(matcher_winners.most_common()),
         "worst_primary_matches": sorted(

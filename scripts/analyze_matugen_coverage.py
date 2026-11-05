@@ -44,7 +44,6 @@ SCHEME_TYPES = (
     "scheme-rainbow",
     "scheme-tonal-spot",
     "scheme-vibrant",
-    "scheme-smart",
 )
 HUES = tuple(range(0, 360, 15))
 SATURATIONS = (0.35, 0.65, 0.95)
@@ -270,10 +269,16 @@ def analyze(
             "saturations": list(SATURATIONS),
             "hsl_lightnesses": list(LIGHTNESSES),
             "scheme_types": list(SCHEME_TYPES),
+            "excluded_smart_mode": (
+                "scheme-smart is excluded because Matugen's source implements it "
+                "as image-dependent detection; color hex input falls back to "
+                "scheme-tonal-spot rather than exercising Smart detection."
+            ),
             "modes": ["dark", "light"],
             "palette_candidates_for_primary_fidelity": 56,
             "palette_candidates_for_live_matcher": len(themes),
             "sample_count": len(samples),
+            "expected_sample_count": len(source_colors()) * len(SCHEME_TYPES) * 2,
             "note": (
                 "Each HSL seed is passed through Matugen 4.2.0's color command. "
                 "The generated semantic primary roles are measured; seed RGB "

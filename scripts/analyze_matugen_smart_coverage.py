@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import struct
 import subprocess
 import zlib
@@ -75,7 +76,7 @@ def run_smart_fixture(
         "--json",
         "hex",
         "--dry-run",
-        "--quiet",
+        "--verbose",
     ]
     try:
         completed = subprocess.run(
@@ -87,12 +88,21 @@ def run_smart_fixture(
             f"exit={exc.returncode}; stdout={exc.stdout!r}; stderr={exc.stderr!r}"
         ) from exc
     try:
-        return json.loads(completed.stdout)
+        payload = json.loads(completed.stdout)
     except json.JSONDecodeError as exc:
         raise RuntimeError(
             f"Matugen did not return JSON for {image_path.name}: "
             f"{completed.stdout[:300]!r}; stderr={completed.stderr[:300]!r}"
         ) from exc
+
+    variant_match = re.search(r"variant=(Scheme[A-Za-z]+)", completed.stderr)
+    if not variant_match:
+        raise RuntimeError(
+            f"Matugen did not report its resolved Smart variant for "
+            f"{image_path.name}: stderr={completed.stderr!r}"
+        )
+    payload["_matugen_detected_variant"] = variant_match.group(1)
+    return payload
 
 
 def analyze_smart_images(matugen: str, themes_path: Path) -> dict[str, Any]:
@@ -123,7 +133,7 @@ def analyze_smart_images(matugen: str, themes_path: Path) -> dict[str, Any]:
             write_solid_png(image_path, rgb)
             fallback_hex = "#{:02x}{:02x}{:02x}".format(*rgb)
             payload = run_smart_fixture(matugen, image_path, fallback_hex)
-            actual_variant = payload.get("scheme")
+            actual_variant = payload.pop("_matugen_detected_variant")
             actual_mode = payload.get("mode")
             if actual_variant != expected_variant or actual_mode != expected_mode:
                 raise RuntimeError(

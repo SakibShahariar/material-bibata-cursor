@@ -35,6 +35,50 @@ Alternatively, copy the theme folder into `%LOCALAPPDATA%\Icons\` and set
 the cursors in **Settings → Devices → Mouse → Additional mouse settings →
 Pointers**.
 
+## Windows cursor scheme mapping
+
+The Windows registry mapping is maintained in `WIN_SCHEME` in
+[`scripts/build_windows.py`](../scripts/build_windows.py). Change the
+X11 cursor name in that table when changing a Windows scheme assignment;
+the builder writes the corresponding `Install.inf` entries from generated
+`.cur` / `.ani` files. Missing outputs are omitted rather than registered
+as broken paths, and animated `.ani` files take precedence over static
+`.cur` files.
+
+| Windows scheme value | Material Bibata cursor |
+|---|---|
+| `Arrow` | `left_ptr` |
+| `Help` | `question_arrow` |
+| `AppStarting` | `left_ptr_watch` (animated) |
+| `Wait` | `wait` (animated) |
+| `Crosshair` | `crosshair` |
+| `IBeam` | `xterm` |
+| `NWPen` | `pencil` |
+| `No` | `crossed_circle` |
+| `SizeNS` | `sb_v_double_arrow` |
+| `SizeWE` | `sb_h_double_arrow` |
+| `SizeNWSE` | `bd_double_arrow` |
+| `SizeNESW` | `fd_double_arrow` |
+| `SizeAll` | `move` |
+| `UpArrow` | `sb_up_arrow` |
+| `Hand` | `hand2` |
+
+### Windows smoke checklist
+
+After building and installing a theme on Windows, verify:
+
+- [ ] The `SizeNWSE` and `SizeNESW` diagonal resize cursors point in the
+      expected opposite diagonal directions; report any swap with the
+      Windows version and application.
+- [ ] `Wait` uses the animated `wait.ani` cursor.
+- [ ] `AppStarting` uses the animated `left_ptr_watch.ani` cursor.
+- [ ] The generated `Install.inf` references only files present in the
+      installed theme directory.
+
+These are manual runtime checks; the source mapping and generated INF
+structure can be inspected on Linux, but Windows orientation and animation
+must not be marked verified without a Windows session.
+
 ## Package a release
 
 See [Packaging for redistribution](PACKAGING.md) for creating distributable

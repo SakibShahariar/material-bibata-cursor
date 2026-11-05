@@ -42,7 +42,7 @@ Each archive includes installation instructions appropriate to that platform.
 
 <div align="center">
 
-![All 28 themes](docs/comparison-all-28.png)
+![All 28 themes](docs/comparison-all-28.svg)
 
 </div>
 
@@ -61,7 +61,7 @@ body and a darker, saturated outline.
 
 <div align="center">
 
-![All 28 light themes](docs/comparison-all-28-light.png)
+![All 28 light themes](docs/comparison-all-28-light.svg)
 
 </div>
 

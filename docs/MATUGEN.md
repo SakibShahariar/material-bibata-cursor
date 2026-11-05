@@ -179,9 +179,11 @@ has a worst selected-primary error of **44.60** in this sample. The sample
 does not establish general wallpaper coverage.
 
 The gallery data at `docs/themes.json` is synchronized with the build source
-`themes.json` and is checked by CI. The two static comparison matrix images
-still need regeneration to complete the visual documentation update; they
-must not be treated as previews of these new accent values until refreshed.
+`themes.json` and is checked by CI. The README comparison sheets are generated
+as SVGs by `just matrices` from the pinned Bibata Modern `left_ptr` source and
+current palette data; run `just vendor` first if the upstream source tree is
+not present. The static PNGs are retained as historical files and are no
+longer the README's active comparison images.
 The successful Matugen 4.2.0 Smart regression run selected the expected
 variant and mode for all eight fixtures. Across the selected-mode primary
 colors, the median nearest-palette distance was ΔE00 8.91 and the worst was

@@ -114,6 +114,10 @@ package-win-dark version:
 package-win-light version:
     bash scripts/package_release.sh {{version}} --win --only-light
 
+# Regenerate the dark/light palette comparison SVGs (run 'just vendor' first)
+matrices:
+    python3 scripts/generate_palette_matrices.py
+
 # List all theme names defined in themes.json
 list:
     @python3 -c 'import json; print("\n".join(json.load(open("themes.json", encoding="utf-8")).keys()))'

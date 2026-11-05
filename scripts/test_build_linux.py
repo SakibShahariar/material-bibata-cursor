@@ -173,15 +173,16 @@ class UpstreamTempFileTests(unittest.TestCase):
             source_dir = work_dir / "src"
             source_dir.mkdir()
             utility = source_dir / "cursor_utils.py"
-            utility.write_text(
-                "tmp = Path('/tmp/.cursor.0248.svg')\\n"
-                "    @classmethod\\n"
-                "    def zip_dir(cls, cdir: Path, out: Path):\\n"
-                "        with zipfile.ZipFile(out, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:\\n"
-                "            for item in cls.traverse_dir(cdir):\\n"
-                "                zipf.write(item, arcname=item.relative_to(cdir))\\n",
-                encoding="utf-8",
-            )
+            upstream_writer = [
+                "tmp = Path('/tmp/.cursor.0248.svg')",
+                "    @classmethod",
+                "    def zip_dir(cls, cdir: Path, out: Path):",
+                "        with zipfile.ZipFile(out, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:",
+                "            for item in cls.traverse_dir(cdir):",
+                "                zipf.write(item, arcname=item.relative_to(cdir))",
+                "",
+            ]
+            utility.write_text("\n".join(upstream_writer), encoding="utf-8")
 
             build_linux.isolate_upstream_temp_file(work_dir)
             patched = utility.read_text(encoding="utf-8")

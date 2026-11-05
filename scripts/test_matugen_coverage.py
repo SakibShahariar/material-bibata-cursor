@@ -60,7 +60,7 @@ class MatugenCoverageTests(unittest.TestCase):
     def test_mode_aware_matcher_filters_candidates_to_requested_mode(self):
         themes = {
             "Dark": {"body": "#000000", "primary": "#ff0000"},
-            "Light": {"body": "#ffffff", "primary": "#0000ff"},
+            "Theme-Light": {"body": "#ffffff", "primary": "#0000ff"},
             "Classic": {"body": "#000000", "primary": "#ff0000"},
         }
         light_name, _ = find_closest_theme(
@@ -69,15 +69,15 @@ class MatugenCoverageTests(unittest.TestCase):
         dark_name, _ = find_closest_theme(
             "#0000ff", themes, primary_weight=1.0, body_weight=0.0, mode="dark"
         )
-        self.assertEqual(light_name, "Light")
+        self.assertEqual(light_name, "Theme-Light")
         self.assertEqual(dark_name, "Dark")
 
     def test_mode_aware_summary_counts_cross_mode_selections(self):
         samples = [
             {
                 "mode": "light",
-                "mode_matcher_theme": "Light",
-                "nearest_primary_theme": "Light",
+                "mode_matcher_theme": "Theme-Light",
+                "nearest_primary_theme": "Theme-Light",
                 "mode_matcher_primary_delta_e00": 1.0,
                 "primary_delta_e00": 1.0,
             },

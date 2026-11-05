@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Unit tests for Windows SVG source indexing and cursor-name resolution."""
+import shutil
 import sys
 import tempfile
 import unittest
@@ -59,6 +60,35 @@ class SvgIndexTests(unittest.TestCase):
 
 
 class StaticRenderTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("rsvg-convert"), "rsvg-convert is required for PNG equivalence")
+    def test_recolor_once_pngs_match_recolor_per_size(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "pointer.svg"
+            source.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">'
+                '<rect x="16" y="16" width="224" height="224" fill="#000000"/>'
+                "</svg>",
+                encoding="utf-8",
+            )
+            colors = [{"match": "#000000", "replace": "#345678"}]
+            optimized_dir = root / "optimized"
+            legacy_dir = root / "legacy"
+            optimized = build_windows.render_static_cursor(
+                source, colors, optimized_dir, "pointer", 128, 128
+            )
+
+            for size, (optimized_png, _, _) in zip(build_windows.WINDOWS_SIZES, optimized):
+                legacy_svg = legacy_dir / f"pointer_{size}.svg"
+                legacy_png = legacy_dir / f"pointer_{size}.png"
+                build_windows.recolor_svg(source, colors, legacy_svg)
+                build_windows.render_svg_to_png(legacy_svg, legacy_png, size)
+                self.assertEqual(
+                    optimized_png.read_bytes(),
+                    legacy_png.read_bytes(),
+                    f"recolor-once PNG differs at {size}px",
+                )
+
     def test_recolors_static_source_once_for_all_sizes(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

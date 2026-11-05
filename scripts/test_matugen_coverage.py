@@ -9,6 +9,7 @@ try:
         percentile,
         primary_hue_chroma_region,
         source_colors,
+        SCHEME_TYPES,
     )
 except ImportError:
     from analyze_matugen_coverage import (
@@ -25,7 +26,6 @@ class MatugenCoverageTests(unittest.TestCase):
         self.assertEqual(len(samples), 216)
         self.assertEqual({hue for hue, _ in samples}, set(range(0, 360, 15)))
         self.assertEqual(len({color for _, color in samples}), 216)
-        from .analyze_matugen_coverage import SCHEME_TYPES
         self.assertEqual(len(SCHEME_TYPES), 9)
         self.assertNotIn("scheme-smart", SCHEME_TYPES)
 

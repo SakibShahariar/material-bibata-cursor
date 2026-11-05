@@ -4,9 +4,9 @@
 import unittest
 
 try:
-    from .analyze_matugen_coverage import extract_primary_colors, percentile, source_colors
+    from .analyze_matugen_coverage import (\n        extract_primary_colors, percentile, primary_hue_chroma_region, source_colors\n    )
 except ImportError:
-    from analyze_matugen_coverage import extract_primary_colors, percentile, source_colors
+    from analyze_matugen_coverage import (\n        extract_primary_colors, percentile, primary_hue_chroma_region, source_colors\n    )
 
 
 class MatugenCoverageTests(unittest.TestCase):
@@ -45,6 +45,10 @@ class MatugenCoverageTests(unittest.TestCase):
                     }
                 }
             )
+
+    def test_generated_primary_region_includes_hue_and_chroma(self):
+        self.assertEqual(primary_hue_chroma_region("#808080"), "neutral / C* 0-10")
+        self.assertIn("C* ", primary_hue_chroma_region("#ff0000"))
 
     def test_percentile_uses_linear_interpolation(self):
         self.assertEqual(percentile([0.0, 10.0], 0.5), 5.0)

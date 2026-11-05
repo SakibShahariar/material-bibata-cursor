@@ -4,7 +4,7 @@ This directory builds a system-wide `.deb` from the project's published Linux re
 
 ## Build
 
-Install `dpkg-deb`, `curl`, `tar`, and `sha256sum`, then run from the repository root:
+Install `dpkg`, `curl`, `tar`, `coreutils`, `grep`, and `findutils` (these provide `dpkg-deb`, `sha256sum`, and the other commands used by the builder), then run from the repository root:
 
 ```bash
 bash packaging/debian/build-deb.sh v1.5.0

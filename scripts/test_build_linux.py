@@ -134,6 +134,19 @@ class ThemeSelectionTests(unittest.TestCase):
             )
 
 
+def upstream_cursor_utils_source(temp_path="/tmp/.cursor.0248.svg"):
+    """Representative source from the pinned upstream cursor_utils.py."""
+    return "\n".join([
+        f"tmp = Path('{temp_path}')",
+        "    @classmethod",
+        "    def zip_dir(cls, cdir: Path, out: Path):",
+        "        with zipfile.ZipFile(out, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:",
+        "            for item in cls.traverse_dir(cdir):",
+        "                zipf.write(item, arcname=item.relative_to(cdir))",
+        "",
+    ])
+
+
 class UpstreamTempFileTests(unittest.TestCase):
     def test_isolates_shared_renderer_temp_file_per_build_directory(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -141,17 +154,13 @@ class UpstreamTempFileTests(unittest.TestCase):
             source_dir = work_dir / "src"
             source_dir.mkdir()
             utility = source_dir / "cursor_utils.py"
-            utility.write_text(
-                "tmp = Path('/tmp/.cursor.0248.svg')\n",
-                encoding="utf-8",
-            )
+            utility.write_text(upstream_cursor_utils_source(), encoding="utf-8")
 
             build_linux.isolate_upstream_temp_file(work_dir)
 
-            self.assertEqual(
-                utility.read_text(encoding="utf-8"),
-                "tmp = Path(f'/tmp/.cursor.{Path.cwd().name}.svg')\n",
-            )
+            patched = utility.read_text(encoding="utf-8")
+            self.assertIn("Path.cwd().name", patched)
+            self.assertIn("date_time=(1980, 1, 1, 0, 0, 0)", patched)
 
     def test_rejects_unrecognized_upstream_temp_file_implementation(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -159,13 +168,12 @@ class UpstreamTempFileTests(unittest.TestCase):
             source_dir = work_dir / "src"
             source_dir.mkdir()
             (source_dir / "cursor_utils.py").write_text(
-                "tmp = Path('/tmp/changed.svg')\n",
+                upstream_cursor_utils_source("/tmp/changed.svg"),
                 encoding="utf-8",
             )
 
             with self.assertRaises(build_linux.BuildError):
                 build_linux.isolate_upstream_temp_file(work_dir)
-
 
     def test_normalizes_hyprcursor_archive_order_and_timestamps(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -173,16 +181,7 @@ class UpstreamTempFileTests(unittest.TestCase):
             source_dir = work_dir / "src"
             source_dir.mkdir()
             utility = source_dir / "cursor_utils.py"
-            upstream_writer = [
-                "tmp = Path('/tmp/.cursor.0248.svg')",
-                "    @classmethod",
-                "    def zip_dir(cls, cdir: Path, out: Path):",
-                "        with zipfile.ZipFile(out, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:",
-                "            for item in cls.traverse_dir(cdir):",
-                "                zipf.write(item, arcname=item.relative_to(cdir))",
-                "",
-            ]
-            utility.write_text("\n".join(upstream_writer), encoding="utf-8")
+            utility.write_text(upstream_cursor_utils_source(), encoding="utf-8")
 
             build_linux.isolate_upstream_temp_file(work_dir)
             patched = utility.read_text(encoding="utf-8")
@@ -237,7 +236,7 @@ class UpstreamSourceMountTests(unittest.TestCase):
         for directory in ("src", "svg", "config"):
             (build_dir / directory).mkdir(parents=True, exist_ok=True)
         (build_dir / "src" / "cursor_utils.py").write_text(
-            "tmp = Path('/tmp/.cursor.0248.svg')\\n", encoding="utf-8"
+            upstream_cursor_utils_source(), encoding="utf-8"
         )
         (build_dir / "src" / "renderer_helper.py").write_text(
             "VALUE = 1\\n", encoding="utf-8"

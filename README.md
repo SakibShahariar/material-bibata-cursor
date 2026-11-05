@@ -105,7 +105,7 @@ just build-win          # Windows .cur/.ani assets
 just list
 ```
 
-See [Packaging for redistribution](docs/PACKAGING.md) to create release archives. Debian/Ubuntu users can also build a system-wide `.deb` from a published release; see [Debian packaging](packaging/debian/README.md).
+See [Packaging for redistribution](docs/PACKAGING.md) to create release archives.
 
 ## Quality checks
 

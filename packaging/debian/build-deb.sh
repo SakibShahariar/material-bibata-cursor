@@ -7,12 +7,13 @@ version="${1#v}"; archive_tag="v$version"; shift
 [[ "$version" =~ ^[0-9][A-Za-z0-9.+:~_-]*$ ]] || { echo "Invalid package version: $version" >&2; exit 2; }
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/../.." && pwd)"
-archives_dir=""; output_dir="$repo_root/dist"
+archives_dir=""; output_dir="$repo_root/dist"; expected_themes=57
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --archive-tag) [[ $# -ge 2 ]] || usage; archive_tag="$2"; shift 2 ;;
     --archives-dir) [[ $# -ge 2 ]] || usage; archives_dir="$2"; shift 2 ;;
     --output-dir) [[ $# -ge 2 ]] || usage; output_dir="$2"; shift 2 ;;
+    --expected-themes) [[ $# -ge 2 ]] || usage; expected_themes="$2"; shift 2 ;;
     *) usage ;;
   esac
 done
@@ -50,7 +51,7 @@ for group_root in "${dark_roots[0]}" "${light_roots[0]}"; do
   done < <(find "$group_root" -mindepth 1 -maxdepth 1 -type d -name 'Bibata-Material-*' -print0)
 done
 theme_count="$(find "$pkg_root/usr/share/icons" -mindepth 1 -maxdepth 1 -type d -name 'Bibata-Material-*' | wc -l)"
-[[ "$theme_count" -eq 57 ]] || { echo "Expected 57 theme directories, found $theme_count" >&2; exit 1; }
+[[ "$theme_count" -eq "$expected_themes" ]] || { echo "Expected $expected_themes theme directories, found $theme_count" >&2; exit 1; }
 dark_root="${dark_roots[0]}"
 for doc in LICENSE README.md CREDITS.txt; do [[ -f "$dark_root/$doc" ]] || { echo "Release archive is missing $doc" >&2; exit 1; }; done
 for doc in LICENSE README.md CREDITS.txt; do install -m 0644 "$dark_root/$doc" "$pkg_root/usr/share/doc/material-bibata-cursor/$doc"; done

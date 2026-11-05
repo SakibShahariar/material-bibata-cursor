@@ -27,8 +27,7 @@ import tomllib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-UPSTREAM_URL = "https://github.com/rtgiskard/bibata_cursor"
-UPSTREAM_COMMIT = "f4ccfe8abb63fddc7b3ce51a866fd8378395cb3d"
+from source_provenance import UPSTREAM_COMMIT, UPSTREAM_REPOSITORY as UPSTREAM_URL
 THEME_PREFIX = "Bibata-Material-"
 EXTRA_X11_SIZES = (12, 18, 30, 36, 42, 54, 60, 66)
 

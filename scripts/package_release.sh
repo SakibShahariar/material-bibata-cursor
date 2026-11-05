@@ -92,14 +92,23 @@ write_archive_docs() {
     local dir="$1"
     cp "$REPO_ROOT/LICENSE" "$dir/LICENSE"
     cp "$REPO_ROOT/README.md" "$dir/README.md"
-    cat > "$dir/CREDITS.txt" << 'EOF'
-Material Bibata Cursor
+    python3 - "$REPO_ROOT" "$dir/CREDITS.txt" <<'PY'
+from pathlib import Path
+import sys
+
+repo_root = Path(sys.argv[1])
+sys.path.insert(0, str(repo_root / "scripts"))
+from source_provenance import UPSTREAM_COMMIT, UPSTREAM_REPOSITORY
+
+credits = f"""Material Bibata Cursor
 
 Build and color-matching tooling in this repository, including themes.json:
 MIT License; see LICENSE.
 
 The generated cursor artwork is derived from Bibata Cursor by rtgiskard:
-https://github.com/rtgiskard/bibata_cursor
+{UPSTREAM_REPOSITORY}
+Pinned upstream source revision:
+{UPSTREAM_REPOSITORY}/tree/{UPSTREAM_COMMIT}
 That upstream project identifies its license as GNU GPL version 3 or later.
 The original Bibata_Cursor artwork was designed by Abdulkaiz Khatri and is
 credited by the upstream project: https://github.com/ful1e5/Bibata_Cursor
@@ -107,7 +116,9 @@ credited by the upstream project: https://github.com/ful1e5/Bibata_Cursor
 The GPL terms apply to redistribution of the derivative cursor artwork;
 the MIT license for this repository's tooling does not replace them. See
 README.md and the upstream project for further details.
-EOF
+"""
+Path(sys.argv[2]).write_text(credits, encoding="utf-8")
+PY
 }
 
 # Plain-language install instructions, shared by both archives.

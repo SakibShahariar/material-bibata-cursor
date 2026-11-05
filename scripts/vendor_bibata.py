@@ -21,10 +21,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+from source_provenance import UPSTREAM_COMMIT, UPSTREAM_REPOSITORY
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 VENDOR_DIR = REPO_ROOT / "scripts" / "bibata_cursor"
-UPSTREAM_URL = "https://github.com/rtgiskard/bibata_cursor.git"
-UPSTREAM_REF = "main"
+UPSTREAM_URL = f"{UPSTREAM_REPOSITORY}.git"
+UPSTREAM_REF = UPSTREAM_COMMIT
 COPY_ENTRIES = ("svg", "config")
 
 
@@ -37,7 +39,7 @@ def main() -> int:
     parser.add_argument(
         "--upstream-commit",
         default=UPSTREAM_REF,
-        help="Upstream commit, tag, or branch to vendor (default: main)",
+        help=f"Upstream commit, tag, or branch to vendor (default: {UPSTREAM_REF})",
     )
     parser.add_argument(
         "--force",

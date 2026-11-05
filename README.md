@@ -143,6 +143,26 @@ The compiled cursor themes are derivative of
 GPLv3-or-later. If you redistribute compiled themes, that's under GPLv3,
 not this repo's MIT license.
 
+## Upstream provenance
+
+Material Bibata uses Bibata's SVG artwork and build metadata from
+[Bibata_Cursor](https://github.com/rtgiskard/bibata_cursor), currently pinned to
+[`f4ccfe8abb63fddc7b3ce51a866fd8378395cb3d`](https://github.com/rtgiskard/bibata_cursor/tree/f4ccfe8abb63fddc7b3ce51a866fd8378395cb3d).
+Upstream supplies cursor shapes and source geometry; this project adds
+Material Design 3 palettes/recoloring, the expanded Xcursor size ladder,
+CSS/Wayland/Qt name resolution, scalable SVG and Hyprcursor output, and
+Windows `.cur`/`.ani` packaging. Original artwork attribution is preserved
+in each release archive's `CREDITS.txt`.
+
+The upstream artwork remains GPLv3-or-later; this repository's build tools
+and `themes.json` remain MIT. The source URL and commit are centralized in
+`scripts/source_provenance.py`, and every release archive records that exact
+pin in `CREDITS.txt`. To update Bibata, review the upstream diff and license,
+change the single pin, regenerate and validate every output format, and
+preserve attribution. Full checked-in source vendoring is tracked separately
+in #40; until that is complete, builders materialize the pinned upstream
+source when needed.
+
 ## Star History
 
 <div align="center">

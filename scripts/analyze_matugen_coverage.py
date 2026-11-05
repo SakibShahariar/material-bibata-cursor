@@ -18,7 +18,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
-from color_match import delta_e_hex, find_closest_theme, hex_to_lab, ciede2000
+from color_match import delta_e_hex, find_closest_theme
 
 MATUGEN_VERSION = "4.2.0"
 SCHEME_TYPES = (

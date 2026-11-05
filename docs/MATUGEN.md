@@ -74,8 +74,9 @@ Two measurements are reported separately:
 The report includes overall and per-scheme/mode distributions, source-hue
 bands, generated-primary CIELAB hue/chroma regions, the matcher's selection
 counts, and the worst primary-color matches.
-A dedicated GitHub Actions workflow runs this analysis when its inputs or
-methodology change and uploads the full JSON report as an artifact. This
+The manually triggered GitHub Actions workflow runs this analysis and uploads
+the full JSON report as an artifact. Start it from the repository's Actions tab
+when the palette data or analysis methodology changes. This
 sampling is a reproducible coverage study of Matugen's color-generation
 pipeline; it is not a claim that every possible wallpaper or source color has
 been sampled.

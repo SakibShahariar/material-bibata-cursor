@@ -58,9 +58,15 @@ python3 scripts/analyze_matugen_coverage.py \
 
 The deterministic input grid contains 216 source colors (24 hues, three
 saturation levels, and three lightness levels). Each source is passed through
-all ten Matugen 4.2.0 scheme types. The analyzer reads the generated semantic
-`primary` role for both dark and light schemes, producing 4,320 generated
-primary-color samples.
+the nine non-Smart Matugen 4.2.0 scheme variants. The analyzer reads the
+generated semantic `primary` role for both dark and light schemes, producing
+3,888 generated primary-color samples.
+
+Matugen's `scheme-smart` is deliberately excluded from this color-seed test.
+The upstream implementation requires an image to detect its Smart variant and
+mode; when given a hex color it warns and falls back to the default
+Tonal Spot/dark behavior. Smart mode therefore needs a separate test using
+real wallpaper images, not a misleading tenth color-seed run.
 
 Two measurements are reported separately:
 

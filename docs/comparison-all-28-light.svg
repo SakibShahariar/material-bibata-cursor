@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1272" height="1284" viewBox="0 0 1272 1284" role="img" aria-label="Material Bibata light palette comparison">
-<rect width="1240" height="1284" fill="#141b20"/>
+<rect width="1272" height="1284" fill="#141b20"/>
 <text x="40" y="48" fill="#edf3f6" font-family="Inter, Noto Sans, sans-serif" font-size="30" font-weight="700">Material Bibata · Light palettes</text>
 <text x="40" y="77" fill="#aab8c1" font-family="Inter, Noto Sans, sans-serif" font-size="14">28 palettes · real Bibata pointer geometry · body fill and primary outline</text>
 <g data-theme="Ice-Blue-Light"><rect x="40" y="108" width="286" height="146" rx="14" fill="#202a31" stroke="#aab8c1" stroke-opacity=".35"/>

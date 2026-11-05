@@ -121,6 +121,30 @@ def percentile(values: list[float], fraction: float) -> float:
     return ordered[lower] * (1 - weight) + ordered[upper] * weight
 
 
+def primary_hue_chroma_region(color_hex: str) -> str:
+    """Bucket a generated primary by CIELAB hue angle and chroma."""
+    _, a, b = hex_to_lab(color_hex)
+    chroma = math.hypot(a, b)
+    if chroma < 10:
+        hue_band = "neutral"
+    else:
+        hue = math.degrees(math.atan2(b, a)) % 360
+        lower = int(hue // 30) * 30
+        hue_band = f"{lower:03d}-{lower + 30:03d}°"
+
+    if chroma < 10:
+        chroma_band = "0-10"
+    elif chroma < 25:
+        chroma_band = "10-25"
+    elif chroma < 40:
+        chroma_band = "25-40"
+    elif chroma < 55:
+        chroma_band = "40-55"
+    else:
+        chroma_band = "55+"
+    return f"{hue_band} / C* {chroma_band}"
+
+
 def summarize(values: list[float]) -> dict[str, float]:
     return {
         "median": percentile(values, 0.50),

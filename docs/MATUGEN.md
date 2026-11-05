@@ -91,7 +91,7 @@ The color-seed report includes overall and per-scheme/mode distributions,
 source-hue bands, generated-primary CIELAB hue/chroma regions, matcher
 selection counts, and the worst primary-color matches.
 
-### Matugen 4.2.0 controlled-grid results
+### Matugen 4.2.0 controlled-grid baseline (before palette refinement)
 
 The successful 216-seed run produced 3,888 generated primary samples across
 the nine hex-compatible schemes and both modes. Against the 56 Material
@@ -122,44 +122,66 @@ representative sample of real wallpapers. The Smart fixtures described below
 verify the Smart decision branches but likewise do not estimate real wallpaper
 frequency. Do not recolor or merge palettes based on these grids alone.
 
-### Pairwise palette separation
+### Pairwise palette separation and targeted refinements
 
-The same successful grid workflow also measures pairwise distance between
-palette primary and body colors. It evaluates all **56 selectable palettes**
-(28 Dark and 28 Light): 1,540 total pairs, including 378 pairs within each
-mode. For decisions about what the mode-aware matcher can confuse, the
-within-mode comparisons are the useful ones.
+The workflow measures pairwise distance between palette primary and body
+colors across all **56 selectable palettes** (28 Dark and 28 Light): 1,540
+total pairs, including 378 pairs within each mode. The pre-refinement report
+found four same-mode primary pairs below ΔE00 3. They were refined without
+merging or removing any of the 28 families:
 
-Four within-mode primary pairs have ΔE00 below 3:
+| Palette | Previous primary | Updated primary | Close pair before |
+|---|---|---|---|
+| Charcoal | `#7591a3` | `#6790a4` | Charcoal / Slate — 2.93 |
+| Midnight-Light | `#3a7714` | `#226d1e` | Midnight-Light / Sage-Light — 1.44 |
+| Salmon-Light | `#ad1806` | `#a0131c` | Blush-Light / Salmon-Light — 2.50 |
+| Sky-Blue-Light | `#0567b4` | `#1557bd` | Ice-Blue-Light / Sky-Blue-Light — 2.94 |
 
-| Mode | Pair | Primary ΔE00 | Body ΔE00 |
-|---|---|---:|---:|
-| Dark | Charcoal / Slate | 2.93 | 5.28 |
-| Light | Midnight-Light / Sage-Light | 1.44 | 1.23 |
-| Light | Blush-Light / Salmon-Light | 2.50 | 0.55 |
-| Light | Ice-Blue-Light / Sky-Blue-Light | 2.94 | 0.89 |
+Only the four primary accent values changed; body and watch colors remain
+unchanged. After the edits, **zero of the 1,540 primary-color pairs** are below
+ΔE00 3. The four edited pairs now have clearly greater separation (about
+6.2–9.2 ΔE00). The closest remaining pair is Brown-Light / Sand-Light at
+3.12, followed by Deep-Blue-Light / Seafoam-Light at 3.20 and
+Apricot-Light / Sunset-Light at 3.37. This is a targeted refinement, not a
+claim that every palette pair is widely separated.
 
-The next closest Dark primary pair is Mint / Seafoam (ΔE00 3.76); the next
-closest Light pair is Brown-Light / Sand-Light (3.12). These are candidates
-for more deliberate separation, not automatic merge recommendations. The
-dark Mint / Seafoam pair has a much closer body color (ΔE00 1.05), even though
-their primary colors are more distinct (3.76).
+Body-color overlap remains at 41 pairs below ΔE00 3, including 38 of 378
+Light pairs. This is largely because many Light presets use similarly pale
+backgrounds, and it is not evidence that their cursor accent colors are
+duplicates. For example, Mint-Light / Seafoam-Light body colors differ by
+only ΔE00 0.21 while their primary colors differ by 15.53. The analyzer
+therefore reports primary and body separation independently.
 
-Body-color overlap is much more common: 41 of the 1,540 primary/body pairs
-have body ΔE00 below 3, including 38 of 378 Light pairs. This is largely
-because many Light presets use similarly pale backgrounds. It should not be
-treated as evidence that their cursor accent colors are duplicates. For
-example, Mint-Light / Seafoam-Light body colors differ by only ΔE00 0.21,
-while their primary colors differ by 15.53. The analyzer therefore reports
-primary and body separation independently.
+### Post-refinement Matugen 4.2.0 results
 
-The current evidence supports keeping all 28 families rather than merging
-them. It identifies four primary-color pairs for targeted review, while
-showing that broad palette merging would sacrifice distinct accent coverage.
-No palette values have been changed in this analysis pass; any color edit
-must be re-evaluated against the complete generated-primary grid and the
-pairwise report, then reflected in the comparison matrices and gallery data.
+The successful 3,888-sample controlled grid confirms that the refinements did
+not trade away Matugen coverage. Primary-only ΔE00 is now median **7.23**,
+p90 **15.13**, p95 **18.50**, and worst **21.39** (mean **7.93**), compared
+with the pre-refinement baseline of median **8.00**, p90 **15.25**, p95
+**18.50**, and worst **21.72** (mean **8.18**). Samples above ΔE00 15 fell
+from **419 to 403**.
 
+The production mode-aware matcher now has selected-primary ΔE00 median
+**7.27**, p90 **15.26**, p95 **18.50**, and worst **22.17**; it still has zero
+cross-mode selections. It chooses a different theme from the primary-only
+winner in **468/3,888 (12.0%)** samples, down from 479 (12.3%) before the
+palette edits. The current 75/25 primary/body matcher score is median
+**18.51**, p90 **24.52**, p95/worst **34.83**. As before, that weighted score
+is not a primary-fidelity metric. The legacy no-mode fallback can still
+select a cross-mode theme; normal Matugen templates pass the resolved mode.
+
+The pinned 79-image exploratory wallpaper sample remains non-representative.
+After the edits, nearest-primary ΔE00 is median **6.78**, p90 **11.72**, p95
+**12.79**, and worst **18.50**. The mode-aware selected-primary p90 is
+**11.77**, worst **18.50**, with no cross-mode selections; its mismatch from
+the primary-only winner remains **3/79**. The unfiltered legacy matcher still
+has a worst selected-primary error of **44.60** in this sample. The sample
+does not establish general wallpaper coverage.
+
+The gallery data at `docs/themes.json` is synchronized with the build source
+`themes.json` and is checked by CI. The two static comparison matrix images
+still need regeneration to complete the visual documentation update; they
+must not be treated as previews of these new accent values until refreshed.
 The successful Matugen 4.2.0 Smart regression run selected the expected
 variant and mode for all eight fixtures. Across the selected-mode primary
 colors, the median nearest-palette distance was ΔE00 8.91 and the worst was
@@ -192,12 +214,10 @@ controlled seed grid. All reports are uploaded as a workflow artifact.
 The pinned 79-image run selected Matugen Smart variants as follows:
 Neutral **45**, Tonal Spot **29**, Monochrome **4**, and Vibrant **1**; 62
 outputs were Dark and 17 Light. Nearest-primary ΔE00 was median **6.78**,
-p90 **11.82**, p95 **12.79**, and worst **18.50**. The live weighted matcher
+p90 **11.72**, p95 **12.79**, and worst **18.50**. The live weighted matcher
 selected a different theme from the primary-only winner in **5/79** cases;
 its selected-primary median was **6.78**, p90 **11.87**, and worst **44.60**.
-Mode-aware matching reduced the mismatch count to **3/79**, preserved the
-median/p90, and reduced the worst selected-primary error to **18.50** with no
-cross-mode selections.
+Mode-aware matching reduced the mismatch count to **3/79**, with selected-primary p90 **11.77** and worst **18.50**, and no cross-mode selections.
 
 The source snapshot is pinned to
 ee39a37b24ab7700cc4d52f50b01a5d13df6a865. Even with the broader category mix,

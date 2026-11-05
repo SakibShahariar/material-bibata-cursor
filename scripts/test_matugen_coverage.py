@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Unit tests for the Matugen-generated palette coverage analyzer."""
 
+import json
 import unittest
+from pathlib import Path
 
 try:
     from .analyze_matugen_coverage import (
@@ -59,6 +61,14 @@ class MatugenCoverageTests(unittest.TestCase):
         self.assertEqual(
             report["dark"]["closest_primary_pairs"][0]["theme_b"], "B"
         )
+
+    def test_repository_palettes_have_no_same_mode_primary_pairs_below_delta_e_3(self):
+        themes_path = Path(__file__).resolve().parent.parent / "themes.json"
+        themes = json.loads(themes_path.read_text(encoding="utf-8"))
+        report = summarize_palette_pairwise_separation(themes)
+        self.assertEqual(report["all"]["candidate_count"], 56)
+        self.assertEqual(report["dark"]["primary_pairs_below_delta_e_3"], 0)
+        self.assertEqual(report["light"]["primary_pairs_below_delta_e_3"], 0)
 
     def test_summarizes_matcher_selection_against_primary_only_winner(self):
         samples = [

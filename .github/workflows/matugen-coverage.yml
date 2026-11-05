@@ -52,14 +52,15 @@ jobs:
 
       - name: Fetch pinned CC0 wallpaper sample
         run: |
-          git clone --filter=blob:none https://github.com/rose-pine/wallpapers.git "$RUNNER_TEMP/wallpapers"
-          git -C "$RUNNER_TEMP/wallpapers" checkout ee39a37b24ab7700cc4d52f50b01a5d13df6a865
+          git clone --filter=blob:none --sparse https://github.com/rose-pine/wallpapers.git "$RUNNER_TEMP/wallpapers"
+          git -C "$RUNNER_TEMP/wallpapers" sparse-checkout set generative illustration photography minecraft miscellaneous os
+          git -C "$RUNNER_TEMP/wallpapers" checkout --detach ee39a37b24ab7700cc4d52f50b01a5d13df6a865
 
       - name: Analyze Smart mode on real wallpaper images
         run: |
           python scripts/analyze_matugen_smart_coverage.py \
             --matugen matugen \
-            --wallpaper-dir "$RUNNER_TEMP/wallpapers/photography" \
+            --wallpaper-dir "$RUNNER_TEMP/wallpapers" \
             --json-output "$RUNNER_TEMP/matugen-wallpaper-coverage.json"
 
       - name: Upload coverage reports

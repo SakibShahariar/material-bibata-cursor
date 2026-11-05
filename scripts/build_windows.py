@@ -20,6 +20,7 @@ Usage:
 import argparse
 import json
 import struct
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import subprocess
 import sys
 if sys.version_info < (3, 12):
@@ -198,6 +199,27 @@ def render_frame_icon(svg_path: Path, colors: list[dict], tmp_dir: Path,
     return single_cur_icon(png_tmp.read_bytes(), w, h, hx, hy)
 
 
+
+def render_static_cursor(
+    svg_path: Path,
+    colors: list[dict],
+    tmp_dir: Path,
+    stem: str,
+    x_hot: int,
+    y_hot: int,
+) -> list[tuple[Path, int, int]]:
+    """Recolor one static source SVG, then render all requested sizes."""
+    recolored_svg = tmp_dir / f"{stem}_recolored.svg"
+    recolor_svg(svg_path, colors, recolored_svg)
+    images = []
+    for size in WINDOWS_SIZES:
+        png_tmp = tmp_dir / f"{stem}_{size}.png"
+        render_svg_to_png(recolored_svg, png_tmp, size)
+        hx = int(size * x_hot / 256)
+        hy = int(size * y_hot / 256)
+        images.append((png_tmp, hx, hy))
+    return images
+
 def build_theme(
     theme_key: str,
     themes: dict,
@@ -267,17 +289,9 @@ def build_theme(
             ok += 1
             continue
 
-        images = []
-
-        for size in WINDOWS_SIZES:
-            svg_tmp = tmp_dir / f"{cursor_name}_{size}.svg"
-            png_tmp = tmp_dir / f"{cursor_name}_{size}.png"
-            recolor_svg(svg_path, colors, svg_tmp)
-            render_svg_to_png(svg_tmp, png_tmp, size)
-
-            hx = int(size * x_hot / 256)
-            hy = int(size * y_hot / 256)
-            images.append((png_tmp, hx, hy))
+        images = render_static_cursor(
+            svg_path, colors, tmp_dir, cursor_name, x_hot, y_hot
+        )
 
         cur_path = theme_dir / f"{x11_name}.cur"
         create_cur(images, cur_path)
@@ -394,6 +408,16 @@ def write_install_inf(theme_dir: Path, theme_key: str) -> None:
 
 def filter_themes(themes: dict, args) -> list[str]:
     names = list(themes.keys())
+    if args.themes is not None:
+        requested = [name.strip() for name in args.themes.split(",")]
+        if not requested or any(not name for name in requested):
+            raise ValueError("--themes requires non-empty comma-separated names")
+        if len(set(requested)) != len(requested):
+            raise ValueError("--themes cannot contain duplicate names")
+        unknown = set(requested).difference(themes)
+        if unknown:
+            raise ValueError("unknown theme(s): " + ", ".join(sorted(unknown)))
+        names = requested
     if args.only_light:
         names = [n for n in names if n.endswith("-Light")]
     elif args.only_dark:
@@ -403,8 +427,7 @@ def filter_themes(themes: dict, args) -> list[str]:
         names = [n for n in names if n not in exclude]
     if args.theme:
         if args.theme not in themes:
-            print(f"Error: '{args.theme}' not found", file=sys.stderr)
-            sys.exit(1)
+            raise ValueError(f"unknown theme: {args.theme}")
         names = [args.theme]
     return names
 
@@ -413,36 +436,56 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Build Windows .cur cursor themes")
     parser.add_argument("theme", nargs="?", default=None)
+    parser.add_argument("--themes", help="Comma-separated theme names to build")
     parser.add_argument("--only-light", action="store_true")
     parser.add_argument("--only-dark", action="store_true")
     parser.add_argument("--exclude", default=None)
+    parser.add_argument("--jobs", type=int, default=1, help="Number of themes to build concurrently (default: 1)")
+    parser.add_argument("--output-dir", type=Path, default=REPO_ROOT / "out_win", help="Output directory (default: out_win)")
     args = parser.parse_args()
     if sys.version_info < (3, 12):
         parser.error("Python 3.12+ is required by the pinned upstream Bibata source")
 
+    if args.jobs < 1:
+        parser.error("--jobs must be at least 1")
+    if args.theme and args.themes is not None:
+        parser.error("use either a positional theme name or --themes, not both")
+
     themes = load_themes()
-    names = filter_themes(themes, args)
+    try:
+        names = filter_themes(themes, args)
+    except ValueError as exc:
+        parser.error(str(exc))
     if not names:
-        print("Error: no themes to build", file=sys.stderr)
-        sys.exit(1)
+        parser.error("no themes to build after applying filters")
 
     try:
         svg_index = build_svg_index()
     except OSError as exc:
         parser.error(f"could not index SVG sources under {SVG_DIR}: {exc}")
 
-    out_base = REPO_ROOT / "out_win"
+    out_base = args.output_dir.expanduser().resolve()
     out_base.mkdir(parents=True, exist_ok=True)
 
     total_ok, total_fail = 0, 0
-    for name in names:
-        print(f"Building {name}...")
-        fail = build_theme(name, themes, out_base, svg_index)
-        total_ok += 1
-        total_fail += fail
+    with ThreadPoolExecutor(max_workers=args.jobs) as executor:
+        futures = {
+            executor.submit(build_theme, name, themes, out_base, svg_index): name
+            for name in names
+        }
+        for future in as_completed(futures):
+            name = futures[future]
+            try:
+                failures = future.result()
+            except Exception as exc:
+                print(f"Failed {name}: {exc}", file=sys.stderr)
+                failures = 1
+            if failures:
+                total_fail += failures
+            else:
+                total_ok += 1
 
-    print(f"\nDone: {total_ok - total_fail} succeeded, "
-          f"{total_fail} failed")
+    print(f"\nDone: {total_ok} theme(s) succeeded, {total_fail} cursor/theme failure(s)")
     print(f"Output: {out_base}")
     if total_fail:
         sys.exit(1)

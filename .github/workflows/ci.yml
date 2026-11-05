@@ -124,6 +124,18 @@ jobs:
           grep -q 'usr/share/doc/material-bibata-cursor/LICENSE' "$RUNNER_TEMP/deb-published.contents"
           grep -q 'usr/share/doc/material-bibata-cursor/README.md' "$RUNNER_TEMP/deb-published.contents"
           grep -q 'usr/share/doc/material-bibata-cursor/CREDITS.txt' "$RUNNER_TEMP/deb-published.contents"
+          # Exercise the documented apt install/remove path on the actual
+          # Ubuntu runner, preserving a pre-existing unrelated icon directory.
+          sudo install -d /usr/share/icons/Unrelated
+          printf 'keep me\\n' | sudo tee /usr/share/icons/Unrelated/package-test-marker >/dev/null
+          sudo apt install --yes "$package"
+          test -f /usr/share/icons/Bibata-Material-Peach/index.theme
+          test -f /usr/share/doc/material-bibata-cursor/CREDITS.txt
+          sudo apt remove --yes material-bibata-cursor
+          test ! -e /usr/share/icons/Bibata-Material-Peach
+          test -f /usr/share/icons/Unrelated/package-test-marker
+          sudo rm -f /usr/share/icons/Unrelated/package-test-marker
+          sudo rmdir /usr/share/icons/Unrelated
 
       - name: Smoke-test Debian package with legacy archive layout
         run: |

@@ -77,9 +77,15 @@ def run_smart_fixture(
         "--dry-run",
         "--quiet",
     ]
-    completed = subprocess.run(
-        command, check=True, capture_output=True, text=True, timeout=30
-    )
+    try:
+        completed = subprocess.run(
+            command, check=True, capture_output=True, text=True, timeout=30
+        )
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            f"Matugen Smart command failed for {image_path.name}: "
+            f"exit={exc.returncode}; stdout={exc.stdout!r}; stderr={exc.stderr!r}"
+        ) from exc
     try:
         return json.loads(completed.stdout)
     except json.JSONDecodeError as exc:

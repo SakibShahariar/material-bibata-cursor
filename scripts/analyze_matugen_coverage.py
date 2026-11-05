@@ -176,6 +176,31 @@ def summarize_matcher_selection(samples: list[dict[str, Any]]) -> dict[str, Any]
     }
 
 
+def summarize_mode_aware_selection(
+    samples: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Measure mode-filtered matcher fidelity against primary-only matching."""
+    selected_values = [item["mode_matcher_primary_delta_e00"] for item in samples]
+    nearest_values = [item["primary_delta_e00"] for item in samples]
+    mismatches = sum(
+        item["mode_matcher_theme"] != item["nearest_primary_theme"]
+        for item in samples
+    )
+    mode_mismatches = sum(
+        item["mode_matcher_theme"].endswith("-Light") != (item["mode"] == "light")
+        for item in samples
+    )
+    return {
+        "selected_primary_delta_e00": summarize(selected_values),
+        "selection_mismatch_count": mismatches,
+        "selection_mismatch_rate": mismatches / len(samples),
+        "mode_mismatch_count": mode_mismatches,
+        "selected_primary_samples_above_warning_threshold": sum(
+            value > NEAREST_PRESET_WARNING_DELTA_E for value in selected_values
+        ),
+    }
+
+
 def summarize(values: list[float]) -> dict[str, float]:
     return {
         "median": percentile(values, 0.50),
@@ -230,6 +255,12 @@ def analyze(
                 matcher_primary_score = delta_e_hex(
                     primary_hex, themes[nearest_name]["primary"]
                 )
+                mode_matcher_name, mode_matcher_score = find_closest_theme(
+                    primary_hex, themes, mode=mode
+                )
+                mode_matcher_primary_score = delta_e_hex(
+                    primary_hex, themes[mode_matcher_name]["primary"]
+                )
                 samples.append(
                     {
                         "source_hue": hue,
@@ -242,6 +273,9 @@ def analyze(
                         "matcher_theme": nearest_name,
                         "matcher_score": weighted_score,
                         "matcher_primary_delta_e00": matcher_primary_score,
+                        "mode_matcher_theme": mode_matcher_name,
+                        "mode_matcher_score": mode_matcher_score,
+                        "mode_matcher_primary_delta_e00": mode_matcher_primary_score,
                     }
                 )
 
@@ -291,6 +325,12 @@ def analyze(
         "primary_fidelity_delta_e00": summarize(primary_values),
         "current_matcher_score": summarize(matcher_values),
         "matcher_primary_selection": summarize_matcher_selection(samples),
+        "mode_aware_matcher_score": summarize(
+            [item["mode_matcher_score"] for item in samples]
+        ),
+        "mode_aware_matcher_primary_selection": summarize_mode_aware_selection(
+            samples
+        ),
         "matcher_warning_threshold": NEAREST_PRESET_WARNING_DELTA_E,
         "matcher_samples_above_warning_threshold": sum(
             score > NEAREST_PRESET_WARNING_DELTA_E for score in matcher_values

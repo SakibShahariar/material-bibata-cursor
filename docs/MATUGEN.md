@@ -38,8 +38,8 @@ with `just build`) so the matched preset is available locally.
 
 The hook does **not** build or install themes: it picks the closest preset
 in `themes.json` using `color_match.py` and applies that already-installed
-theme. It uses Matugen's resolved `mode` to compare only dark presets for
-Dark mode or `-Light` presets for Light mode. If a custom/older template omits
+theme. It uses Matugen's resolved `mode` to compare the dark presets (plus the
+original Classic preset) for Dark mode or the `-Light` presets for Light mode. If a custom/older template omits
 `mode`, it falls back to matching across all presets for compatibility.
 Matching uses CIEDE2000; it does not recolor or rebuild a cursor to match
 Matugen's exact primary hex value, so the result may be close rather than

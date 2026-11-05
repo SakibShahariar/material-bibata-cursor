@@ -19,8 +19,10 @@ from typing import Any
 
 try:
     from .analyze_matugen_coverage import delta_e_hex
+    from .color_match import find_closest_theme
 except ImportError:
     from analyze_matugen_coverage import delta_e_hex
+    from color_match import find_closest_theme
 
 FIXTURES = (
     ("monochrome-dark", (64, 64, 64), "SchemeMonochrome", "dark"),
@@ -157,6 +159,10 @@ def analyze_smart_images(matugen: str, themes_path: Path) -> dict[str, Any]:
             nearest_delta = delta_e_hex(
                 primary_hex, material_themes[nearest_name]["primary"]
             )
+            matcher_name, matcher_score = find_closest_theme(primary_hex, themes)
+            matcher_primary_delta = delta_e_hex(
+                primary_hex, themes[matcher_name]["primary"]
+            )
             results.append(
                 {
                     "fixture": name,
@@ -168,10 +174,19 @@ def analyze_smart_images(matugen: str, themes_path: Path) -> dict[str, Any]:
                     "primary_hex": primary_hex,
                     "nearest_theme": nearest_name,
                     "primary_delta_e00": nearest_delta,
+                    "matcher_theme": matcher_name,
+                    "matcher_score": matcher_score,
+                    "matcher_primary_delta_e00": matcher_primary_delta,
                 }
             )
 
     values = sorted(item["primary_delta_e00"] for item in results)
+    selected_values = sorted(
+        item["matcher_primary_delta_e00"] for item in results
+    )
+    mismatches = sum(
+        item["matcher_theme"] != item["nearest_theme"] for item in results
+    )
     return {
         "matugen_version": version,
         "sampling": {
@@ -194,6 +209,18 @@ def analyze_smart_images(matugen: str, themes_path: Path) -> dict[str, Any]:
         "primary_fidelity_delta_e00": {
             "median": values[len(values) // 2],
             "worst": values[-1],
+        },
+        "live_matcher": {
+            "formula": "75% primary + 25% body",
+            "score_median": sorted(item["matcher_score"] for item in results)[
+                len(results) // 2
+            ],
+            "selected_primary_delta_e00_median": selected_values[
+                len(selected_values) // 2
+            ],
+            "selected_primary_delta_e00_worst": selected_values[-1],
+            "different_from_primary_only_winner": mismatches,
+            "selection_mismatch_rate": mismatches / len(results),
         },
         "results": results,
     }
@@ -224,6 +251,14 @@ def main() -> int:
         "Selected-mode primary ΔE00: "
         f"median {report['primary_fidelity_delta_e00']['median']:.2f}, "
         f"worst {report['primary_fidelity_delta_e00']['worst']:.2f}"
+    )
+    matcher = report["live_matcher"]
+    print(
+        "Live 75/25 matcher: "
+        f"selected-primary median {matcher['selected_primary_delta_e00_median']:.2f}, "
+        f"worst {matcher['selected_primary_delta_e00_worst']:.2f}; "
+        f"different winner {matcher['different_from_primary_only_winner']}/"
+        f"{len(report['results'])}"
     )
     for item in report["results"]:
         print(

@@ -83,8 +83,8 @@ class MatugenCoverageTests(unittest.TestCase):
             },
             {
                 "mode": "light",
-                "mode_matcher_theme": "Dark",
-                "nearest_primary_theme": "Light",
+                "mode_matcher_theme": "Dark-Dark",
+                "nearest_primary_theme": "Light-Light",
                 "mode_matcher_primary_delta_e00": 5.0,
                 "primary_delta_e00": 2.0,
             },

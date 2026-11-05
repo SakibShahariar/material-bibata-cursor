@@ -130,9 +130,13 @@ These fixtures validate the
 Smart decision paths; they are synthetic regression inputs, **not** a
 representative wallpaper corpus. Real wallpaper-based coverage remains a
 separate validation requirement.
-The manually triggered GitHub Actions workflow runs this analysis and uploads
-the full JSON report as an artifact. Start it from the repository's Actions tab
-when the palette data or analysis methodology changes. This
+The workflow also checks a pinned snapshot of the CC0-1.0
+[Rosé Pine Wallpapers](https://github.com/rose-pine/wallpapers) repository.
+It analyzes supported JPG, PNG, and WebP images from its photography folder.
+This is a small, curated real-image sample—not a random or representative
+wallpaper population—and its palette is community-curated. The report keeps
+this exploratory corpus separate from the synthetic Smart fixtures and
+controlled seed grid. All reports are uploaded as a workflow artifact. This
 sampling is a reproducible coverage study of Matugen's color-generation
 pipeline; it is not a claim that every possible wallpaper or source color has
 been sampled.

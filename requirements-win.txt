@@ -1,2 +1,0 @@
-# Python dependencies required by the Windows .cur/.ani builder.
-Pillow>=10.0

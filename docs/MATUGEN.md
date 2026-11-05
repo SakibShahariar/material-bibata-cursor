@@ -122,6 +122,44 @@ representative sample of real wallpapers. The Smart fixtures described below
 verify the Smart decision branches but likewise do not estimate real wallpaper
 frequency. Do not recolor or merge palettes based on these grids alone.
 
+### Pairwise palette separation
+
+The same successful grid workflow also measures pairwise distance between
+palette primary and body colors. It evaluates all **56 selectable palettes**
+(28 Dark and 28 Light): 1,540 total pairs, including 378 pairs within each
+mode. For decisions about what the mode-aware matcher can confuse, the
+within-mode comparisons are the useful ones.
+
+Four within-mode primary pairs have ΔE00 below 3:
+
+| Mode | Pair | Primary ΔE00 | Body ΔE00 |
+|---|---|---:|---:|
+| Dark | Charcoal / Slate | 2.93 | 5.28 |
+| Light | Midnight-Light / Sage-Light | 1.44 | 1.23 |
+| Light | Blush-Light / Salmon-Light | 2.50 | 0.55 |
+| Light | Ice-Blue-Light / Sky-Blue-Light | 2.94 | 0.89 |
+
+The next closest Dark primary pair is Mint / Seafoam (ΔE00 3.76); the next
+closest Light pair is Brown-Light / Sand-Light (3.12). These are candidates
+for more deliberate separation, not automatic merge recommendations. The
+dark Mint / Seafoam pair has a much closer body color (ΔE00 1.05), even though
+their primary colors are more distinct (3.76).
+
+Body-color overlap is much more common: 41 of the 1,540 primary/body pairs
+have body ΔE00 below 3, including 38 of 378 Light pairs. This is largely
+because many Light presets use similarly pale backgrounds. It should not be
+treated as evidence that their cursor accent colors are duplicates. For
+example, Mint-Light / Seafoam-Light body colors differ by only ΔE00 0.21,
+while their primary colors differ by 15.53. The analyzer therefore reports
+primary and body separation independently.
+
+The current evidence supports keeping all 28 families rather than merging
+them. It identifies four primary-color pairs for targeted review, while
+showing that broad palette merging would sacrifice distinct accent coverage.
+No palette values have been changed in this analysis pass; any color edit
+must be re-evaluated against the complete generated-primary grid and the
+pairwise report, then reflected in the comparison matrices and gallery data.
+
 The successful Matugen 4.2.0 Smart regression run selected the expected
 variant and mode for all eight fixtures. Across the selected-mode primary
 colors, the median nearest-palette distance was ΔE00 8.91 and the worst was

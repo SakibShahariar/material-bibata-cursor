@@ -124,7 +124,9 @@ A separate Smart-mode check generates eight deterministic solid-color PNG
 fixtures. They cover Matugen's four Smart variants (Monochrome, Neutral,
 Tonal Spot, and Vibrant) in both Dark and Light mode. The workflow verifies
 that Matugen selects the expected variant and mode, then measures the selected
-mode's primary against all 56 cursor palettes. These fixtures validate the
+mode's primary against all 56 cursor palettes. It also reports the live 75/25
+matcher selection and the selected theme's primary-color error separately.
+These fixtures validate the
 Smart decision paths; they are synthetic regression inputs, **not** a
 representative wallpaper corpus. Real wallpaper-based coverage remains a
 separate validation requirement.

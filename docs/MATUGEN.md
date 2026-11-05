@@ -65,8 +65,8 @@ generated semantic `primary` role for both dark and light schemes, producing
 Matugen's `scheme-smart` is deliberately excluded from this color-seed test.
 The upstream implementation requires an image to detect its Smart variant and
 mode; when given a hex color it warns and falls back to the default
-Tonal Spot/dark behavior. Smart mode therefore needs a separate test using
-real wallpaper images, not a misleading tenth color-seed run.
+Tonal Spot/dark behavior. Smart mode therefore needs image-based testing, not a misleading tenth
+color-seed run.
 
 Three measurements are reported separately:
 

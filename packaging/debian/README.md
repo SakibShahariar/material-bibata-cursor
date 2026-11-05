@@ -4,13 +4,19 @@ This directory builds a system-wide `.deb` from the project's published Linux re
 
 ## Build
 
-Install `dpkg`, `curl`, `tar`, `coreutils`, `grep`, and `findutils` (these provide `dpkg-deb`, `sha256sum`, and the other commands used by the builder), then run from the repository root:
+Install the builder prerequisites:
+
+```bash
+sudo apt install dpkg curl tar coreutils grep findutils python3
+```
+
+Then run from the repository root:
 
 ```bash
 bash packaging/debian/build-deb.sh v1.5.0
 ```
 
-The script downloads the dark and light Linux archives plus the release SHA-256 manifest, verifies both archives, and builds `dist/material-bibata-cursor_1.5.0_all.deb`. To build from already-downloaded release assets (also used by CI):
+The script downloads the dark and light Linux archives, reads their SHA-256 digests from the GitHub Release API metadata, verifies both archives, and builds `dist/material-bibata-cursor_1.5.0_all.deb`. A separate checksum-manifest asset is not required. To build from already-downloaded release archives plus a fixture checksum manifest (also used by CI):
 
 ```bash
 bash packaging/debian/build-deb.sh 1.5.0 --archive-tag ci --archives-dir dist --output-dir dist

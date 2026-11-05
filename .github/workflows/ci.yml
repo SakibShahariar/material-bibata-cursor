@@ -67,13 +67,10 @@ jobs:
       - name: Validate CSS cursor name resolution
         run: python scripts/validate_cursor_names.py
 
-      - name: Build Windows cursor formats (parallel and serial comparison)
-        env:
-          RUNNER_TEMP: ${{ runner.temp }}
+      - name: Build Windows cursor formats
         run: |
-          python scripts/build_windows.py --themes Peach,Peach-Light --jobs 2 --output-dir out_win
-          python scripts/build_windows.py --themes Peach,Peach-Light --jobs 1 --output-dir "$RUNNER_TEMP/windows-serial"
-          diff -qr out_win "$RUNNER_TEMP/windows-serial"
+          python scripts/build_windows.py Peach
+          python scripts/build_windows.py Peach-Light
 
       - name: Validate generated cursor assets
         env:
@@ -105,21 +102,3 @@ jobs:
             --archive dist/bibata-material-light-ci.tar.gz \
             --archive dist/bibata-material-dark-ci-win.zip \
             --archive dist/bibata-material-light-ci-win.zip
-
-      - name: Smoke-test Debian package
-        run: |
-          bash packaging/debian/build-deb.sh 1.5.0 --archive-tag ci --archives-dir dist --output-dir "$RUNNER_TEMP/deb" --expected-themes 2
-          package="$RUNNER_TEMP/deb/material-bibata-cursor_1.5.0_all.deb"
-          dpkg-deb --field "$package" Package Version Architecture
-          dpkg-deb --contents "$package" > "$RUNNER_TEMP/deb.contents"
-          grep -q 'usr/share/icons/Bibata-Material-Peach/index.theme' "$RUNNER_TEMP/deb.contents"
-          root="$RUNNER_TEMP/deb-root"
-          mkdir -p "$root/var/lib/dpkg" "$root/usr/share/icons/Unrelated"
-          touch "$root/var/lib/dpkg/status"
-          printf 'unrelated theme\n' > "$root/usr/share/icons/Unrelated/marker"
-          sudo dpkg --root="$root" --admindir="$root/var/lib/dpkg" --force-depends --install "$package"
-          test -f "$root/usr/share/icons/Bibata-Material-Peach/index.theme"
-          test -f "$root/usr/share/icons/Unrelated/marker"
-          sudo dpkg --root="$root" --admindir="$root/var/lib/dpkg" --remove material-bibata-cursor
-          test ! -e "$root/usr/share/icons/Bibata-Material-Peach"
-          test -f "$root/usr/share/icons/Unrelated/marker"

@@ -114,19 +114,52 @@ jobs:
             --archive dist/bibata-material-dark-ci-win.zip \
             --archive dist/bibata-material-light-ci-win.zip
 
-      - name: Smoke-test Debian package
+      - name: Smoke-test published Debian package inputs
         run: |
+          bash packaging/debian/build-deb.sh v1.5.0 --output-dir "$RUNNER_TEMP/deb-published"
+          package="$RUNNER_TEMP/deb-published/material-bibata-cursor_1.5.0_all.deb"
+          dpkg-deb --field "$package" Package Version Architecture
+          dpkg-deb --contents "$package" > "$RUNNER_TEMP/deb-published.contents"
+          grep -q 'usr/share/icons/Bibata-Material-Peach/index.theme' "$RUNNER_TEMP/deb-published.contents"
+          grep -q 'usr/share/doc/material-bibata-cursor/LICENSE' "$RUNNER_TEMP/deb-published.contents"
+          grep -q 'usr/share/doc/material-bibata-cursor/README.md' "$RUNNER_TEMP/deb-published.contents"
+          grep -q 'usr/share/doc/material-bibata-cursor/CREDITS.txt' "$RUNNER_TEMP/deb-published.contents"
+
+      - name: Smoke-test Debian package with legacy archive layout
+        run: |
+          # Simulate the published v1.5.0 archives, which predate bundled
+          # README/LICENSE/CREDITS files. The package must source docs from
+          # this checkout rather than requiring them inside release tarballs.
+          python - <<'PY'
+          import os
+          import tarfile
+          from pathlib import Path
+          for name in ("bibata-material-dark-ci.tar.gz", "bibata-material-light-ci.tar.gz"):
+              archive = Path("dist") / name
+              rewritten = archive.with_suffix(".tmp.tar.gz")
+              with tarfile.open(archive, "r:gz") as source, tarfile.open(rewritten, "w:gz") as target:
+                  for member in source.getmembers():
+                      if Path(member.name).name in {"LICENSE", "README.md", "CREDITS.txt"}:
+                          continue
+                      target.addfile(member, source.extractfile(member) if member.isfile() else None)
+              os.replace(rewritten, archive)
+          PY
+          (cd dist && sha256sum bibata-material-dark-ci.tar.gz bibata-material-light-ci.tar.gz > SHA256SUMS-ci.txt)
           bash packaging/debian/build-deb.sh 1.5.0 --archive-tag ci --archives-dir dist --output-dir "$RUNNER_TEMP/deb" --expected-themes 2
           package="$RUNNER_TEMP/deb/material-bibata-cursor_1.5.0_all.deb"
           dpkg-deb --field "$package" Package Version Architecture
           dpkg-deb --contents "$package" > "$RUNNER_TEMP/deb.contents"
           grep -q 'usr/share/icons/Bibata-Material-Peach/index.theme' "$RUNNER_TEMP/deb.contents"
+          grep -q 'usr/share/doc/material-bibata-cursor/LICENSE' "$RUNNER_TEMP/deb.contents"
+          grep -q 'usr/share/doc/material-bibata-cursor/README.md' "$RUNNER_TEMP/deb.contents"
+          grep -q 'usr/share/doc/material-bibata-cursor/CREDITS.txt' "$RUNNER_TEMP/deb.contents"
           root="$RUNNER_TEMP/deb-root"
           mkdir -p "$root/var/lib/dpkg" "$root/usr/share/icons/Unrelated"
           touch "$root/var/lib/dpkg/status"
           printf 'unrelated theme\\n' > "$root/usr/share/icons/Unrelated/marker"
           sudo dpkg --root="$root" --admindir="$root/var/lib/dpkg" --force-depends --install "$package"
           test -f "$root/usr/share/icons/Bibata-Material-Peach/index.theme"
+          test -f "$root/usr/share/doc/material-bibata-cursor/CREDITS.txt"
           test -f "$root/usr/share/icons/Unrelated/marker"
           sudo dpkg --root="$root" --admindir="$root/var/lib/dpkg" --remove material-bibata-cursor
           test ! -e "$root/usr/share/icons/Bibata-Material-Peach"

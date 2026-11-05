@@ -10,6 +10,8 @@ try:
         primary_hue_chroma_region,
         source_colors,
         summarize_matcher_selection,
+        summarize_mode_aware_selection,
+        find_closest_theme,
         SCHEME_TYPES,
     )
 except ImportError:
@@ -52,6 +54,43 @@ class MatugenCoverageTests(unittest.TestCase):
         self.assertEqual(result["selection_mismatch_rate"], 0.5)
         self.assertEqual(result["primary_fidelity_regret_delta_e00"]["mean"], 2.0)
         self.assertEqual(result["selected_primary_delta_e00"]["median"], 6.5)
+
+    def test_mode_aware_matcher_filters_candidates_to_requested_mode(self):
+        themes = {
+            "Dark": {"body": "#000000", "primary": "#ff0000"},
+            "Light": {"body": "#ffffff", "primary": "#0000ff"},
+            "Classic": {"body": "#000000", "primary": "#ff0000"},
+        }
+        light_name, _ = find_closest_theme(
+            "#ff0000", themes, primary_weight=1.0, body_weight=0.0, mode="light"
+        )
+        dark_name, _ = find_closest_theme(
+            "#0000ff", themes, primary_weight=1.0, body_weight=0.0, mode="dark"
+        )
+        self.assertEqual(light_name, "Light")
+        self.assertEqual(dark_name, "Dark")
+
+    def test_mode_aware_summary_counts_cross_mode_selections(self):
+        samples = [
+            {
+                "mode": "light",
+                "mode_matcher_theme": "Light",
+                "nearest_primary_theme": "Light",
+                "mode_matcher_primary_delta_e00": 1.0,
+                "primary_delta_e00": 1.0,
+            },
+            {
+                "mode": "light",
+                "mode_matcher_theme": "Dark",
+                "nearest_primary_theme": "Light",
+                "mode_matcher_primary_delta_e00": 5.0,
+                "primary_delta_e00": 2.0,
+            },
+        ]
+        result = summarize_mode_aware_selection(samples)
+        self.assertEqual(result["mode_mismatch_count"], 1)
+        self.assertEqual(result["selection_mismatch_count"], 1)
+        self.assertEqual(result["selected_primary_delta_e00"]["median"], 3.0)
 
     def test_extracts_both_generated_semantic_primary_roles(self):
         payload = {

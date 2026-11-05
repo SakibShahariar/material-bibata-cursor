@@ -167,6 +167,29 @@ class UpstreamTempFileTests(unittest.TestCase):
                 build_linux.isolate_upstream_temp_file(work_dir)
 
 
+    def test_normalizes_hyprcursor_archive_order_and_timestamps(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            work_dir = Path(temporary)
+            source_dir = work_dir / "src"
+            source_dir.mkdir()
+            utility = source_dir / "cursor_utils.py"
+            utility.write_text(
+                "tmp = Path('/tmp/.cursor.0248.svg')\\n"
+                "    @classmethod\\n"
+                "    def zip_dir(cls, cdir: Path, out: Path):\\n"
+                "        with zipfile.ZipFile(out, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:\\n"
+                "            for item in cls.traverse_dir(cdir):\\n"
+                "                zipf.write(item, arcname=item.relative_to(cdir))\\n",
+                encoding="utf-8",
+            )
+
+            build_linux.isolate_upstream_temp_file(work_dir)
+            patched = utility.read_text(encoding="utf-8")
+            self.assertIn("date_time=(1980, 1, 1, 0, 0, 0)", patched)
+            self.assertIn("key=lambda item: item.relative_to(cdir).as_posix()", patched)
+            self.assertNotIn("zipf.write(item, arcname=item.relative_to(cdir))", patched)
+
+
 class ConfigPatchTests(unittest.TestCase):
     def test_patches_colors_and_adds_sizes_without_losing_existing_sizes(self):
         with tempfile.TemporaryDirectory() as temporary:

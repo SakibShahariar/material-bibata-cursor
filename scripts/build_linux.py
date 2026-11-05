@@ -198,8 +198,21 @@ def isolate_upstream_temp_file(work_dir: Path) -> None:
             "pinned upstream cursor utility no longer has the expected shared "
             "temporary SVG path; review the upstream renderer before building"
         )
+
+    # Hyprcursor archives otherwise inherit per-file mtimes and filesystem
+    # traversal order, making identical serial/parallel builds differ.
+    zip_original = "        with zipfile.ZipFile(out, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:\\n            for item in cls.traverse_dir(cdir):\\n                zipf.write(item, arcname=item.relative_to(cdir))"
+    zip_replacement = "        with zipfile.ZipFile(out, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:\\n            items = sorted(\\n                cls.traverse_dir(cdir),\\n                key=lambda item: item.relative_to(cdir).as_posix(),\\n            )\\n            for item in items:\\n                info = zipfile.ZipInfo(\\n                    item.relative_to(cdir).as_posix(),\\n                    date_time=(1980, 1, 1, 0, 0, 0),\\n                )\\n                info.compress_type = zipfile.ZIP_DEFLATED\\n                info.external_attr = (0o100644 & 0xFFFF) << 16\\n                zipf.writestr(info, item.read_bytes())"
+    if source.count(zip_original) != 1:
+        raise BuildError(
+            "pinned upstream cursor utility no longer has the expected Hyprcursor "
+            "archive writer; review the upstream renderer before building"
+        )
+    patched_source = source.replace(original, replacement).replace(
+        zip_original, zip_replacement
+    )
     try:
-        cursor_utils.write_text(source.replace(original, replacement), encoding="utf-8")
+        cursor_utils.write_text(patched_source, encoding="utf-8")
     except OSError as exc:
         raise BuildError(f"could not isolate upstream renderer temporary file: {exc}") from exc
 

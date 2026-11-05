@@ -21,6 +21,8 @@ except ImportError:
         primary_hue_chroma_region,
         source_colors,
         summarize_matcher_selection,
+        summarize_mode_aware_selection,
+        find_closest_theme,
         SCHEME_TYPES,
     )
 

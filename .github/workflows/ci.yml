@@ -113,9 +113,9 @@ jobs:
           root="$RUNNER_TEMP/deb-root"
           mkdir -p "$root/usr/share/icons/Unrelated"
           printf 'unrelated theme\n' > "$root/usr/share/icons/Unrelated/marker"
-          dpkg --root="$root" --admindir="$root/var/lib/dpkg" --force-depends --install "$package"
+          sudo dpkg --root="$root" --admindir="$root/var/lib/dpkg" --force-depends --install "$package"
           test -f "$root/usr/share/icons/Bibata-Material-Peach/index.theme"
           test -f "$root/usr/share/icons/Unrelated/marker"
-          dpkg --root="$root" --admindir="$root/var/lib/dpkg" --remove material-bibata-cursor
+          sudo dpkg --root="$root" --admindir="$root/var/lib/dpkg" --remove material-bibata-cursor
           test ! -e "$root/usr/share/icons/Bibata-Material-Peach"
           test -f "$root/usr/share/icons/Unrelated/marker"

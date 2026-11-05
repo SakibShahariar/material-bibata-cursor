@@ -49,6 +49,19 @@ jobs:
             --matugen matugen \
             --json-output "$RUNNER_TEMP/matugen-smart-coverage.json"
 
+
+      - name: Fetch pinned CC0 wallpaper sample
+        run: |
+          git clone --filter=blob:none https://github.com/rose-pine/wallpapers.git "$RUNNER_TEMP/wallpapers"
+          git -C "$RUNNER_TEMP/wallpapers" checkout ee39a37b24ab7700cc4d52f50b01a5d13df6a865
+
+      - name: Analyze Smart mode on real wallpaper images
+        run: |
+          python scripts/analyze_matugen_smart_coverage.py \
+            --matugen matugen \
+            --wallpaper-dir "$RUNNER_TEMP/wallpapers/photography" \
+            --json-output "$RUNNER_TEMP/matugen-wallpaper-coverage.json"
+
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
         with:
@@ -56,4 +69,5 @@ jobs:
           path: |
             ${{ runner.temp }}/matugen-coverage.json
             ${{ runner.temp }}/matugen-smart-coverage.json
+            ${{ runner.temp }}/matugen-wallpaper-coverage.json
           if-no-files-found: error

@@ -266,6 +266,7 @@ def summarize_palette_pairwise_separation(
         }
     return report
 
+
 def analyze(
     matugen: str, themes_path: Path
 ) -> dict[str, Any]:
@@ -378,7 +379,9 @@ def analyze(
             ),
         },
         "primary_fidelity_delta_e00": summarize(primary_values),
-        "palette_pairwise_separation": summarize_palette_pairwise_separation(material_themes),
+        "palette_pairwise_separation": summarize_palette_pairwise_separation(
+            material_themes
+        ),
         "current_matcher_score": summarize(matcher_values),
         "matcher_primary_selection": summarize_matcher_selection(samples),
         "mode_aware_matcher_score": summarize(

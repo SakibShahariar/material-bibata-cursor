@@ -17,6 +17,7 @@ try:
     )
 except ImportError:
     from analyze_matugen_coverage import (
+        summarize_palette_pairwise_separation,
         extract_primary_colors,
         percentile,
         primary_hue_chroma_region,

@@ -18,10 +18,10 @@ from tempfile import TemporaryDirectory
 from typing import Any
 
 try:
-    from .analyze_matugen_coverage import delta_e_hex
+    from .analyze_matugen_coverage import delta_e_hex, percentile
     from .color_match import find_closest_theme
 except ImportError:
-    from analyze_matugen_coverage import delta_e_hex
+    from analyze_matugen_coverage import delta_e_hex, percentile
     from color_match import find_closest_theme
 
 FIXTURES = (
@@ -226,6 +226,105 @@ def analyze_smart_images(matugen: str, themes_path: Path) -> dict[str, Any]:
     }
 
 
+
+def analyze_wallpaper_corpus(
+    matugen: str, themes: dict[str, dict[str, str]], wallpaper_dir: Path
+) -> dict[str, Any]:
+    """Measure Smart-mode coverage on a directory of real wallpaper images."""
+    supported = {".jpg", ".jpeg", ".png", ".webp"}
+    images = sorted(
+        path for path in wallpaper_dir.rglob("*")
+        if path.is_file() and path.suffix.lower() in supported
+    )
+    if not images:
+        raise ValueError(f"No supported wallpaper images found in {wallpaper_dir}")
+
+    material_themes = {
+        name: colors for name, colors in themes.items() if name != "Classic"
+    }
+    results = []
+    for image_path in images:
+        payload = run_smart_fixture(matugen, image_path, "#808080")
+        variant = payload.pop("_matugen_detected_variant")
+        mode = payload.get("mode")
+        if mode not in {"dark", "light"}:
+            raise ValueError(
+                f"Matugen returned an invalid Smart mode for {image_path}: {mode!r}"
+            )
+        try:
+            primary_hex = payload["colors"]["primary"][mode]["color"]
+        except (KeyError, TypeError) as exc:
+            raise ValueError(
+                f"Matugen JSON is missing selected Smart primary for {image_path}"
+            ) from exc
+
+        nearest_name = min(
+            material_themes,
+            key=lambda theme: delta_e_hex(
+                primary_hex, material_themes[theme]["primary"]
+            ),
+        )
+        nearest_delta = delta_e_hex(
+            primary_hex, material_themes[nearest_name]["primary"]
+        )
+        matcher_name, matcher_score = find_closest_theme(primary_hex, themes)
+        matcher_primary_delta = delta_e_hex(
+            primary_hex, themes[matcher_name]["primary"]
+        )
+        results.append({
+            "image": image_path.relative_to(wallpaper_dir).as_posix(),
+            "variant": variant,
+            "mode": mode,
+            "primary_hex": primary_hex,
+            "nearest_theme": nearest_name,
+            "primary_delta_e00": nearest_delta,
+            "matcher_theme": matcher_name,
+            "matcher_score": matcher_score,
+            "matcher_primary_delta_e00": matcher_primary_delta,
+        })
+
+    primary_values = [item["primary_delta_e00"] for item in results]
+    selected_values = [item["matcher_primary_delta_e00"] for item in results]
+    matcher_scores = [item["matcher_score"] for item in results]
+    mismatches = sum(
+        item["nearest_theme"] != item["matcher_theme"] for item in results
+    )
+    variants: dict[str, int] = {}
+    modes: dict[str, int] = {}
+    for item in results:
+        variants[item["variant"]] = variants.get(item["variant"], 0) + 1
+        modes[item["mode"]] = modes.get(item["mode"], 0) + 1
+
+    return {
+        "sampling": {
+            "image_count": len(results),
+            "supported_extensions": sorted(supported),
+            "variant_counts": variants,
+            "mode_counts": modes,
+            "representative_wallpaper_corpus": False,
+            "note": (
+                "This is a small curated third-party CC0 wallpaper collection. "
+                "It contains real images but is not a random or representative "
+                "sample of wallpaper users or wallpaper-derived colors."
+            ),
+        },
+        "nearest_primary_delta_e00": {
+            "median": percentile(primary_values, 0.5),
+            "p90": percentile(primary_values, 0.9),
+            "p95": percentile(primary_values, 0.95),
+            "worst": max(primary_values),
+        },
+        "live_matcher": {
+            "score_median": percentile(matcher_scores, 0.5),
+            "selected_primary_delta_e00_median": percentile(selected_values, 0.5),
+            "selected_primary_delta_e00_p90": percentile(selected_values, 0.9),
+            "selected_primary_delta_e00_worst": max(selected_values),
+            "different_from_primary_only_winner": mismatches,
+            "selection_mismatch_rate": mismatches / len(results),
+        },
+        "results": results,
+    }
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--matugen", default="matugen")
@@ -235,10 +334,16 @@ def main() -> int:
         default=Path(__file__).resolve().parent.parent / "themes.json",
     )
     parser.add_argument("--json-output", type=Path)
+    parser.add_argument("--wallpaper-dir", type=Path)
     args = parser.parse_args()
 
     try:
         report = analyze_smart_images(args.matugen, args.themes)
+        if args.wallpaper_dir:
+            themes = json.loads(args.themes.read_text(encoding="utf-8"))
+            report["wallpaper_corpus"] = analyze_wallpaper_corpus(
+                args.matugen, themes, args.wallpaper_dir
+            )
     except (OSError, subprocess.SubprocessError, ValueError, RuntimeError) as exc:
         print(f"Matugen Smart coverage failed: {exc}")
         return 1

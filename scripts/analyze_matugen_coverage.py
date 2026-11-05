@@ -211,6 +211,61 @@ def summarize(values: list[float]) -> dict[str, float]:
     }
 
 
+
+def summarize_palette_pairwise_separation(
+    themes: dict[str, dict[str, str]]
+) -> dict[str, Any]:
+    """Rank primary- and body-color separation for the 56 selectable palettes."""
+    material = {
+        name: colors for name, colors in themes.items() if name != "Classic"
+    }
+    scopes = {
+        "all": material,
+        "dark": {
+            name: colors for name, colors in material.items()
+            if not name.endswith("-Light")
+        },
+        "light": {
+            name: colors for name, colors in material.items()
+            if name.endswith("-Light")
+        },
+    }
+    report: dict[str, Any] = {}
+    for scope, candidates in scopes.items():
+        pairs = []
+        names = sorted(candidates)
+        for index, first in enumerate(names):
+            for second in names[index + 1:]:
+                first_colors = candidates[first]
+                second_colors = candidates[second]
+                pairs.append({
+                    "theme_a": first,
+                    "theme_b": second,
+                    "primary_delta_e00": delta_e_hex(
+                        first_colors["primary"], second_colors["primary"]
+                    ),
+                    "body_delta_e00": delta_e_hex(
+                        first_colors["body"], second_colors["body"]
+                    ),
+                })
+        closest_primary = sorted(
+            pairs, key=lambda item: item["primary_delta_e00"]
+        )
+        closest_body = sorted(pairs, key=lambda item: item["body_delta_e00"])
+        report[scope] = {
+            "candidate_count": len(candidates),
+            "pair_count": len(pairs),
+            "primary_pairs_below_delta_e_3": sum(
+                item["primary_delta_e00"] < 3.0 for item in pairs
+            ),
+            "body_pairs_below_delta_e_3": sum(
+                item["body_delta_e00"] < 3.0 for item in pairs
+            ),
+            "closest_primary_pairs": closest_primary[:10],
+            "closest_body_pairs": closest_body[:10],
+        }
+    return report
+
 def analyze(
     matugen: str, themes_path: Path
 ) -> dict[str, Any]:
@@ -323,6 +378,7 @@ def analyze(
             ),
         },
         "primary_fidelity_delta_e00": summarize(primary_values),
+        "palette_pairwise_separation": summarize_palette_pairwise_separation(material_themes),
         "current_matcher_score": summarize(matcher_values),
         "matcher_primary_selection": summarize_matcher_selection(samples),
         "mode_aware_matcher_score": summarize(
@@ -408,6 +464,17 @@ def main() -> int:
         f'{report["sampling"]["sample_count"]} '
         f'({selected["selection_mismatch_rate"]:.1%})'
     )
+    print("Closest within-mode primary pairs:")
+    for mode in ("dark", "light"):
+        pair_report = report["palette_pairwise_separation"][mode]
+        print(
+            f'  {mode}: '
+            + ", ".join(
+                f'{item["theme_a"]}/{item["theme_b"]} '
+                f'({item["primary_delta_e00"]:.2f})'
+                for item in pair_report["closest_primary_pairs"][:5]
+            )
+        )
     print("Worst primary matches:")
     for item in report["worst_primary_matches"]:
         print(

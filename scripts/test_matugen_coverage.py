@@ -11,6 +11,7 @@ try:
         source_colors,
         summarize_matcher_selection,
         summarize_mode_aware_selection,
+        summarize_palette_pairwise_separation,
         find_closest_theme,
         SCHEME_TYPES,
     )
@@ -35,6 +36,28 @@ class MatugenCoverageTests(unittest.TestCase):
         self.assertEqual(len({color for _, color in samples}), 216)
         self.assertEqual(len(SCHEME_TYPES), 9)
         self.assertNotIn("scheme-smart", SCHEME_TYPES)
+
+    def test_pairwise_report_covers_all_palettes_and_separates_modes(self):
+        themes = {
+            "A": {"primary": "#ff0000", "body": "#330000"},
+            "B": {"primary": "#ee0000", "body": "#440000"},
+            "A-Light": {"primary": "#aa0000", "body": "#eeeeee"},
+            "B-Light": {"primary": "#990000", "body": "#dddddd"},
+            "Classic": {"primary": "#ffffff", "body": "#000000"},
+        }
+        report = summarize_palette_pairwise_separation(themes)
+        self.assertEqual(report["all"]["candidate_count"], 4)
+        self.assertEqual(report["all"]["pair_count"], 6)
+        self.assertEqual(report["dark"]["candidate_count"], 2)
+        self.assertEqual(report["dark"]["pair_count"], 1)
+        self.assertEqual(report["light"]["candidate_count"], 2)
+        self.assertEqual(report["light"]["pair_count"], 1)
+        self.assertEqual(
+            report["dark"]["closest_primary_pairs"][0]["theme_a"], "A"
+        )
+        self.assertEqual(
+            report["dark"]["closest_primary_pairs"][0]["theme_b"], "B"
+        )
 
     def test_summarizes_matcher_selection_against_primary_only_winner(self):
         samples = [

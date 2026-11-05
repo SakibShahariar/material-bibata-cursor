@@ -22,19 +22,24 @@ for command in dpkg-deb dpkg sha256sum tar; do command -v "$command" >/dev/null 
 dpkg --validate-pkgname material-bibata-cursor
 dpkg --validate-version "$version"
 work_dir="$(mktemp -d)"; trap 'rm -rf "$work_dir"' EXIT
+dark_archive="bibata-material-dark-$archive_tag.tar.gz"; light_archive="bibata-material-light-$archive_tag.tar.gz"; checksum_file="SHA256SUMS-$archive_tag.txt"
 if [[ -z "$archives_dir" ]]; then
   command -v curl >/dev/null || { echo "curl is required to download release assets" >&2; exit 1; }
+  command -v python3 >/dev/null || { echo "python3 is required to read GitHub release digests" >&2; exit 1; }
   archives_dir="$work_dir/downloads"; mkdir -p "$archives_dir"
   base_url="https://github.com/SakibShahariar/material-bibata-cursor/releases/download/$archive_tag"
-  for asset in "bibata-material-dark-$archive_tag.tar.gz" "bibata-material-light-$archive_tag.tar.gz" "SHA256SUMS-$archive_tag.txt"; do
+  for asset in "$dark_archive" "$light_archive"; do
     curl --fail --location --silent --show-error "$base_url/$asset" --output "$archives_dir/$asset"
   done
+  # GitHub exposes SHA-256 digests in release API metadata. Do not assume
+  # a separate checksum manifest was uploaded with the release assets.
+  python3 "$script_dir/release_checksums.py" "$archive_tag" "$work_dir/linux-checksums.txt"
 else
   archives_dir="$(cd "$archives_dir" && pwd)"
+  [[ -f "$archives_dir/$checksum_file" ]] || { echo "Missing fixture checksum manifest: $archives_dir/$checksum_file" >&2; exit 1; }
+  grep -E "  (bibata-material-(dark|light)-$archive_tag\\.tar\\.gz)$" "$archives_dir/$checksum_file" > "$work_dir/linux-checksums.txt" || { echo "Checksum manifest does not list both Linux archives" >&2; exit 1; }
 fi
-dark_archive="bibata-material-dark-$archive_tag.tar.gz"; light_archive="bibata-material-light-$archive_tag.tar.gz"; checksum_file="SHA256SUMS-$archive_tag.txt"
-for asset in "$dark_archive" "$light_archive" "$checksum_file"; do [[ -f "$archives_dir/$asset" ]] || { echo "Missing release asset: $archives_dir/$asset" >&2; exit 1; }; done
-grep -E "  (bibata-material-(dark|light)-$archive_tag\\.tar\\.gz)$" "$archives_dir/$checksum_file" > "$work_dir/linux-checksums.txt" || { echo "Checksum manifest does not list both Linux archives" >&2; exit 1; }
+for asset in "$dark_archive" "$light_archive"; do [[ -f "$archives_dir/$asset" ]] || { echo "Missing release asset: $archives_dir/$asset" >&2; exit 1; }; done
 [[ "$(wc -l < "$work_dir/linux-checksums.txt")" -eq 2 ]] || { echo "Expected exactly two Linux archive checksums" >&2; exit 1; }
 (cd "$archives_dir" && sha256sum --check "$work_dir/linux-checksums.txt")
 mkdir -p "$work_dir/dark" "$work_dir/light"

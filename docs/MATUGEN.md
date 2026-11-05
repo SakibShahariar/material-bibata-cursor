@@ -68,14 +68,20 @@ mode; when given a hex color it warns and falls back to the default
 Tonal Spot/dark behavior. Smart mode therefore needs a separate test using
 real wallpaper images, not a misleading tenth color-seed run.
 
-Two measurements are reported separately:
+Three measurements are reported separately:
 
 - **Primary-only ΔE00:** distance from Matugen's generated primary color to
-  the closest of the 56 Material cursor palettes. This measures accent-color
-  fidelity; the original Classic theme is excluded from this measurement.
+  the closest of the 56 Material cursor palettes. This measures the best
+  available accent-color fidelity; the original Classic theme is excluded.
 - **Current matcher score:** the existing 75% primary / 25% body score used by
   the hook. The live matcher considers all entries in `themes.json`,
   including Classic.
+- **Selected-theme primary ΔE00:** distance from Matugen's generated primary
+  color to the primary color of the theme the live weighted matcher actually
+  selects. The report also counts cases where the weighted matcher selects a
+  different theme from the primary-only winner and quantifies the resulting
+  primary-fidelity regret. This distinguishes palette coverage limitations
+  from choices made by the current weighting formula.
 
 The report includes overall and per-scheme/mode distributions, source-hue
 bands, generated-primary CIELAB hue/chroma regions, the matcher's selection

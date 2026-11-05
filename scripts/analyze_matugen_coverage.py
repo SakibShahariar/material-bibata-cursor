@@ -154,6 +154,28 @@ def primary_hue_chroma_region(color_hex: str) -> str:
 
 
 
+def summarize_matcher_selection(samples: list[dict[str, Any]]) -> dict[str, Any]:
+    """Measure primary fidelity of the theme actually selected by the live matcher."""
+    selected_values = [item["matcher_primary_delta_e00"] for item in samples]
+    nearest_values = [item["primary_delta_e00"] for item in samples]
+    mismatches = sum(
+        item["matcher_theme"] != item["nearest_primary_theme"] for item in samples
+    )
+    regret_values = [
+        max(0.0, selected - nearest)
+        for selected, nearest in zip(selected_values, nearest_values)
+    ]
+    return {
+        "selected_primary_delta_e00": summarize(selected_values),
+        "selection_mismatch_count": mismatches,
+        "selection_mismatch_rate": mismatches / len(samples),
+        "primary_fidelity_regret_delta_e00": summarize(regret_values),
+        "selected_primary_samples_above_warning_threshold": sum(
+            value > NEAREST_PRESET_WARNING_DELTA_E for value in selected_values
+        ),
+    }
+
+
 def summarize(values: list[float]) -> dict[str, float]:
     return {
         "median": percentile(values, 0.50),
@@ -205,6 +227,9 @@ def analyze(
                 primary_score = delta_e_hex(
                     primary_hex, material_themes[primary_name]["primary"]
                 )
+                matcher_primary_score = delta_e_hex(
+                    primary_hex, themes[nearest_name]["primary"]
+                )
                 samples.append(
                     {
                         "source_hue": hue,
@@ -216,6 +241,7 @@ def analyze(
                         "primary_delta_e00": primary_score,
                         "matcher_theme": nearest_name,
                         "matcher_score": weighted_score,
+                        "matcher_primary_delta_e00": matcher_primary_score,
                     }
                 )
 
@@ -264,6 +290,7 @@ def analyze(
         },
         "primary_fidelity_delta_e00": summarize(primary_values),
         "current_matcher_score": summarize(matcher_values),
+        "matcher_primary_selection": summarize_matcher_selection(samples),
         "matcher_warning_threshold": NEAREST_PRESET_WARNING_DELTA_E,
         "matcher_samples_above_warning_threshold": sum(
             score > NEAREST_PRESET_WARNING_DELTA_E for score in matcher_values
@@ -326,6 +353,20 @@ def main() -> int:
         f'{report["matcher_samples_above_warning_threshold"]}/'
         f'{report["sampling"]["sample_count"]} above '
         f'{report["matcher_warning_threshold"]:.0f}'
+    )
+    selected = report["matcher_primary_selection"]
+    print(
+        "Selected-theme primary ΔE00: "
+        f'median {selected["selected_primary_delta_e00"]["median"]:.2f}, '
+        f'p90 {selected["selected_primary_delta_e00"]["p90"]:.2f}, '
+        f'p95 {selected["selected_primary_delta_e00"]["p95"]:.2f}, '
+        f'worst {selected["selected_primary_delta_e00"]["max"]:.2f}'
+    )
+    print(
+        "Matcher differs from primary-only winner: "
+        f'{selected["selection_mismatch_count"]}/'
+        f'{report["sampling"]["sample_count"]} '
+        f'({selected["selection_mismatch_rate"]:.1%})'
     )
     print("Worst primary matches:")
     for item in report["worst_primary_matches"]:

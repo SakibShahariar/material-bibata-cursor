@@ -9,6 +9,7 @@ try:
         percentile,
         primary_hue_chroma_region,
         source_colors,
+        summarize_matcher_selection,
         SCHEME_TYPES,
     )
 except ImportError:
@@ -29,6 +30,27 @@ class MatugenCoverageTests(unittest.TestCase):
         self.assertEqual(len({color for _, color in samples}), 216)
         self.assertEqual(len(SCHEME_TYPES), 9)
         self.assertNotIn("scheme-smart", SCHEME_TYPES)
+
+    def test_summarizes_matcher_selection_against_primary_only_winner(self):
+        samples = [
+            {
+                "matcher_theme": "A",
+                "nearest_primary_theme": "A",
+                "matcher_primary_delta_e00": 4.0,
+                "primary_delta_e00": 4.0,
+            },
+            {
+                "matcher_theme": "B",
+                "nearest_primary_theme": "A",
+                "matcher_primary_delta_e00": 9.0,
+                "primary_delta_e00": 5.0,
+            },
+        ]
+        result = summarize_matcher_selection(samples)
+        self.assertEqual(result["selection_mismatch_count"], 1)
+        self.assertEqual(result["selection_mismatch_rate"], 0.5)
+        self.assertEqual(result["primary_fidelity_regret_delta_e00"]["mean"], 2.0)
+        self.assertEqual(result["selected_primary_delta_e00"]["median"], 6.5)
 
     def test_extracts_both_generated_semantic_primary_roles(self):
         payload = {

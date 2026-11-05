@@ -9,6 +9,7 @@ on:
       - "scripts/test_matugen_coverage.py"
       - "scripts/analyze_matugen_smart_coverage.py"
       - "scripts/color_match.py"
+      - "scripts/cursor_matugen.sh"
       - "themes.json"
   workflow_dispatch:
 

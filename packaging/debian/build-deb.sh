@@ -57,9 +57,15 @@ for group_root in "${dark_roots[0]}" "${light_roots[0]}"; do
 done
 theme_count="$(find "$pkg_root/usr/share/icons" -mindepth 1 -maxdepth 1 -type d -name 'Bibata-Material-*' | wc -l)"
 [[ "$theme_count" -eq "$expected_themes" ]] || { echo "Expected $expected_themes theme directories, found $theme_count" >&2; exit 1; }
-dark_root="${dark_roots[0]}"
-for doc in LICENSE README.md CREDITS.txt; do [[ -f "$dark_root/$doc" ]] || { echo "Release archive is missing $doc" >&2; exit 1; }; done
-for doc in LICENSE README.md CREDITS.txt; do install -m 0644 "$dark_root/$doc" "$pkg_root/usr/share/doc/material-bibata-cursor/$doc"; done
+# Older published releases predate archive documentation bundling.
+# Ship current project documentation and the pinned artwork attribution from
+# this checkout instead of requiring files that are absent from v1.5.0 assets.
+for doc in LICENSE README.md; do
+  [[ -f "$repo_root/$doc" ]] || { echo "Repository is missing required documentation: $repo_root/$doc" >&2; exit 1; }
+  install -m 0644 "$repo_root/$doc" "$pkg_root/usr/share/doc/material-bibata-cursor/$doc"
+done
+[[ -f "$script_dir/CREDITS.txt" ]] || { echo "Missing artwork attribution: $script_dir/CREDITS.txt" >&2; exit 1; }
+install -m 0644 "$script_dir/CREDITS.txt" "$pkg_root/usr/share/doc/material-bibata-cursor/CREDITS.txt"
 cat > "$pkg_root/DEBIAN/control" <<EOF
 Package: material-bibata-cursor
 Version: $version
@@ -78,16 +84,24 @@ Upstream-Name: Material Bibata Cursor
 Source: https://github.com/SakibShahariar/material-bibata-cursor
 
 Files: usr/share/icons/Bibata-Material-*
-Copyright: Bibata Cursor contributors and Sakib Shahariar
-License: GPL-3.0-or-later
- The cursor artwork is derived from Bibata_Cursor and is distributed under
+Copyright: Bibata Cursor contributors; Abdulkaiz Khatri; Sakib Shahariar (modifications)
+License: GPL-3+
+ The cursor artwork is derived from Bibata Cursor and is distributed under
  the GNU General Public License, version 3 or (at your option) any later version.
- See the installed CREDITS.txt and upstream license for attribution and terms.
+ On Debian systems, the complete text is in /usr/share/common-licenses/GPL-3.
+ See the installed CREDITS.txt for source revision and attribution.
 
-Files: usr/share/doc/material-bibata-cursor/*
-Copyright: 2026 Sakib Shahariar and upstream contributors
-License: MIT and GPL-3.0-or-later
- See the included LICENSE and CREDITS.txt files for applicable terms.
+Files: usr/share/doc/material-bibata-cursor/LICENSE
+Copyright: 2026 Sakib Shahariar Shimanto
+License: MIT
+ The project tooling and documentation are distributed under the MIT License.
+ See the installed LICENSE file for the complete terms.
+
+Files: usr/share/doc/material-bibata-cursor/README.md usr/share/doc/material-bibata-cursor/CREDITS.txt
+Copyright: 2026 Sakib Shahariar Shimanto; Bibata Cursor contributors
+License: MIT and GPL-3+
+ See the installed LICENSE and CREDITS.txt files for the applicable project
+ and upstream artwork terms.
 EOF
 mkdir -p "$output_dir"
 output="$output_dir/material-bibata-cursor_${version}_all.deb"

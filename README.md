@@ -56,6 +56,9 @@ cd material-bibata-cursor
 python3 scripts/build_linux.py
 ```
 
+The builders use bounded CPU parallelism by default; pass `--jobs 1` to build
+themes serially.
+
 Common tasks (using [just](https://just.systems/)):
 
 ```sh

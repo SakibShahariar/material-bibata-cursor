@@ -1,5 +1,10 @@
 # Fedora RPM packaging
 
+> **Status: unverified / not published.** This spec has never been built in
+> COPR or installed with DNF. It is a contributed packaging starting point,
+> not a supported installation method. Validation is tracked in #10 and
+> publication in #50.
+
 This spec packages the prebuilt Linux release archives into a noarch RPM.
 It installs only `Bibata-Material-*` theme directories under
 `/usr/share/icons`; RPM owns those paths, so uninstalling the package does

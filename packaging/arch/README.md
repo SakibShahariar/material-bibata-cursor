@@ -1,5 +1,10 @@
 # Arch Linux package
 
+> **Status: unverified / not published.** This recipe has never been built with
+> `makepkg` or installed on an Arch system. It is a contributed packaging
+> starting point, not a supported installation method. Validation is tracked
+> in #11 and publication in #50.
+
 This directory contains the PKGBUILD and generated `.SRCINFO` for a system-wide
 package. It installs the compiled Xcursor, Hyprcursor, and scalable SVG theme
 trees under `/usr/share/icons`; it does not run a post-install script or touch
@@ -8,7 +13,7 @@ package's files on uninstall.
 
 ## Build and install
 
-The PKGBUILD currently targets release `v1.5.0` (`pkgver=1.5.0`). From an
+The PKGBUILD currently targets release `v1.6.0` (`pkgver=1.6.0`). From an
 Arch Linux system with `base-devel` installed, run:
 
 ```bash

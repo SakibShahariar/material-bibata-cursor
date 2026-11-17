@@ -1,5 +1,5 @@
 Name:           material-bibata-cursor
-Version:        1.5.0
+Version:        1.6.0
 Release:        1%{?dist}
 Summary:        Material Design 3 Bibata cursor themes
 License:        MIT AND GPL-3.0-or-later
@@ -47,5 +47,8 @@ install -Dpm 0644 dark/README.md \
 %{_datadir}/icons/Bibata-Material-*
 
 %changelog
+* Tue Nov 17 2026 Sakib Shahariar <74959773+SakibShahariar@users.noreply.github.com> - 1.6.0-1
+- Update to the 1.6.0 release archives (refined palettes, 11-size Xcursor ladder).
+
 * Wed Oct 21 2026 Sakib Shahariar <74959773+SakibShahariar@users.noreply.github.com> - 1.5.0-1
 - Initial Fedora RPM packaging using the upstream release archives.

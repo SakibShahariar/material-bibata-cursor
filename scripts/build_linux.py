@@ -31,6 +31,54 @@ from source_provenance import UPSTREAM_COMMIT, UPSTREAM_REPOSITORY as UPSTREAM_U
 THEME_PREFIX = "Bibata-Material-"
 MAX_DEFAULT_JOBS = 8
 
+# The pinned upstream renderer recolors and renders every cursor size in a
+# separate rsvg-convert process. Animation frames dominate this cost. Replace
+# the per-theme copy's render method with one that renders each unique source
+# once at the largest size and downsizes the remaining sizes in-process.
+RENDER_METHOD_ORIGINAL = """    def render(self, render: CursorRender, cdir: str = ''):
+        dirPath = cdir if cdir else self.name
+        for src, basename, size in self.renders:
+            dst = Path(f'{dirPath}/{basename}')
+
+            if dst.suffix == '.svg':
+                Utils.svg_recolor(render.color_maps, src, dst)
+            elif dst.suffix == '.png':
+                tmp = Path('/tmp/.cursor.0248.svg')
+                Utils.svg_recolor(render.color_maps, src, tmp)
+                Utils.svg_convert(tmp, dst, size, size)
+                tmp.unlink()
+            else:
+                logger.warning(f'cursor `{self.name}`: undefined render suffix: {dst}')
+"""
+
+RENDER_METHOD_DOWNSCALE = """    def render(self, render: CursorRender, cdir: str = ''):
+        from PIL import Image
+        dirPath = cdir if cdir else self.name
+        cache: dict[bytes, Image.Image] = {}
+        for src, basename, size in self.renders:
+            dst = Path(f'{dirPath}/{basename}')
+
+            if dst.suffix == '.svg':
+                Utils.svg_recolor(render.color_maps, src, dst)
+            elif dst.suffix == '.png':
+                tmp = Path('/tmp/.cursor.0248.svg')
+                Utils.svg_recolor(render.color_maps, src, tmp)
+                key = tmp.read_bytes()
+                if key not in cache:
+                    preview = tmp.with_suffix('.preview.png')
+                    Utils.svg_convert(tmp, preview, 96, 96)
+                    cache[key] = Image.open(preview).convert('RGBA')
+                    preview.unlink()
+                image = cache[key]
+                if image.size == (size, size):
+                    image.save(dst)
+                else:
+                    image.resize((size, size), Image.Resampling.LANCZOS).save(dst)
+                tmp.unlink()
+            else:
+                logger.warning(f'cursor `{self.name}`: undefined render suffix: {dst}')
+"""
+
 
 def default_jobs() -> int:
     """Bounded parallel default; --jobs 1 remains available for serial builds."""
@@ -189,12 +237,23 @@ def default_scalable_dir(install_dir: Path) -> Path:
 
 
 def isolate_upstream_temp_file(work_dir: Path) -> None:
-    """Avoid collisions in the pinned upstream renderer's shared /tmp filename."""
+    """Isolate renderer temp files and render each source once at 96px.
+
+    The per-theme copy is patched so cursor sizes are produced by downscaling
+    a single librsvg render instead of one rsvg-convert process per size.
+    """
     cursor_utils = work_dir / "src" / "cursor_utils.py"
     try:
         source = cursor_utils.read_text(encoding="utf-8")
     except OSError as exc:
         raise BuildError(f"could not read upstream cursor utility: {exc}") from exc
+
+    if source.count(RENDER_METHOD_ORIGINAL) != 1:
+        raise BuildError(
+            "pinned upstream cursor utility no longer has the expected render "
+            "method; review the upstream renderer before building"
+        )
+    source = source.replace(RENDER_METHOD_ORIGINAL, RENDER_METHOD_DOWNSCALE)
 
     original = "tmp = Path('/tmp/.cursor.0248.svg')"
     replacement = "tmp = Path(f'/tmp/.cursor.{Path.cwd().name}.svg')"

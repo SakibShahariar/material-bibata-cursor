@@ -152,6 +152,12 @@ check-deps:
             echo "✗ Python 3.12+ required (tomllib is part of the standard library)"
             missing=1
         fi
+        if python3 -c 'from PIL import Image' >/dev/null 2>&1; then
+            echo "✓ Pillow"
+        else
+            echo "✗ Pillow (install with: python3 -m pip install Pillow)"
+            missing=1
+        fi
     fi
     if [ "$missing" -eq 1 ]; then
         echo ""

@@ -37,6 +37,9 @@ source canvas.
 The Python Linux builder clones or updates the pinned `bibata_cursor`
 source, patches its render config with each theme's colors, then compiles
 and installs to `~/.icons` (Xcursor `cursors/` + Hyprland `hyprcursors/`).
+To keep animation-heavy builds fast, the patched renderer rasterizes each
+unique source once at 96px with librsvg and produces the smaller Xcursor
+sizes by in-process downscaling with Pillow.
 `index.theme` is written immediately after each theme installs. The same
 SVG sources are recolored into a `cursors_scalable/` tree under
 `$XDG_DATA_HOME/icons`.

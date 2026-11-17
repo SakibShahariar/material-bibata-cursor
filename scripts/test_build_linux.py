@@ -137,8 +137,7 @@ class ThemeSelectionTests(unittest.TestCase):
 
 def upstream_cursor_utils_source(temp_path="/tmp/.cursor.0248.svg"):
     """Representative source from the pinned upstream cursor_utils.py."""
-    return "\n".join([
-        f"tmp = Path('{temp_path}')",
+    source = build_linux.RENDER_METHOD_ORIGINAL + "\n".join([
         "    @classmethod",
         "    def zip_dir(cls, cdir: Path, out: Path):",
         "        with zipfile.ZipFile(out, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:",
@@ -146,6 +145,7 @@ def upstream_cursor_utils_source(temp_path="/tmp/.cursor.0248.svg"):
         "                zipf.write(item, arcname=item.relative_to(cdir))",
         "",
     ])
+    return source.replace("/tmp/.cursor.0248.svg", temp_path)
 
 
 class UpstreamTempFileTests(unittest.TestCase):
@@ -162,6 +162,23 @@ class UpstreamTempFileTests(unittest.TestCase):
             patched = utility.read_text(encoding="utf-8")
             self.assertIn("Path.cwd().name", patched)
             self.assertIn("date_time=(1980, 1, 1, 0, 0, 0)", patched)
+
+    def test_renders_each_source_once_and_downscales_sizes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            work_dir = Path(temporary)
+            source_dir = work_dir / "src"
+            source_dir.mkdir()
+            (source_dir / "cursor_utils.py").write_text(
+                upstream_cursor_utils_source(), encoding="utf-8"
+            )
+
+            build_linux.isolate_upstream_temp_file(work_dir)
+
+            patched = (source_dir / "cursor_utils.py").read_text(encoding="utf-8")
+            self.assertIn("from PIL import Image", patched)
+            self.assertIn("cache: dict[bytes, Image.Image]", patched)
+            self.assertIn("Image.Resampling.LANCZOS", patched)
+            self.assertNotIn("Utils.svg_convert(tmp, dst, size, size)", patched)
 
     def test_rejects_unrecognized_upstream_temp_file_implementation(self):
         with tempfile.TemporaryDirectory() as temporary:

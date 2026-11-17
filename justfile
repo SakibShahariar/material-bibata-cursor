@@ -51,6 +51,10 @@ svg-one theme:
 gallery-previews *flags:
     python3 scripts/generate_gallery_previews.py {{flags}}
 
+# Regenerate recolorable SVG templates for the gallery customizer
+gallery-templates:
+    python3 scripts/generate_gallery_templates.py
+
 # Set an installed theme as the active cursor, e.g. `just apply Apricot`
 apply theme:
     python3 scripts/apply_theme.py {{theme}}

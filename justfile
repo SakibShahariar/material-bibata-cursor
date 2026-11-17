@@ -43,6 +43,10 @@ svg:
 svg-one theme:
     python3 scripts/generate_svg_cursors.py --theme {{theme}}
 
+# Regenerate real-cursor gallery previews from installed themes
+gallery-previews *flags:
+    python3 scripts/generate_gallery_previews.py {{flags}}
+
 # Set an installed theme as the active cursor, e.g. `just apply Apricot`
 apply theme:
     python3 scripts/apply_theme.py {{theme}}

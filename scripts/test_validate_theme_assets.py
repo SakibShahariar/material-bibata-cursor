@@ -45,7 +45,7 @@ class XcursorSizeValidationTests(unittest.TestCase):
 
     def test_rejects_missing_size(self):
         sizes = parse_xcursor_sizes(
-            make_xcursor(sorted(EXPECTED_XCURSOR_SIZES - {66})),
+            make_xcursor(sorted(EXPECTED_XCURSOR_SIZES - {96})),
             Path("cursor"),
         )
         with self.assertRaisesRegex(ValidationError, "expected Xcursor sizes"):

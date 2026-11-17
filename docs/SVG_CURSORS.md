@@ -23,16 +23,14 @@ If you installed themes before SVG export existed, there's nothing to
 undo: `just svg` regenerates the scalable tree without recompiling
 anything.
 
-Cursors are compiled at more sizes than upstream's default — every exact
-size a 24px cursor hits across common fractional display scaling steps.
-The Xcursor bitmap ladder is **12, 16, 18, 20, 22, 24, 28, 30, 32, 36,
-42, 48, 54, 60, 64, 66, 72, 84, and 96px**. It combines the pinned
-Bibata defaults with the extra sizes in build_linux.py. CI validates
-that every generated Xcursor file contains this complete size set.
-Without an exact match, some apps scale the nearest available bitmap
-instead, which can look blurry on fractional scaling. Windows .cur
-files use a separate 16, 24, 32, 48, 64, and 128px ladder; scalable SVG
-cursors retain a 256-unit source canvas.
+The Xcursor bitmap ladder is the pinned Bibata default:
+**16, 20, 22, 24, 28, 32, 48, 64, 72, 84, and 96px**. CI validates that
+every generated Xcursor file contains this complete size set. This keeps
+build cost and release size aligned with upstream; sizes between these
+steps are interpolated by the desktop, which can look slightly soft at
+some fractional scaling factors. Windows `.cur` files use a separate 16,
+24, 32, 48, 64, and 128px ladder; scalable SVG cursors retain a 256-unit
+source canvas.
 
 ## Build flow
 

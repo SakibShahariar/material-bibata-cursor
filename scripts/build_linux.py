@@ -29,7 +29,6 @@ from pathlib import Path
 
 from source_provenance import UPSTREAM_COMMIT, UPSTREAM_REPOSITORY as UPSTREAM_URL
 THEME_PREFIX = "Bibata-Material-"
-EXTRA_X11_SIZES = (12, 18, 30, 36, 42, 54, 60, 66)
 
 
 class BuildError(RuntimeError):
@@ -137,7 +136,7 @@ def patch_theme_config(work_dir: Path, theme: str, colors: dict) -> None:
             or any(type(size) is not int or size <= 0 for size in sizes)
         ):
             raise ValueError("cursor_defaults.x11_sizes is missing or invalid")
-        merged_sizes = sorted(set(sizes).union(EXTRA_X11_SIZES))
+        merged_sizes = sorted(set(sizes))
         text = config_path.read_text(encoding="utf-8")
         lines = text.splitlines()
         section = None

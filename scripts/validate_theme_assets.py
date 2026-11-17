@@ -14,11 +14,10 @@ from pathlib import Path, PurePosixPath
 
 THEME_PREFIX = "Bibata-Material-"
 
-# Union of the pinned Bibata default sizes and build_linux.py's extra
-# fractional-scaling sizes. Keep this in sync with docs/SVG_CURSORS.md.
+# The pinned Bibata Xcursor size ladder. Keep this in sync with
+# docs/SVG_CURSORS.md and scripts/bibata_cursor/config/build.toml.
 EXPECTED_XCURSOR_SIZES = {
-    12, 16, 18, 20, 22, 24, 28, 30, 32, 36,
-    42, 48, 54, 60, 64, 66, 72, 84, 96,
+    16, 20, 22, 24, 28, 32, 48, 64, 72, 84, 96,
 }
 XCURSOR_IMAGE_TYPE = 0xFFFD0002
 XCURSOR_FILE_HEADER = struct.Struct("<4sIII")

@@ -103,8 +103,8 @@ tracked by #40.
 
 - **Formats:** Xcursor, Hyprcursor, scalable SVG, and Windows `.cur` /
   `.ani`.
-- **Sizes:** Xcursor 12, 16, 18, 20, 22, 24, 28, 30, 32, 36, 42, 48,
-  54, 60, 64, 66, 72, 84, and 96px; Windows `.cur` 16, 24, 32, 48,
+- **Sizes:** Xcursor 16, 20, 22, 24, 28, 32, 48, 64, 72, 84, and 96px
+  (the pinned Bibata default ladder); Windows `.cur` 16, 24, 32, 48,
   64, and 128px; SVG source canvas 256 units.
 - **Hotspots and animation:** SVG frame metadata uses absolute 256-unit
   hotspot coordinates. `wait` and `left_ptr_watch` are 54-frame
@@ -122,9 +122,11 @@ tracked by #40.
    currently resolves this name to `grabbing`. This is a semantic gap,
    not a reason to silently change the mapping; #44 tracks whether to add
    dedicated move/resize art or choose an explicit alias.
-3. Keep the exact-size Xcursor ladder: KDE's documented fractional-scaling
-   workaround and Capitaine's DPI strategy both reinforce shipping exact
-   physical sizes where source SVGs are available.
+3. The pinned Bibata Xcursor ladder is retained as-is; KDE's documented
+   fractional-scaling workaround and Capitaine's DPI strategy describe
+   why exact sizes help, but the added intermediate sizes were removed to
+   keep build cost and release size aligned with upstream. Reintroducing
+   them would need fresh visual validation under #38/#57.
 4. Keep the Hyprcursor metadata contract separate from SVG metadata:
    normalized hotspots and resize algorithms need explicit conversion and
    validation.

@@ -192,7 +192,7 @@ class UpstreamTempFileTests(unittest.TestCase):
 
 
 class ConfigPatchTests(unittest.TestCase):
-    def test_patches_colors_and_adds_sizes_without_losing_existing_sizes(self):
+    def test_patches_colors_and_preserves_upstream_sizes(self):
         with tempfile.TemporaryDirectory() as temporary:
             work_dir = Path(temporary)
             config_dir = work_dir / "config"
@@ -228,8 +228,8 @@ class ConfigPatchTests(unittest.TestCase):
             config = tomllib.loads((config_dir / "build.toml").read_text(encoding="utf-8"))
             self.assertEqual(config["other"]["x11_sizes"], [1])
             sizes = config["cursor_defaults"]["x11_sizes"]
-            self.assertTrue({12, 18, 24, 30, 32, 36, 42, 48, 54, 60, 66}.issubset(sizes))
-            self.assertEqual(sizes, sorted(set(sizes)))
+            self.assertEqual(sizes, [24, 32, 48])
+
 
 class UpstreamSourceMountTests(unittest.TestCase):
     def make_source_tree(self, root: Path) -> Path:

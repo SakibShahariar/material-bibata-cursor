@@ -9,6 +9,7 @@ pkgbase = material-bibata-cursor
 	depends = hicolor-icon-theme
 	makedepends = git
 	makedepends = python>=3.12
+	makedepends = python-pillow
 	makedepends = librsvg
 	makedepends = xorg-xcursorgen
 	makedepends = licenses

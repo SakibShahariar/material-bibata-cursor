@@ -16,6 +16,25 @@ import build_linux
 from spinner_colors import RAINBOW_MATCHES, spinner_shades
 
 
+class RunOutputTests(unittest.TestCase):
+    def test_quiet_success_suppresses_output(self):
+        with mock.patch.object(build_linux.subprocess, "run") as proc:
+            proc.return_value = SimpleNamespace(returncode=0, stdout="noise", stderr="noise")
+            with mock.patch.object(build_linux, "print") as printer:
+                build_linux.run([sys.executable, "-c", "pass"], quiet=True)
+            printer.assert_not_called()
+
+    def test_quiet_failure_surfaces_captured_output(self):
+        with mock.patch.object(build_linux.subprocess, "run") as proc:
+            proc.return_value = SimpleNamespace(returncode=2, stdout="out-line\n", stderr="err-line\n")
+            with mock.patch.object(build_linux, "print") as printer:
+                with self.assertRaises(build_linux.BuildError):
+                    build_linux.run([sys.executable, "-c", "pass"], quiet=True)
+            printed = " ".join(str(call) for call in printer.call_args_list)
+            self.assertIn("out-line", printed)
+            self.assertIn("err-line", printed)
+
+
 class LoadThemesTests(unittest.TestCase):
     def write_json(self, directory: Path, value) -> Path:
         path = directory / "themes.json"
@@ -369,7 +388,7 @@ class ParallelBuildIsolationTests(unittest.TestCase):
             }
             renderer_cwds: list[str] = []
 
-            def fake_run(command, *, cwd=None):
+            def fake_run(command, *, cwd=None, quiet=False):
                 if str(command[0]).endswith("cursor_utils.py"):
                     renderer_cwds.append(str(cwd))
                     (cwd / "out" / "Bibata-Modern-Classic").mkdir(parents=True)

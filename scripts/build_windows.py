@@ -233,6 +233,7 @@ def build_theme(
     themes: dict,
     out_base: Path,
     svg_index: tuple[dict[str, Path], dict[str, list[Path]]] | None = None,
+    verbose: bool = True,
 ) -> int:
     theme = themes[theme_key]
     body, primary, watch = theme["body"], theme["primary"], theme["watch"]
@@ -314,7 +315,8 @@ def build_theme(
 
     write_index_theme(theme_dir, theme_key)
     write_install_inf(theme_dir, theme_key)
-    print(f"  {theme_key}: {ok} cursors")
+    if verbose:
+        print(f"  {theme_key}: {ok} cursors")
     return fail
 
 
@@ -450,6 +452,7 @@ def main() -> None:
     parser.add_argument("--only-light", action="store_true")
     parser.add_argument("--only-dark", action="store_true")
     parser.add_argument("--exclude", default=None)
+    parser.add_argument("--verbose", action="store_true", help="Show full builder output instead of concise progress")
     parser.add_argument(
         "--jobs", type=int, default=default_jobs(),
         help="Number of themes to build concurrently (default: min(8, CPU count))",
@@ -480,10 +483,12 @@ def main() -> None:
     out_base = args.output_dir.expanduser().resolve()
     out_base.mkdir(parents=True, exist_ok=True)
 
+    total = len(names)
     total_ok, total_fail = 0, 0
+    completed = 0
     with ThreadPoolExecutor(max_workers=args.jobs) as executor:
         futures = {
-            executor.submit(build_theme, name, themes, out_base, svg_index): name
+            executor.submit(build_theme, name, themes, out_base, svg_index, args.verbose): name
             for name in names
         }
         for future in as_completed(futures):
@@ -497,9 +502,12 @@ def main() -> None:
                 total_fail += failures
             else:
                 total_ok += 1
+            completed += 1
+            if not args.verbose:
+                mark = "✓" if not failures else "✗"
+                print(f"  [{completed}/{total}] {mark} {name}", flush=True)
 
-    print(f"\nDone: {total_ok} theme(s) succeeded, {total_fail} cursor/theme failure(s)")
-    print(f"Output: {out_base}")
+    print(f"Done: {total_ok} succeeded, {total_fail} failed.")
     if total_fail:
         sys.exit(1)
 

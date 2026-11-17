@@ -90,9 +90,24 @@ class BuildError(RuntimeError):
     """A build prerequisite, source, or per-theme operation failed."""
 
 
-def run(command: list[str], *, cwd: Path | None = None) -> None:
-    result = subprocess.run(command, cwd=cwd)
+def run(command: list[str], *, cwd: Path | None = None, quiet: bool = False) -> None:
+    """Run a subprocess, capturing its output when quiet to avoid spam.
+
+    Captured output is discarded on success but surfaced on failure so errors
+    are never hidden.
+    """
+    result = subprocess.run(
+        command, cwd=cwd,
+        stdout=subprocess.PIPE if quiet else None,
+        stderr=subprocess.PIPE if quiet else None,
+        text=True,
+    )
     if result.returncode:
+        if quiet:
+            if result.stdout:
+                print(result.stdout, file=sys.stdout, end="")
+            if result.stderr:
+                print(result.stderr, file=sys.stderr, end="")
         raise BuildError(
             f"command failed with exit code {result.returncode}: "
             + " ".join(map(str, command))
@@ -342,9 +357,11 @@ def build_one(
     install_dir: Path,
     scalable_dir: Path,
     themes_json: Path,
+    verbose: bool = False,
 ) -> tuple[str, bool, str]:
     """Build one theme in an isolated work directory, then safely install it."""
     theme_name = f"{THEME_PREFIX}{theme}"
+    quiet = not verbose
     try:
         with tempfile.TemporaryDirectory(prefix=f"run-{theme}-", dir=build_dir) as temp:
             work_dir = Path(temp)
@@ -365,8 +382,11 @@ def build_one(
                     "Bibata-Modern-Classic",
                     "--out-dir",
                     str(output_dir),
+                    "--log-level",
+                    "error",
                 ],
                 cwd=work_dir,
+                quiet=quiet,
             )
             compiled_theme = work_dir / output_dir / "Bibata-Modern-Classic"
             if not compiled_theme.is_dir():
@@ -387,7 +407,8 @@ def build_one(
                     str(themes_json),
                     "--script-dir",
                     str(script_dir),
-                ]
+                ],
+                quiet=quiet,
             )
         return theme, True, f"Installed {theme_name}"
     except Exception as exc:
@@ -443,6 +464,7 @@ def main() -> int:
     parser.add_argument("--exclude", help="Comma-separated theme names to skip")
     parser.add_argument("--only-light", action="store_true", help="Build only -Light themes")
     parser.add_argument("--only-dark", action="store_true", help="Build only dark themes (and Classic)")
+    parser.add_argument("--verbose", action="store_true", help="Show full builder output instead of concise progress")
     parser.add_argument(
         "--jobs", type=int, default=default_jobs(),
         help="Number of themes to build concurrently (default: min(8, CPU count))",
@@ -485,8 +507,10 @@ def main() -> int:
         if args.scalable_dir
         else default_scalable_dir(install_dir).resolve()
     )
-    print(f"Building {len(selected)} theme(s) with {args.jobs} worker(s)...")
+    total = len(selected)
+    print(f"Building {total} theme(s) with {args.jobs} worker(s)...")
     failures = 0
+    completed = 0
     with ThreadPoolExecutor(max_workers=args.jobs) as executor:
         futures = {
             executor.submit(
@@ -498,17 +522,23 @@ def main() -> int:
                 install_dir=install_dir,
                 scalable_dir=scalable_dir,
                 themes_json=themes_json,
+                verbose=args.verbose,
             ): name
             for name in selected
         }
         for future in as_completed(futures):
             name, success, message = future.result()
-            print(message, file=sys.stdout if success else sys.stderr)
+            completed += 1
+            if not success:
+                print(message, file=sys.stderr)
+            if args.verbose:
+                print(message, file=sys.stdout if success else sys.stderr)
+            else:
+                mark = "✓" if success else "✗"
+                print(f"  [{completed}/{total}] {mark} {name}", flush=True)
             failures += not success
 
-    print(f"\nFinished: {len(selected) - failures} succeeded, {failures} failed.")
-    print(f"Xcursor themes installed to: {install_dir}")
-    print(f"Scalable SVG themes installed to: {scalable_dir}")
+    print(f"Done: {total - failures} succeeded, {failures} failed.")
     return 1 if failures else 0
 
 

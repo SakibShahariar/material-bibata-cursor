@@ -15,6 +15,10 @@ vendor *flags:
 build:
     python3 scripts/build_linux.py
 
+# Build all themes with full verbose builder output
+build-verbose:
+    python3 scripts/build_linux.py --verbose
+
 # Build a single theme by name, e.g. `just build-one Apricot`
 build-one theme:
     python3 scripts/build_linux.py {{theme}}

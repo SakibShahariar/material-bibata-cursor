@@ -59,7 +59,8 @@ python3 scripts/build_linux.py
 ```
 
 The builders use bounded CPU parallelism by default; pass `--jobs 1` to build
-themes serially.
+themes serially. Output is intentionally concise (progress + summary); pass
+`--verbose` (or `just build-verbose`) to see the full build logs.
 
 Common tasks (using [just](https://just.systems/)):
 

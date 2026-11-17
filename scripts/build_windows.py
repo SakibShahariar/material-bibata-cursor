@@ -19,6 +19,7 @@ Usage:
 
 import argparse
 import json
+import os
 import struct
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import subprocess
@@ -42,6 +43,12 @@ RSVG_CONVERT = "rsvg-convert"
 WINDOWS_SIZES = [16, 24, 32, 48, 64, 128]
 ANI_SIZE = 32
 THEME_PREFIX = "Bibata-Material-"
+MAX_DEFAULT_JOBS = 8
+
+
+def default_jobs() -> int:
+    """Bounded parallel default; --jobs 1 remains available for serial builds."""
+    return min(MAX_DEFAULT_JOBS, os.cpu_count() or 1)
 
 RIFF_HEADER = struct.Struct("<4sI4s")
 CHUNK_HEADER = struct.Struct("<4sI")
@@ -440,7 +447,10 @@ def main() -> None:
     parser.add_argument("--only-light", action="store_true")
     parser.add_argument("--only-dark", action="store_true")
     parser.add_argument("--exclude", default=None)
-    parser.add_argument("--jobs", type=int, default=1, help="Number of themes to build concurrently (default: 1)")
+    parser.add_argument(
+        "--jobs", type=int, default=default_jobs(),
+        help="Number of themes to build concurrently (default: min(8, CPU count))",
+    )
     parser.add_argument("--output-dir", type=Path, default=REPO_ROOT / "out_win", help="Output directory (default: out_win)")
     args = parser.parse_args()
     if sys.version_info < (3, 12):

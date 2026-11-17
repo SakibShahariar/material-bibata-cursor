@@ -152,6 +152,18 @@ class ThemeSelectionTests(unittest.TestCase):
             build_windows.filter_themes(self.themes, self.args(themes="Missing"))
 
 
+class DefaultJobsTests(unittest.TestCase):
+    def test_uses_cpu_count_bounded_by_eight(self):
+        with patch.object(build_windows.os, "cpu_count", return_value=4):
+            self.assertEqual(build_windows.default_jobs(), 4)
+        with patch.object(build_windows.os, "cpu_count", return_value=32):
+            self.assertEqual(build_windows.default_jobs(), build_windows.MAX_DEFAULT_JOBS)
+
+    def test_falls_back_to_one_when_cpu_count_is_unavailable(self):
+        with patch.object(build_windows.os, "cpu_count", return_value=None):
+            self.assertEqual(build_windows.default_jobs(), 1)
+
+
 class ParallelThemeBuildTests(unittest.TestCase):
     def test_concurrent_themes_only_write_their_own_tree(self):
         with tempfile.TemporaryDirectory() as temporary:

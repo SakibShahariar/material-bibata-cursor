@@ -29,6 +29,12 @@ from pathlib import Path
 
 from source_provenance import UPSTREAM_COMMIT, UPSTREAM_REPOSITORY as UPSTREAM_URL
 THEME_PREFIX = "Bibata-Material-"
+MAX_DEFAULT_JOBS = 8
+
+
+def default_jobs() -> int:
+    """Bounded parallel default; --jobs 1 remains available for serial builds."""
+    return min(MAX_DEFAULT_JOBS, os.cpu_count() or 1)
 
 
 class BuildError(RuntimeError):
@@ -374,7 +380,10 @@ def main() -> int:
     parser.add_argument("--exclude", help="Comma-separated theme names to skip")
     parser.add_argument("--only-light", action="store_true", help="Build only -Light themes")
     parser.add_argument("--only-dark", action="store_true", help="Build only dark themes (and Classic)")
-    parser.add_argument("--jobs", type=int, default=1, help="Number of themes to build concurrently (default: 1)")
+    parser.add_argument(
+        "--jobs", type=int, default=default_jobs(),
+        help="Number of themes to build concurrently (default: min(8, CPU count))",
+    )
     parser.add_argument(
         "--install-dir",
         type=Path,

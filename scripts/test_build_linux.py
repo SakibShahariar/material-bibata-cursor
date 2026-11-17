@@ -298,6 +298,18 @@ class UpstreamSourceMountTests(unittest.TestCase):
             self.assertTrue((build_dir / "src" / "cursor_utils.py").is_file())
 
 
+class DefaultJobsTests(unittest.TestCase):
+    def test_uses_cpu_count_bounded_by_eight(self):
+        with mock.patch.object(build_linux.os, "cpu_count", return_value=4):
+            self.assertEqual(build_linux.default_jobs(), 4)
+        with mock.patch.object(build_linux.os, "cpu_count", return_value=32):
+            self.assertEqual(build_linux.default_jobs(), build_linux.MAX_DEFAULT_JOBS)
+
+    def test_falls_back_to_one_when_cpu_count_is_unavailable(self):
+        with mock.patch.object(build_linux.os, "cpu_count", return_value=None):
+            self.assertEqual(build_linux.default_jobs(), 1)
+
+
 class ParallelBuildIsolationTests(unittest.TestCase):
     def test_concurrent_builds_use_unique_workdirs_and_leave_source_unchanged(self):
         with tempfile.TemporaryDirectory() as temporary:

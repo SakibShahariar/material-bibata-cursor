@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Unit tests for Windows SVG source indexing and cursor-name resolution."""
+import json
 import shutil
 import sys
 import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import patch
 from pathlib import Path
 
@@ -148,6 +150,74 @@ class ThemeSelectionTests(unittest.TestCase):
     def test_rejects_unknown_requested_theme(self):
         with self.assertRaises(ValueError):
             build_windows.filter_themes(self.themes, self.args(themes="Missing"))
+
+
+class ParallelThemeBuildTests(unittest.TestCase):
+    def test_concurrent_themes_only_write_their_own_tree(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "bibata_cursor"
+            (source / "config").mkdir(parents=True)
+            svg_dir = source / "svg"
+            svg_dir.mkdir()
+            (svg_dir / "pointer.svg").write_text("<svg/>", encoding="utf-8")
+            (source / "config" / "render.json").write_text(
+                json.dumps({
+                    "Bibata-Modern-Classic": {
+                        "colors": [{"replace": "#000000"} for _ in range(3)]
+                    }
+                }),
+                encoding="utf-8",
+            )
+            (source / "config" / "build.toml").write_text(
+                '[cursors.left_ptr]\nx11_name = "left_ptr"\n'
+                '[cursor_defaults]\nx_hotspot = 128\ny_hotspot = 128\n',
+                encoding="utf-8",
+            )
+            out = root / "out"
+            themes = {
+                name: {"body": "#112233", "primary": "#AABBCC", "watch": "#000000"}
+                for name in ("Peach", "Peach-Light", "Apricot", "Apricot-Light")
+            }
+
+            def fake_recolor(svg_path, colors, dst):
+                dst.parent.mkdir(parents=True, exist_ok=True)
+                dst.write_text("<svg/>", encoding="utf-8")
+
+            def fake_render(svg_path, png_path, size):
+                png_path.write_bytes(b"png")
+
+            with patch.object(build_windows, "SVG_DIR", svg_dir), \
+                 patch.object(build_windows, "BIBATA_DIR", source), \
+                 patch.object(build_windows, "RENDER_JSON", source / "config" / "render.json"), \
+                 patch.object(build_windows, "CONFIG_TOML", source / "config" / "build.toml"), \
+                 patch.object(build_windows, "recolor_svg", side_effect=fake_recolor), \
+                 patch.object(build_windows, "render_svg_to_png", side_effect=fake_render), \
+                 patch.object(build_windows, "create_cur", side_effect=lambda images, dst: dst.write_bytes(b"cur")), \
+                 patch.object(build_windows, "write_ani", side_effect=lambda frames, dst, *a: dst.write_bytes(b"ani")):
+                with ThreadPoolExecutor(max_workers=4) as executor:
+                    failures = list(executor.map(
+                        lambda name: build_windows.build_theme(name, themes, out),
+                        themes,
+                    ))
+
+            self.assertEqual(failures, [0, 0, 0, 0])
+            self.assertEqual(
+                sorted(path.name for path in out.iterdir()),
+                sorted(f"Bibata-Material-{name}" for name in themes),
+            )
+            for name in themes:
+                theme_dir = out / f"Bibata-Material-{name}"
+                self.assertEqual(
+                    (theme_dir / "index.theme").read_text(encoding="utf-8").splitlines()[1],
+                    f"Name=Bibata-Material-{name.replace('-', ' ')}",
+                )
+                self.assertFalse(list(theme_dir.rglob("_tmp")))
+                self.assertEqual(
+                    sorted(path.name for path in theme_dir.iterdir()),
+                    ["index.theme", "install.inf", "left_ptr.cur"],
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

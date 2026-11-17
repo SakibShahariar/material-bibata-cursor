@@ -6,6 +6,7 @@ import sys
 import tempfile
 import tomllib
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from unittest import mock
 from pathlib import Path
 from types import SimpleNamespace
@@ -295,6 +296,69 @@ class UpstreamSourceMountTests(unittest.TestCase):
                 build_linux.mount_upstream_sources(build_dir, Path(work))
             self.assertTrue((build_dir / "svg" / "pointer.svg").is_file())
             self.assertTrue((build_dir / "src" / "cursor_utils.py").is_file())
+
+
+class ParallelBuildIsolationTests(unittest.TestCase):
+    def test_concurrent_builds_use_unique_workdirs_and_leave_source_unchanged(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            build_dir = root / "bibata_cursor"
+            for directory in ("src", "svg", "config"):
+                (build_dir / directory).mkdir(parents=True)
+            (build_dir / "src" / "cursor_utils.py").write_text(
+                upstream_cursor_utils_source(), encoding="utf-8"
+            )
+            (build_dir / "svg" / "pointer.svg").write_text("<svg/>", encoding="utf-8")
+            (build_dir / "config" / "render.json").write_text(
+                json.dumps({
+                    "Bibata-Modern-Classic": {
+                        "colors": [{"replace": "#000000"} for _ in range(3)]
+                    }
+                }),
+                encoding="utf-8",
+            )
+            (build_dir / "config" / "build.toml").write_text(
+                "[cursor_defaults]\nx11_sizes = [24]\n", encoding="utf-8"
+            )
+            source_digest = {
+                path.relative_to(build_dir).as_posix(): path.read_bytes()
+                for path in sorted(build_dir.rglob("*"))
+                if path.is_file()
+            }
+            renderer_cwds: list[str] = []
+
+            def fake_run(command, *, cwd=None):
+                if str(command[0]).endswith("cursor_utils.py"):
+                    renderer_cwds.append(str(cwd))
+                    (cwd / "out" / "Bibata-Modern-Classic").mkdir(parents=True)
+
+            colors = {"body": "#112233", "primary": "#AABBCC", "watch": "#000000"}
+            with mock.patch.object(build_linux, "run", side_effect=fake_run):
+                with ThreadPoolExecutor(max_workers=4) as executor:
+                    results = list(executor.map(
+                        lambda theme: build_linux.build_one(
+                            theme, colors,
+                            script_dir=root,
+                            build_dir=build_dir,
+                            install_dir=root / "install",
+                            scalable_dir=root / "scalable",
+                            themes_json=root / "themes.json",
+                        ),
+                        ["Peach", "Peach-Light", "Apricot", "Apricot-Light"],
+                    ))
+
+            self.assertTrue(all(success for _, success, _ in results), results)
+            self.assertEqual(len(renderer_cwds), 4)
+            self.assertEqual(len(set(renderer_cwds)), 4)
+            self.assertTrue(all(Path(cwd).parent == build_dir for cwd in renderer_cwds))
+            after = {
+                path.relative_to(build_dir).as_posix(): path.read_bytes()
+                for path in sorted(build_dir.rglob("*"))
+                if path.is_file()
+            }
+            self.assertEqual(after, source_digest)
+            self.assertFalse(list(build_dir.glob("run-*")))
+
 
 if __name__ == "__main__":
     unittest.main()

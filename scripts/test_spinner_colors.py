@@ -35,6 +35,13 @@ class SpinnerColorTests(unittest.TestCase):
             list(spinner_shades("#226d1e")) * 2,
         )
 
+    def test_semantic_status_colors_are_not_remapped(self):
+        # These keep fixed meanings (red=no-drop, green=copy, etc.) and must
+        # never enter the theme-derived recolor map.
+        semantic = {"#FE0000", "#06B231", "#606060", "#F27400", "#5F3BE4", "#179DD8", "#2C2C2C", "#0A6857"}
+        mapped = {entry["match"].upper() for entry in recolor_entries("#226d1e")}
+        self.assertFalse(semantic & mapped, f"semantic colors were remapped: {semantic & mapped}")
+
     def test_shades_are_hue_consistent_with_primary(self):
         # All shades should share the primary's hue family (no rainbow drift).
         import colorsys

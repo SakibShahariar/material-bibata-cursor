@@ -47,6 +47,23 @@ example, `cell` uses the plus-shaped `plus` art rather than `crosshair`.
 Both animated cursors keep their full frame sequences in the scalable SVG
 tree, with per-frame delay metadata.
 
+## Recoloring and fixed colors
+
+The three palette roles (`body`, `primary`, `watch`) are substituted into the
+matching upstream color slots. Two additional groups of upstream colors are
+remapped to shades of each theme's `primary` so they follow the palette rather
+than staying a fixed rainbow:
+
+- the four `wait` / `left_ptr_watch` spinner colors, and
+- the four corner-resize (`bottom_*_corner` / `top_*_corner`) accents.
+
+Drag-and-drop and status shapes (`dnd-*`, `copy`, `link`, `circle`,
+`crossed_circle`, `context-menu`, `pointer-move`) intentionally keep their
+**semantic** colors — red for no-drop, green for copy, gray for link, and so
+on. These are universal status signals, not theme accents; recoloring them
+would strip their meaning. Windows-only shapes (`person`, `pin`) also retain
+their upstream colors. This applies to every theme, not just Classic.
+
 ## Drag and drop
 
 | CSS name | Legacy X11 fallback | Notes |

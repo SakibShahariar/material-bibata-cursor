@@ -31,6 +31,7 @@ import tomllib
 from pathlib import Path
 
 from generate_svg_cursors import resolve_source_dir
+from spinner_colors import recolor_entries
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SVG_DIR = REPO_ROOT / "scripts" / "bibata_cursor" / "svg"
@@ -238,9 +239,11 @@ def build_theme(
 
     render_theme = load_render_theme("Bibata-Modern-Classic")
     colors = render_theme["colors"]
+    colors = [dict(entry) for entry in colors]  # don't mutate the shared cache
     colors[0]["replace"] = body
     colors[1]["replace"] = primary
     colors[2]["replace"] = watch
+    colors.extend(recolor_entries(primary))
 
     cursor_configs, defaults = load_cursor_config()
     theme_dir = out_base / f"{THEME_PREFIX}{theme_key}"

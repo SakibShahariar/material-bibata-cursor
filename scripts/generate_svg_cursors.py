@@ -46,6 +46,9 @@ import sys
 import tomllib
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from spinner_colors import recolor_entries
+
 NOMINAL_SIZE = 256  # matches the real SVG canvas size (24px canvas would be wrong)
 
 # freedesktop/CSS cursor names as returned by ClutterCursorType's
@@ -125,12 +128,15 @@ def resolve_source_dir(bibata_dir: Path, group_name: str) -> dict:
 
 
 def recolor_svg(svg_text: str, body: str, primary: str, watch: str) -> str:
-    """Same plain text substitution bibata_cursor's Utils.svg_recolor
-    does: body replaces #00FF00, primary replaces #0000FF, watch
-    replaces #FF0000."""
+    """Plain text substitution matching bibata_cursor's Utils.svg_recolor:
+    body replaces #00FF00, primary replaces #0000FF, watch replaces #FF0000.
+    The animated cursors' four hardcoded rainbow colors are also replaced
+    with shades derived from primary so the spinner follows the theme."""
     svg_text = svg_text.replace("#00FF00", body)
     svg_text = svg_text.replace("#0000FF", primary)
     svg_text = svg_text.replace("#FF0000", watch)
+    for entry in recolor_entries(primary):
+        svg_text = svg_text.replace(entry["match"], entry["replace"])
     return svg_text
 
 

@@ -13,6 +13,7 @@ from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_linux
+from spinner_colors import RAINBOW_MATCHES, spinner_shades
 
 
 class LoadThemesTests(unittest.TestCase):
@@ -238,10 +239,22 @@ class ConfigPatchTests(unittest.TestCase):
             )
 
             render = json.loads((config_dir / "render.json").read_text(encoding="utf-8"))
+            colors = render["Bibata-Modern-Classic"]["colors"]
             self.assertEqual(
-                [entry["replace"] for entry in render["Bibata-Modern-Classic"]["colors"]],
+                [entry["replace"] for entry in colors[:3]],
                 ["#112233", "#AABBCC", "#000000"],
             )
+            # The four upstream rainbow colors are remapped to primary shades.
+            self.assertEqual(len(colors), 7)
+            self.assertEqual(
+                [entry["match"] for entry in colors[3:]],
+                list(RAINBOW_MATCHES),
+            )
+            self.assertEqual(
+                [entry["replace"] for entry in colors[3:]],
+                list(spinner_shades("#AABBCC")),
+            )
+            self.assertEqual(len({entry["replace"] for entry in colors[3:]}), 4)
             config = tomllib.loads((config_dir / "build.toml").read_text(encoding="utf-8"))
             self.assertEqual(config["other"]["x11_sizes"], [1])
             sizes = config["cursor_defaults"]["x11_sizes"]

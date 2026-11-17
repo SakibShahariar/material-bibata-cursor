@@ -28,6 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from source_provenance import UPSTREAM_COMMIT, UPSTREAM_REPOSITORY as UPSTREAM_URL
+from spinner_colors import recolor_entries
 THEME_PREFIX = "Bibata-Material-"
 MAX_DEFAULT_JOBS = 8
 
@@ -173,6 +174,9 @@ def patch_theme_config(work_dir: Path, theme: str, colors: dict) -> None:
             raise ValueError("upstream render config has fewer than three color entries")
         for entry, key in zip(color_entries[:3], ("body", "primary", "watch")):
             entry["replace"] = colors[key]
+        # Map the upstream hardcoded rainbow spinner colors to theme-derived
+        # shades so wait/left_ptr_watch follow the theme's primary color.
+        color_entries.extend(recolor_entries(colors["primary"]))
         with render_path.open("w", encoding="utf-8", newline="\n") as stream:
             json.dump(render, stream, indent=2)
             stream.write("\n")

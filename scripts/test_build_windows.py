@@ -160,7 +160,7 @@ class ParallelThemeBuildTests(unittest.TestCase):
             (source / "config").mkdir(parents=True)
             svg_dir = source / "svg"
             svg_dir.mkdir()
-            (svg_dir / "pointer.svg").write_text("<svg/>", encoding="utf-8")
+            (svg_dir / "left_ptr.svg").write_text("<svg/>", encoding="utf-8")
             (source / "config" / "render.json").write_text(
                 json.dumps({
                     "Bibata-Modern-Classic": {
@@ -174,6 +174,7 @@ class ParallelThemeBuildTests(unittest.TestCase):
                 '[cursor_defaults]\nx_hotspot = 128\ny_hotspot = 128\n',
                 encoding="utf-8",
             )
+            svg_index = build_windows.build_svg_index(svg_dir)
             out = root / "out"
             themes = {
                 name: {"body": "#112233", "primary": "#AABBCC", "watch": "#000000"}
@@ -197,7 +198,7 @@ class ParallelThemeBuildTests(unittest.TestCase):
                  patch.object(build_windows, "write_ani", side_effect=lambda frames, dst, *a: dst.write_bytes(b"ani")):
                 with ThreadPoolExecutor(max_workers=4) as executor:
                     failures = list(executor.map(
-                        lambda name: build_windows.build_theme(name, themes, out),
+                        lambda name: build_windows.build_theme(name, themes, out, svg_index),
                         themes,
                     ))
 

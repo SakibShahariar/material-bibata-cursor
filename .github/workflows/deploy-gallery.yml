@@ -1,8 +1,8 @@
 name: Deploy cursor gallery
 
-# Keep deployment manual until the repository owner enables Pages.
-# Restore the master/docs push trigger after a successful first deployment.
 on:
+  push:
+    branches: [master]
   workflow_dispatch:
 
 permissions:
@@ -26,8 +26,6 @@ jobs:
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: false
 
       - name: Upload gallery site
         uses: actions/upload-pages-artifact@v3

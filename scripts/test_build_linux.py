@@ -13,7 +13,7 @@ from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_linux
-from spinner_colors import RAINBOW_MATCHES, spinner_shades
+from spinner_colors import CORNER_MATCHES, RAINBOW_MATCHES, spinner_shades
 
 
 class RunOutputTests(unittest.TestCase):
@@ -263,15 +263,18 @@ class ConfigPatchTests(unittest.TestCase):
                 [entry["replace"] for entry in colors[:3]],
                 ["#112233", "#AABBCC", "#000000"],
             )
-            # The four upstream rainbow colors are remapped to primary shades.
-            self.assertEqual(len(colors), 7)
+            # The spinner and corner-resize hardcoded colors are remapped to
+            # primary shades so both follow the theme.
+            self.assertEqual(len(colors), 11)
+            expected_matches = list(RAINBOW_MATCHES) + list(CORNER_MATCHES)
+            expected_shades = list(spinner_shades("#AABBCC")) * 2
             self.assertEqual(
                 [entry["match"] for entry in colors[3:]],
-                list(RAINBOW_MATCHES),
+                expected_matches,
             )
             self.assertEqual(
                 [entry["replace"] for entry in colors[3:]],
-                list(spinner_shades("#AABBCC")),
+                expected_shades,
             )
             self.assertEqual(len({entry["replace"] for entry in colors[3:]}), 4)
             config = tomllib.loads((config_dir / "build.toml").read_text(encoding="utf-8"))

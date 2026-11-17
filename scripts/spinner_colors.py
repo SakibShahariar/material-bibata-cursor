@@ -17,6 +17,11 @@ import re
 
 RAINBOW_MATCHES = ("#F05024", "#FCB813", "#7EBA41", "#32A0DA")
 
+# Hardcoded accent colors on the four corner-resize cursor paths. These sit
+# outside the three recolor slots, so without remapping every theme shows the
+# same orange/green/red/blue resize handles.
+CORNER_MATCHES = ("#FDBE2A", "#96C865", "#F1613A", "#4FADDF")
+
 # Lightness offsets applied to the primary color's own lightness. The primary
 # itself sits in the middle two shades; the outer two add contrast so the
 # spinning motion remains readable against the theme's background.
@@ -58,8 +63,13 @@ def spinner_shades(primary: str) -> tuple[str, str, str, str]:
 
 
 def recolor_entries(primary: str) -> list[dict[str, str]]:
-    """Return render.json-style recolor entries for the four rainbow colors."""
-    return [
+    """Return recolor entries for the spinner and corner-resize hardcoded colors."""
+    spinner = [
         {"match": match, "replace": shade}
         for match, shade in zip(RAINBOW_MATCHES, spinner_shades(primary))
     ]
+    corners = [
+        {"match": match, "replace": shade}
+        for match, shade in zip(CORNER_MATCHES, spinner_shades(primary))
+    ]
+    return spinner + corners

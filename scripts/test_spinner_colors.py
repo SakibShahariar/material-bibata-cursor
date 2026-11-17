@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from spinner_colors import RAINBOW_MATCHES, recolor_entries, spinner_shades
+from spinner_colors import CORNER_MATCHES, RAINBOW_MATCHES, recolor_entries, spinner_shades
 
 
 class SpinnerColorTests(unittest.TestCase):
@@ -24,10 +24,16 @@ class SpinnerColorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             spinner_shades("not-a-color")
 
-    def test_recolor_entries_match_upstream_rainbow_literals(self):
+    def test_recolor_entries_match_upstream_hardcoded_literals(self):
         entries = recolor_entries("#226d1e")
-        self.assertEqual([entry["match"] for entry in entries], list(RAINBOW_MATCHES))
-        self.assertEqual([entry["replace"] for entry in entries], list(spinner_shades("#226d1e")))
+        self.assertEqual(
+            [entry["match"] for entry in entries],
+            list(RAINBOW_MATCHES) + list(CORNER_MATCHES),
+        )
+        self.assertEqual(
+            [entry["replace"] for entry in entries],
+            list(spinner_shades("#226d1e")) * 2,
+        )
 
     def test_shades_are_hue_consistent_with_primary(self):
         # All shades should share the primary's hue family (no rainbow drift).

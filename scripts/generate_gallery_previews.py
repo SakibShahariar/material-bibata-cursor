@@ -24,7 +24,10 @@ from PIL import Image
 REPO_ROOT = Path(__file__).resolve().parent.parent
 THEMES_JSON = REPO_ROOT / "themes.json"
 DEFAULT_OUTPUT = REPO_ROOT / "docs" / "previews"
-SHAPES = ("left_ptr", "xterm", "bd_double_arrow", "wait")
+SHAPES = ("left_ptr", "xterm", "bd_double_arrow")
+WAIT_SHAPE = "wait"
+WAIT_FRAME_STEP = 2
+WAIT_QUALITY = 85
 
 MAGIC = b"Xcur"
 IMAGE_TYPE = 0xFFFD0002
@@ -61,6 +64,32 @@ def read_xcursor_size(path: Path, size: int) -> Image.Image:
     raise ValueError(f"{path}: no image at size {size}")
 
 
+def read_xcursor_frames(path: Path, size: int) -> tuple[list[Image.Image], int]:
+    """Return every animation frame at the requested size and its delay."""
+    data = path.read_bytes()
+    magic, header_size, _version, toc_count = FILE_HEADER.unpack_from(data)
+    if magic != MAGIC:
+        raise ValueError(f"{path}: invalid Xcursor magic")
+    frames: list[Image.Image] = []
+    delay = 40
+    for index in range(toc_count):
+        chunk_type, subtype, position = TOC_ENTRY.unpack_from(data, header_size + index * TOC_ENTRY.size)
+        if chunk_type != IMAGE_TYPE or subtype != size:
+            continue
+        _chunk_size, actual_type, actual_subtype, _version = CHUNK_HEADER.unpack_from(data, position)
+        width, height, _xhot, _yhot, frame_delay = IMAGE_HEADER.unpack_from(data, position + CHUNK_HEADER.size)
+        if actual_type != IMAGE_TYPE or actual_subtype != size:
+            continue
+        delay = frame_delay
+        pixels_start = position + CHUNK_HEADER.size + IMAGE_HEADER.size
+        frames.append(
+            Image.frombytes("RGBA", (width, height), data[pixels_start:pixels_start + width * height * 4], "raw", "BGRA")
+        )
+    if not frames:
+        raise ValueError(f"{path}: no animation frames at size {size}")
+    return frames, delay
+
+
 def generate(
     themes_json: Path,
     install_dir: Path,
@@ -83,6 +112,22 @@ def generate(
         target = output_dir / f"{theme}.png"
         strip.save(target)
         written.append(target.name)
+
+        wait_path = install_dir / f"Bibata-Material-{theme}" / "cursors" / WAIT_SHAPE
+        if not wait_path.is_file():
+            raise ValueError(f"missing cursor for {theme}/{WAIT_SHAPE}: {wait_path}")
+        frames, delay = read_xcursor_frames(wait_path, size)
+        frames = frames[::WAIT_FRAME_STEP]
+        animated = output_dir / f"{theme}-wait.webp"
+        frames[0].save(
+            animated, "WEBP", save_all=True, append_images=frames[1:],
+            duration=delay * WAIT_FRAME_STEP, loop=0, quality=WAIT_QUALITY, method=6,
+        )
+        written.append(animated.name)
+        # Static first frame for visitors who prefer reduced motion.
+        still = output_dir / f"{theme}-wait.png"
+        frames[0].save(still)
+        written.append(still.name)
     return written
 
 
@@ -103,7 +148,7 @@ def main() -> int:
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
-    print(f"Wrote {len(written)} real-cursor preview strips to {args.output_dir}")
+    print(f"Wrote {len(written)} real-cursor preview assets to {args.output_dir}")
     return 0
 
 

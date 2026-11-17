@@ -55,6 +55,10 @@ gallery-previews *flags:
 gallery-templates:
     python3 scripts/generate_gallery_templates.py
 
+# Regenerate the downloadable theme template blob for the gallery
+gallery-theme-template:
+    python3 scripts/generate_gallery_theme_template.py
+
 # Set an installed theme as the active cursor, e.g. `just apply Apricot`
 apply theme:
     python3 scripts/apply_theme.py {{theme}}

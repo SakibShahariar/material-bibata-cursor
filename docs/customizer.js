@@ -15,6 +15,7 @@
   const TEMPLATES = ['left_ptr', 'xterm', 'bd_double_arrow', 'wait', 'bottom_right_corner'];
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const templates = window.GALLERY_TEMPLATES || {};
+  let currentColors = null;
 
   // --- Colorsys-compatible HLS (matches scripts/spinner_colors.py) --------
   function hexToRgb(hex) {
@@ -77,6 +78,70 @@
     return '<div class="color"><i style="background:' + value + '"></i><code>' + label + ' ' + value + '</code></div>';
   }
 
+  // --- Download an installable scalable cursor theme ----------------------
+  async function decodeTemplate() {
+    const b64 = window.GALLERY_THEME_TEMPLATE;
+    if (!b64) throw new Error('theme template missing');
+    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+    const text = await new Response(stream).text();
+    return JSON.parse(text);
+  }
+
+  function themePalette() {
+    return {
+      body: currentColors.body, primary: currentColors.primary, watch: currentColors.watch,
+      spinner: currentColors.spinner,
+    };
+  }
+
+  function recolorAll(files, colors) {
+    const map = {
+      '{{BODY}}': colors.body, '{{PRIMARY}}': colors.primary, '{{WATCH}}': colors.watch,
+    };
+    colors.spinner.forEach((c, i) => { map['{{SPINNER' + i + '}}'] = c; });
+    colors.spinner.forEach((c, i) => { map['{{CORNER' + i + '}}'] = c; });
+    const out = {};
+    for (const [path, content] of Object.entries(files)) {
+      let text = content;
+      for (const [token, value] of Object.entries(map)) text = text.split(token).join(value);
+      out[path] = text;
+    }
+    return out;
+  }
+
+  function downloadTheme() {
+    const btn = document.getElementById('download-theme');
+    const dlStatus = document.getElementById('download-status');
+    if (!window.JSZip || !window.GALLERY_THEME_TEMPLATE || !currentColors) {
+      dlStatus.textContent = 'Theme download is unavailable.'; return;
+    }
+    btn.disabled = true; dlStatus.textContent = 'Building theme…';
+    decodeTemplate().then((template) => {
+      const files = recolorAll(template.files, themePalette());
+      const zip = new JSZip();
+      for (const [path, content] of Object.entries(files)) zip.file(path, content);
+      // CSS/X11 aliases: symlinks pointing at the real shape dir, with a
+      // target relative to the symlink's own directory (portable on extraction).
+      const prefix = 'Bibata-Material-Custom/cursors_scalable/';
+      for (const [alias, shape] of Object.entries(template.css_links || {})) {
+        zip.file(prefix + alias, shape, { unixPermissions: 0o120777 });
+      }
+      return zip.generateAsync({ type: 'blob', compression: 'DEFLATE', platform: 'UNIX' });
+    }).then((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'Bibata-Material-Custom.zip';
+      document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      dlStatus.textContent = 'Downloaded — unzip into ~/.local/share/icons/.';
+      btn.disabled = false;
+    }).catch((err) => {
+      dlStatus.textContent = 'Could not build theme: ' + err.message;
+      btn.disabled = false;
+    });
+  }
+
   function update() {
     const colors = {
       body: inputs.body.value.toUpperCase(),
@@ -84,6 +149,7 @@
       watch: inputs.watch.value.toUpperCase(),
       spinner: shades(inputs.primary.value),
     };
+    currentColors = colors;
     preview.replaceChildren();
     if (Object.keys(templates).length === 0) { status.textContent = 'Could not load customizer templates.'; return; }
     for (const shape of TEMPLATES) {
@@ -103,5 +169,6 @@
 
   Object.values(inputs).forEach((el) => el.addEventListener('input', update));
   reduceMotion.addEventListener('change', update);
+  document.getElementById('download-theme').addEventListener('click', downloadTheme);
   update();
 })();

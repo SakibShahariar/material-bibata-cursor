@@ -27,8 +27,6 @@ Xcursor, Hyprcursor, scalable SVG, and Windows `.cur` / `.ani` assets.
 
 </div>
 
-Try the [interactive cursor gallery](https://sakibshahariar.github.io/material-bibata-cursor/).
-
 ## Themes
 
 Ice Blue, Sky Blue, Deep Blue, Soft Blue, Mint, Seafoam, Teal, Peach, Apricot, Sunset, Blush, Salmon, Pink Pastel, Pink Rose, Lilac, Violet, Sage, Lime, Moss, Sand, Beige, Brown, Cloud, Grey, Slate, Noir, Midnight, and Charcoal.

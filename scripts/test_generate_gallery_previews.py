@@ -11,8 +11,8 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from generate_gallery_previews import (
-    REPO_ROOT, SHAPES, THEMES_JSON, WAIT_SHAPE,
-    generate, read_xcursor_frames, read_xcursor_size,
+    ARTWORK_BOX, PREVIEW_BOX, REPO_ROOT, SHAPES, THEMES_JSON, WAIT_SHAPE,
+    generate, normalize, read_xcursor_frames, read_xcursor_size,
 )
 from test_validate_theme_assets import IMAGE_TYPE, make_xcursor
 
@@ -49,19 +49,39 @@ class GalleryPreviewTests(unittest.TestCase):
         themes = json.loads(THEMES_JSON.read_text(encoding="utf-8"))
         previews = REPO_ROOT / "docs" / "previews"
         missing = [
-            name for name in themes
-            if not (previews / f"{name}.png").is_file()
-            or not (previews / f"{name}-wait.webp").is_file()
-            or not (previews / f"{name}-wait.png").is_file()
+            f"{name}-{shape}" for name in themes for shape in SHAPES
+            if not (previews / f"{name}-{shape}.png").is_file()
+        ]
+        missing += [
+            f"{name}-{WAIT_SHAPE}" for name in themes
+            if not (previews / f"{name}-{WAIT_SHAPE}.png").is_file()
+            or not (previews / f"{name}-{WAIT_SHAPE}.webp").is_file()
         ]
         self.assertEqual(missing, [], f"missing real-cursor previews: {missing}")
 
     def test_gallery_uses_real_previews_not_illustrations(self):
         html = (REPO_ROOT / "docs" / "gallery.html").read_text(encoding="utf-8")
         self.assertIn("previews/'", html)
+        self.assertIn("left_ptr", html)
+        self.assertIn("bd_double_arrow", html)
         self.assertIn("-wait.webp", html)
         self.assertNotIn("svgShape", html)
         self.assertNotIn("illustrative", html.lower())
+        self.assertNotIn("'strip'", html)
+
+    def test_normalizes_shapes_to_uniform_visual_footprint(self):
+        slim = Image.new("RGBA", (48, 48), (0, 0, 0, 0))
+        slim.paste((0, 0, 0, 255), (22, 4, 26, 44))
+        wide = Image.new("RGBA", (48, 48), (0, 0, 0, 0))
+        wide.paste((0, 0, 0, 255), (1, 1, 47, 47))
+
+        slim_out, wide_out = normalize([slim])[0], normalize([wide])[0]
+
+        self.assertEqual(slim_out.size, (PREVIEW_BOX, PREVIEW_BOX))
+        self.assertEqual(wide_out.size, (PREVIEW_BOX, PREVIEW_BOX))
+        # Both artworks are scaled to the same ARTWORK_BOX footprint.
+        self.assertEqual(slim_out.getchannel("A").getbbox()[3] - slim_out.getchannel("A").getbbox()[1], ARTWORK_BOX)
+        self.assertEqual(wide_out.getchannel("A").getbbox()[2] - wide_out.getchannel("A").getbbox()[0], ARTWORK_BOX)
 
     def test_reads_all_real_animation_frames(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -71,7 +91,7 @@ class GalleryPreviewTests(unittest.TestCase):
             self.assertEqual(len(frames), 6)
             self.assertEqual(delay, 40)
 
-    def test_generates_strip_and_animated_wait_per_theme(self):
+    def test_generates_equal_size_shape_images_and_animated_wait_per_theme(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             install = root / "icons"
@@ -87,15 +107,16 @@ class GalleryPreviewTests(unittest.TestCase):
 
             written = generate(themes_json, install, output, 48)
 
-            self.assertEqual(sorted(written), [
-                "Apricot-wait.png", "Apricot-wait.webp", "Apricot.png",
-                "Peach-wait.png", "Peach-wait.webp", "Peach.png",
-            ])
+            self.assertEqual(len(written), 2 * (len(SHAPES) + 2))
             for theme in ("Apricot", "Peach"):
-                image = Image.open(output / f"{theme}.png")
-                self.assertEqual(image.size, (48 * len(SHAPES), 48))
+                for shape in SHAPES:
+                    image = Image.open(output / f"{theme}-{shape}.png")
+                    self.assertEqual(image.size, (48, 48))
+                still = Image.open(output / f"{theme}-wait.png")
+                self.assertEqual(still.size, (48, 48))
                 animated = Image.open(output / f"{theme}-wait.webp")
                 self.assertGreater(animated.n_frames, 1)
+                self.assertEqual(animated.size, (48, 48))
 
 
 if __name__ == "__main__":

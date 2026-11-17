@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Generate gallery previews from the real compiled Xcursor files.
 
-Reads the installed Xcursor themes and writes one PNG strip per theme to
-docs/previews/, containing the actual rendered artwork for the gallery. This
-keeps previews faithful to the shipped cursors instead of using illustrative
-shapes drawn in the gallery page.
+Reads the installed Xcursor themes and writes one image per cursor shape to
+docs/previews/, containing the actual rendered artwork for the gallery. The
+wait cursor is exported as an animated WebP (plus a static fallback for
+reduced motion); other shapes are still PNGs. This keeps previews faithful to
+the shipped cursors instead of using illustrative shapes drawn in the page.
 
 Usage:
     python3 scripts/generate_gallery_previews.py
@@ -28,6 +29,8 @@ SHAPES = ("left_ptr", "xterm", "bd_double_arrow")
 WAIT_SHAPE = "wait"
 WAIT_FRAME_STEP = 2
 WAIT_QUALITY = 85
+PREVIEW_BOX = 48
+ARTWORK_BOX = 40
 
 MAGIC = b"Xcur"
 IMAGE_TYPE = 0xFFFD0002
@@ -90,6 +93,37 @@ def read_xcursor_frames(path: Path, size: int) -> tuple[list[Image.Image], int]:
     return frames, delay
 
 
+def normalize(frames: list[Image.Image]) -> list[Image.Image]:
+    """Crop transparent padding and scale artwork into a uniform box.
+
+    Shapes have very different alpha bounds (e.g. a slim I-beam vs a full
+    circular spinner). Cropping to the shared bounds and scaling to a fixed
+    footprint makes all four previews look equally sized and evenly spaced.
+    """
+    bbox = None
+    for frame in frames:
+        current = frame.getchannel("A").getbbox()
+        if current is None:
+            continue
+        bbox = current if bbox is None else (
+            min(bbox[0], current[0]), min(bbox[1], current[1]),
+            max(bbox[2], current[2]), max(bbox[3], current[3]),
+        )
+    if bbox is None:
+        return frames
+    result = []
+    for frame in frames:
+        cropped = frame.crop(bbox)
+        cropped.thumbnail((ARTWORK_BOX, ARTWORK_BOX), Image.Resampling.LANCZOS)
+        canvas = Image.new("RGBA", (PREVIEW_BOX, PREVIEW_BOX), (0, 0, 0, 0))
+        canvas.alpha_composite(
+            cropped,
+            ((PREVIEW_BOX - cropped.width) // 2, (PREVIEW_BOX - cropped.height) // 2),
+        )
+        result.append(canvas)
+    return result
+
+
 def generate(
     themes_json: Path,
     install_dir: Path,
@@ -100,24 +134,19 @@ def generate(
     output_dir.mkdir(parents=True, exist_ok=True)
     written: list[str] = []
     for theme in themes:
-        parts: list[Image.Image] = []
         for shape in SHAPES:
             cursor = install_dir / f"Bibata-Material-{theme}" / "cursors" / shape
             if not cursor.is_file():
                 raise ValueError(f"missing cursor for {theme}/{shape}: {cursor}")
-            parts.append(read_xcursor_size(cursor, size))
-        strip = Image.new("RGBA", (size * len(parts), size), (0, 0, 0, 0))
-        for index, part in enumerate(parts):
-            strip.alpha_composite(part, (index * size, 0))
-        target = output_dir / f"{theme}.png"
-        strip.save(target)
-        written.append(target.name)
+            target = output_dir / f"{theme}-{shape}.png"
+            normalize([read_xcursor_size(cursor, size)])[0].save(target)
+            written.append(target.name)
 
         wait_path = install_dir / f"Bibata-Material-{theme}" / "cursors" / WAIT_SHAPE
         if not wait_path.is_file():
             raise ValueError(f"missing cursor for {theme}/{WAIT_SHAPE}: {wait_path}")
         frames, delay = read_xcursor_frames(wait_path, size)
-        frames = frames[::WAIT_FRAME_STEP]
+        frames = normalize(frames[::WAIT_FRAME_STEP])
         animated = output_dir / f"{theme}-wait.webp"
         frames[0].save(
             animated, "WEBP", save_all=True, append_images=frames[1:],

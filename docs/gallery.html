@@ -8,7 +8,7 @@
 <style>
 :root{font:16px/1.5 system-ui,sans-serif;color-scheme:light dark;--bg:#f4f6f8;--panel:#fff;--ink:#17212b;--muted:#5c6873;--line:#d9e0e6}
 @media(prefers-color-scheme:dark){:root{--bg:#11171c;--panel:#1b242b;--ink:#edf3f7;--muted:#b0bdc6;--line:#34434e}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}main{max-width:1000px;margin:auto;padding:clamp(1rem,4vw,3rem)}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1}p{color:var(--muted)}a{color:inherit}.controls{display:flex;gap:.6rem;flex-wrap:wrap;margin:1.5rem 0}button,select,input{font:inherit;border:1px solid var(--line);border-radius:.7rem;padding:.65rem .85rem;background:var(--panel);color:var(--ink)}button{cursor:pointer}button[aria-pressed=true]{background:#356b82;color:white}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:1rem}.card{overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:1rem}.sample{height:140px;display:flex;align-items:center;justify-content:space-evenly;background:var(--body)}.sample img{height:48px;object-fit:contain;filter:drop-shadow(0 1px 2px #0005)}.sample .strip{width:144px;max-width:100%}.sample .wait{width:48px}.cardbody{padding:1rem}.colors{display:flex;gap:.5rem;margin:1rem 0}.color{flex:1;min-width:0}.color i{display:block;height:1.4rem;border-radius:.3rem;border:1px solid #8885}.color code{font-size:.65rem;overflow-wrap:anywhere;color:var(--muted)}.empty{padding:2rem;text-align:center;grid-column:1/-1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}main{max-width:1000px;margin:auto;padding:clamp(1rem,4vw,3rem)}h1{font-size:clamp(2rem,5vw,3rem);line-height:1.1}p{color:var(--muted)}a{color:inherit}.controls{display:flex;gap:.6rem;flex-wrap:wrap;margin:1.5rem 0}button,select,input{font:inherit;border:1px solid var(--line);border-radius:.7rem;padding:.65rem .85rem;background:var(--panel);color:var(--ink)}button{cursor:pointer}button[aria-pressed=true]{background:#356b82;color:white}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:1rem}.card{overflow:hidden;background:var(--panel);border:1px solid var(--line);border-radius:1rem}.sample{height:140px;display:flex;align-items:center;justify-content:space-evenly;background:var(--body)}.sample img{width:48px;height:48px;flex:0 0 48px;object-fit:contain;filter:drop-shadow(0 1px 2px #0005)}.cardbody{padding:1rem}.colors{display:flex;gap:.5rem;margin:1rem 0}.color{flex:1;min-width:0}.color i{display:block;height:1.4rem;border-radius:.3rem;border:1px solid #8885}.color code{font-size:.65rem;overflow-wrap:anywhere;color:var(--muted)}.empty{padding:2rem;text-align:center;grid-column:1/-1}
 </style>
 </head>
 <body><main>
@@ -33,9 +33,11 @@ function render(){
  for(const [name,palette] of entries){
   const article=document.createElement('article');article.className='card';
   const sample=document.createElement('div');sample.className='sample';sample.style.setProperty('--body',palette.body);sample.style.setProperty('--primary',palette.primary);
-  const strip=document.createElement('img');strip.className='strip';strip.src='./previews/'+encodeURIComponent(name)+'.png';strip.alt='Rendered pointer, text, and resize cursors for '+name;strip.loading='lazy';
-  const wait=document.createElement('img');wait.className='wait';wait.src='./previews/'+encodeURIComponent(name)+(reduceMotion.matches?'-wait.png':'-wait.webp');wait.alt='Busy cursor for '+name;wait.loading='lazy';
-  sample.append(strip,wait);
+  const base='./previews/'+encodeURIComponent(name);
+  for(const shape of ['left_ptr','xterm','bd_double_arrow']){
+    const img=document.createElement('img');img.src=base+'-'+shape+'.png';img.alt=shape.replaceAll('_',' ')+' cursor for '+name;img.loading='lazy';sample.append(img);
+  }
+  const wait=document.createElement('img');wait.src=base+(reduceMotion.matches?'-wait.png':'-wait.webp');wait.alt='Busy cursor for '+name;wait.loading='lazy';sample.append(wait);
   const body=document.createElement('div');body.className='cardbody';
   const title=document.createElement('h2');title.textContent=palette.label||name.replaceAll('-',' ');body.append(title);
   const colors=document.createElement('div');colors.className='colors';

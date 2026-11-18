@@ -86,6 +86,7 @@ The project targets X11, Wayland, GNOME, KDE Plasma, Hyprland, Niri, and Windows
 CI checks builder tests, theme contrast, cursor-name resolution, representative Linux/Windows builds, and release archive contents.
 
 More guides:
+- [Install and select a theme](docs/INSTALL.md)
 - [SVG cursors](docs/SVG_CURSORS.md)
 - [Cursor shapes](docs/CURSOR_SHAPES.md)
 - [Windows cursors](docs/WINDOWS.md)

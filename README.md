@@ -85,6 +85,12 @@ The project targets X11, Wayland, GNOME, KDE Plasma, Hyprland, Niri, and Windows
 
 CI checks builder tests, theme contrast, cursor-name resolution, representative Linux/Windows builds, and release archive contents.
 
+Research and proposal documents (no shipped behavior changes yet):
+- [Cursor architecture and metadata proposal](docs/ARCHITECTURE.md)
+- [Semantic cursor color roles](docs/SEMANTIC_ROLES.md)
+- [Left-handed cursor research](docs/LEFT_HANDED.md)
+- [Animation research](docs/ANIMATION_RESEARCH.md)
+
 More guides:
 - [Install and select a theme](docs/INSTALL.md)
 - [Cursor size and rendering QA](docs/SIZE_QA.md)

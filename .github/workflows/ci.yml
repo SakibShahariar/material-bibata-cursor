@@ -95,6 +95,9 @@ jobs:
             --install-dir "$RUNNER_TEMP/icons" \
             --scalable-dir "$RUNNER_TEMP/scalable" \
             --windows-dir out_win
+          python scripts/validate_animations.py \
+            --themes Peach,Peach-Light \
+            --scalable-dir "$RUNNER_TEMP/scalable"
 
       - name: Smoke-test Linux release archives
         env:

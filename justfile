@@ -63,6 +63,10 @@ gallery-theme-template:
 hotspot-qa theme="Peach":
     python3 scripts/generate_hotspot_qa_page.py --theme {{theme}}
 
+# Validate animated cursors against the pinned upstream contract (#39)
+validate-animations:
+    python3 scripts/validate_animations.py
+
 # Set an installed theme as the active cursor, e.g. `just apply Apricot`
 apply theme:
     python3 scripts/apply_theme.py {{theme}}

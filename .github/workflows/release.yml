@@ -52,6 +52,8 @@ jobs:
             --install-dir "$BIBATA_MATERIAL_INSTALL_DIR" \
             --scalable-dir "$BIBATA_MATERIAL_SCALABLE_DIR" \
             --windows-dir out_win
+          python scripts/validate_animations.py \
+            --scalable-dir "$BIBATA_MATERIAL_SCALABLE_DIR"
 
       - name: Package Linux release archives
         env:

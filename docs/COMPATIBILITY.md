@@ -119,33 +119,38 @@ cursor.
 
 ## Qt and X11 aliases
 
-Qt requests these cursor names on X11/Wayland. Names without dedicated
-Material Bibata art resolve through the X11 cursor fallback; they are listed
-as gaps rather than silently mapped to unrelated art.
+Qt does **not** look up enum names like `up_arrow` or `whatsthis` in a cursor
+theme. Its XCB backend maps each `Qt::CursorShape` to a standard X11 cursor
+name (source:
+[`qxcbcursor.cpp`](https://github.com/qt/qtbase/blob/dev/src/plugins/platforms/xcb/qxcbcursor.cpp),
+`cursorIdForShape()`). The table below shows the actual X11 names a theme must
+provide; every one resolves in Material Bibata.
 
-| Qt name | Qt cursor shape | Material Bibata resolution |
+| Qt cursor shape | X11 name requested | Material Bibata resolution |
 |---|---|---|
-| `left_ptr` | `Qt::ArrowCursor` | Real art → `left_ptr` |
-| `up_arrow` | `Qt::UpArrowCursor` | Gap: X11 fallback |
-| `cross` | `Qt::CrossCursor` | Alias → `crosshair` |
-| `wait` | `Qt::WaitCursor` | Real art → `wait` |
-| `ibeam` | `Qt::IBeamCursor` | Alias → `xterm` |
-| `size_ver` | `Qt::SizeVerCursor` | Alias → `sb_v_double_arrow` |
-| `size_hor` | `Qt::SizeHorCursor` | Alias → `sb_h_double_arrow` |
-| `size_bdiag` | `Qt::SizeBDiagCursor` | Alias → `bd_double_arrow` |
-| `size_fdiag` | `Qt::SizeFDiagCursor` | Alias → `fd_double_arrow` |
-| `size_all` | `Qt::SizeAllCursor` | Alias → `move` |
-| `split_v` | `Qt::SplitVCursor` | Gap: X11 fallback |
-| `split_h` | `Qt::SplitHCursor` | Gap: X11 fallback |
-| `pointing_hand` | `Qt::PointingHandCursor` | Alias → `hand2` |
-| `openhand` | `Qt::OpenHandCursor` | Alias → `hand1` |
-| `closedhand` | `Qt::ClosedHandCursor` | Alias → `grabbing` |
-| `whatsthis` | `Qt::WhatsThisCursor` | Gap: X11 fallback |
-| `busy` | `Qt::BusyCursor` | Alias → `left_ptr_watch` |
-| `forbidden` | `Qt::ForbiddenCursor` | Alias → `crossed_circle` |
-| `drag-copy` | `Qt::DragCopyCursor` | Alias → `copy` |
-| `drag-move` | `Qt::DragMoveCursor` | Alias → `move` |
-| `drag-link` | `Qt::DragLinkCursor` | Alias → `dnd-link` |
+| `Qt::ArrowCursor` | `left_ptr` | Real art → `left_ptr` |
+| `Qt::UpArrowCursor` | `center_ptr` | Real art → `center_ptr` |
+| `Qt::CrossCursor` | `crosshair` | Real art → `crosshair` |
+| `Qt::WaitCursor` | `watch` | Alias → `wait` |
+| `Qt::IBeamCursor` | `xterm` | Real art → `xterm` |
+| `Qt::SizeVerCursor` | `sb_v_double_arrow` | Real art → `sb_v_double_arrow` |
+| `Qt::SizeHorCursor` | `sb_h_double_arrow` | Real art → `sb_h_double_arrow` |
+| `Qt::SizeBDiagCursor` | `top_right_corner` | Real art → `top_right_corner` |
+| `Qt::SizeFDiagCursor` | `bottom_right_corner` | Real art → `bottom_right_corner` |
+| `Qt::SizeAllCursor` | `fleur` | Alias → `move` |
+| `Qt::SplitVCursor` | `sb_v_double_arrow` | Real art → `sb_v_double_arrow` |
+| `Qt::SplitHCursor` | `sb_h_double_arrow` | Real art → `sb_h_double_arrow` |
+| `Qt::PointingHandCursor` | `hand2` | Real art → `hand2` |
+| `Qt::OpenHandCursor` | `hand1` | Real art → `hand1` |
+| `Qt::ClosedHandCursor` | `grabbing` | Real art → `grabbing` |
+| `Qt::WhatsThisCursor` | `question_arrow` | Real art → `question_arrow` |
+| `Qt::BusyCursor` | `watch` | Alias → `wait` |
+| `Qt::ForbiddenCursor` | `circle` | Real art → `circle` |
+
+Qt's drag cursors (`Qt::DragCopyCursor`, `DragMoveCursor`, `DragLinkCursor`) use
+the freedesktop DND names (`dnd-copy`, `dnd-move`, `dnd-link`) on Wayland and
+the X11 fallback on XCB; all three are aliased in the theme
+(`dnd-copy`, `grabbing`/`move`, `dnd-link`).
 
 ## Gaps
 
@@ -154,9 +159,11 @@ as gaps rather than silently mapped to unrelated art.
   Linux parity decision.
 - `all-resize` is classified as a legacy fallback by the validator, but its
   current name-index resolution selects `grabbing` art.
-- Qt `up_arrow`, `split_v`, `split_h`, and `whatsthis` have no dedicated
-  Material Bibata art; they use the platform X11 cursor fallback. Add art or
-  explicit aliases through #44 if these become important.
+- Earlier revisions of this matrix listed Qt enum names (`up_arrow`,
+  `split_v`, `split_h`, `whatsthis`) as gaps. That was incorrect: Qt XCB maps
+  them to standard X11 names (`center_ptr`, `sb_v_double_arrow`,
+  `sb_h_double_arrow`, `question_arrow`), all of which have art in this theme.
+  No new art or aliases are needed.
 - Every CSS and Wayland cursor-shape-v1 name has either dedicated art or an
   explicit alias, so no name renders as an unintended plain arrow.
 

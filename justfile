@@ -59,6 +59,10 @@ gallery-templates:
 gallery-theme-template:
     python3 scripts/generate_gallery_theme_template.py
 
+# Generate a local hotspot QA page for a theme (default Peach), e.g. just hotspot-qa Charcoal
+hotspot-qa theme="Peach":
+    python3 scripts/generate_hotspot_qa_page.py --theme {{theme}}
+
 # Set an installed theme as the active cursor, e.g. `just apply Apricot`
 apply theme:
     python3 scripts/apply_theme.py {{theme}}

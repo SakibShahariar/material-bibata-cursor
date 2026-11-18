@@ -8,6 +8,9 @@ dist/
 out/
 out_win/
 
+# Locally generated hotspot QA page (theme-specific dev aid)
+docs/hotspot-qa.html
+
 # Python
 __pycache__/
 *.pyc

@@ -67,6 +67,14 @@ hotspot-qa theme="Peach":
 validate-animations:
     python3 scripts/validate_animations.py
 
+# Render cursors at all shipped sizes and run objective QA (#73)
+size-qa theme="Peach":
+    python3 scripts/render_size_qa.py --theme {{theme}}
+
+# Update visual regression baselines after an intentional art change (#58)
+update-baselines theme="Peach":
+    python3 scripts/render_size_qa.py --theme {{theme}} --update-baselines docs/baselines
+
 # Set an installed theme as the active cursor, e.g. `just apply Apricot`
 apply theme:
     python3 scripts/apply_theme.py {{theme}}

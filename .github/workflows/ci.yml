@@ -99,6 +99,13 @@ jobs:
             --themes Peach,Peach-Light \
             --scalable-dir "$RUNNER_TEMP/scalable"
 
+      - name: Visual regression check against baselines
+        run: |
+          for theme in Peach Peach-Light; do
+            python scripts/render_size_qa.py --theme "$theme" \
+              --baselines docs/baselines
+          done
+
       - name: Smoke-test Linux release archives
         env:
           RUNNER_TEMP: ${{ runner.temp }}

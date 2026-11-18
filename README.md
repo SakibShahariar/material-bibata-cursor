@@ -87,6 +87,7 @@ CI checks builder tests, theme contrast, cursor-name resolution, representative 
 
 More guides:
 - [Install and select a theme](docs/INSTALL.md)
+- [Cursor size and rendering QA](docs/SIZE_QA.md)
 - [SVG cursors](docs/SVG_CURSORS.md)
 - [Cursor shapes](docs/CURSOR_SHAPES.md)
 - [Windows cursors](docs/WINDOWS.md)

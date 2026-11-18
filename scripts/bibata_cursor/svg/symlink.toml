@@ -1,0 +1,27 @@
+modern = [
+	"groups/modern",
+	"groups/modern-arrow",
+	"groups/shared",
+	"groups/hand",
+]
+
+modern-right = [
+	"groups/modern-right",
+	"groups/modern-arrow",
+	"groups/shared",
+	"groups/hand-right",
+]
+
+original = [
+	"groups/original",
+	"groups/original-arrow",
+	"groups/shared",
+	"groups/hand",
+]
+
+original-right = [
+	"groups/original-right",
+	"groups/original-arrow",
+	"groups/shared",
+	"groups/hand-right",
+]

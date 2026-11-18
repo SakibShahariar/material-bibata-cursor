@@ -139,6 +139,16 @@ def load_themes(path: Path) -> dict:
 
 
 def ensure_upstream(build_dir: Path) -> None:
+    # Vendored source is the primary source of truth: no network needed.
+    if (build_dir / "VENDORED.md").is_file():
+        required = (build_dir / "src" / "cursor_utils.py",
+                    build_dir / "config" / "build.toml",
+                    build_dir / "config" / "render.json",
+                    build_dir / "svg")
+        missing = [str(p) for p in required if not p.exists()]
+        if missing:
+            raise BuildError(f"vendored Bibata source is incomplete: {missing}")
+        return
     if not build_dir.exists():
         print(f"Cloning Bibata source into {build_dir}...")
         # Clone away from the final path so an interrupted clone never leaves

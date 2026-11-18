@@ -1,0 +1,10 @@
+__pycache__/
+
+uv.lock
+bibata.egg-info/
+
+poetry.lock
+
+out/
+svg/modern*/
+svg/original*/

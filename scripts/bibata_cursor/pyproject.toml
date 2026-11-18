@@ -1,0 +1,51 @@
+[project]
+name = "bibata"
+description = "bibata cursors"
+version = "1.0.0"
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src", "svg", "config"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src", "svg", "config"]
+
+[tool.ruff]
+indent-width = 4
+line-length = 94
+
+[tool.ruff.lint]
+## ref: https://docs.astral.sh/ruff/rules/
+select = [
+	"E",		# pycodestyle Error
+	"W",		# pycodestyle Warning
+	"I",		# isort
+	"F",		# Pyflakes
+	"A",		# flake8-builtins
+	"B",		# flake8-bugbear
+	"C4",		# flake8-comprehensions
+	"COM",		# flake8-commas
+	"SIM",		# flake8-simplify
+	"FBT",		# flake8-boolean-trap
+	"PTH",		# flake8-use-pathlib
+	"ASYNC",	# flake8-async
+	"PERF",		# Perflint
+	"FURB",		# refurb
+	"UP",		# pyupgrade
+	"PL",		# Pylint
+]
+ignore = [
+	"E266", 	# too many leading ‘#’ for block comment
+	"E731", 	# do not assign a lambda expression, use a def
+	"I001", 	# Import block is un-sorted or un-formatted
+	"COM812",	# Trailing comma missing
+]
+
+[tool.ruff.format]
+quote-style = "single"
+line-ending = "lf"

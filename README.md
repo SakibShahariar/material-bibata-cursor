@@ -50,7 +50,9 @@ Linux archives include Xcursor, Hyprcursor, and scalable SVG assets. Each archiv
 
 ## Build from source
 
-Requirements: Git, Python 3.12+, Pillow, librsvg, and `xorg-xcursorgen`.
+Requirements: Git (to clone this repository), Python 3.12+, Pillow, librsvg,
+and `xorg-xcursorgen`. The pinned upstream Bibata source is vendored in
+`scripts/bibata_cursor/`, so building does not fetch anything from the network.
 
 ```sh
 git clone https://github.com/SakibShahariar/material-bibata-cursor

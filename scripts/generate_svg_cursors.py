@@ -346,8 +346,8 @@ def main():
 
     bibata_dir = Path(args.bibata_dir)
     if not bibata_dir.is_dir():
-        print(f"Error: {bibata_dir} not found — run build_linux.py at least once first "
-              "(it clones bibata_cursor as a build dependency).", file=sys.stderr)
+        print(f"Error: {bibata_dir} not found — the vendored Bibata source should be "
+              "in this repository at scripts/bibata_cursor/.", file=sys.stderr)
         sys.exit(1)
 
     themes_path = Path(args.themes_json)

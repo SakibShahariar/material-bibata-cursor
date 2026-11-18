@@ -1,0 +1,87 @@
+= Bibata Cursor
+
+image:https://github.com/rtgiskard/bibata_cursor/actions/workflows/build.yaml/badge.svg[build]
+image:https://img.shields.io/badge/license-GPLv3-green.svg?style=flat[license]
+
+This cursor set is a masterpiece of cursors available on the internet,
+hand-designed by https://twitter.com/ful1e5[Abdulkaiz Khatri].
+
+This work is based on https://github.com/ful1e5/Bibata_Cursor[Bibata_Cursor],
+but focused on the support for hyprcursor and Xcursor only.
+
+
+== Build
+
+- Prerequisites
+
+* Python `>= 3.12`
+* https://wiki.gnome.org/Projects/LibRsvg[librsvg]: generating PNG files (Xcursor only)
+* https://xorg.freedesktop.org[xorg-xcursorgen]: generating Xcursor from PNG and related (Xcursor only)
+
+- Quick start
++
+```bash
+# 1. install the dependencies
+# Arch Linux:  pacman -Syu python librsvg xorg-xcursorgen
+# Fedora: dnf install librsvg2-tools xcursorgen
+
+# 2. clone
+git clone https://github.com/rtgiskard/bibata_cursor
+
+# 3. build
+cd bibata_cursor
+./src/cursor_utils.py --hypr --x11 --out-dir ./out
+
+# 4. copy to user local icon theme
+cp -r ./out/Bibata-* ~/.local/share/icons/
+```
+
+- The process of creating the cursor themes:
+
+1. recolor SVG according to `config/render.json`
+2. parse cursor settings from `config/build.toml`
+3. generating cursor config for hyprcursor or Xcursor
+4. Rendering SVG files to PNG files (Xcursor only)
+5. Building cursor themes from SVG (hyprcursor) or PNG (Xcursor) files.
+
+
+== Examples
+
+```bash
+# Run the utils to check the help:
+./src/cursor_utils.py -h
+
+# Generate hyprcursor to `./out`:
+./src/cursor_utils.py --hypr --out-dir ./out
+
+# Generate both hyprcursor and Xcursor for `Bibata-Modern-Classic`:
+./src/cursor_utils.py --hypr --x11 --theme Bibata-Modern-Classic --out-dir ./out
+```
+
+== Customization
+
+=== Customize Sizes
+
+Adjust `config/build.toml: cursor_defaults.x11_sizes`, add only sizes you need to shrink the cursor theme size.
+For hyprcursor, it's all vector image, with no need to set a specific size.
+
+=== Customize Colors
+
+Adjust `config/render.json: colors.replace`, tweak the colors as you like:
+
+1. Base color: which replaces the `#00FF00` color in the SVG.
+2. Outlined color: which replaces the `#0000FF` color in the SVG.
+3. Watch Background color: which replaces the `#FF0000` color in the SVG.
+
+=== Use bibata.live
+
+https://bibata.live simplifies the personalization of cursor themes, making it easy and accessible for users.
+With bibata, you can enhance your cursor experience effortlessly. Best of all, it's available for free, allowing you to
+enjoy a customized bibata cursor theme tailored to your preferences.
+
+More docs can be find on https://github.com/ful1e5/Bibata_Cursor[upstream].
+
+
+== License
+
+This project is licensed under the terms of the https://www.gnu.org/licenses/gpl-3.0.html[GPLv3] or any later version.

@@ -36,7 +36,14 @@ The `Cursor asset validation` workflow builds a representative theme set
 
 - **Live desktop sessions**: CI does not run GNOME Shell, KDE Plasma,
   Hyprland, or X11 sessions, so visual rendering and cursor pickup on real
-  desktops is best-effort.
+  desktops is best-effort. Recorded live evidence so far:
+  - **GNOME Wayland** — Matugen hook applied dark/light presets via gsettings
+    (#49); manual hotspot click checklist at 125/150/200% passed (#38).
+  - **KDE Plasma** — the reporter of #1 confirmed at 2560×1440 / 150% scaling
+    that the cursor blur with the Shake Cursor / Locate Pointer effect was
+    fixed in `v1.6.0-rc1` (scalable SVG path). This verifies rendering for that
+    scenario only — not Matugen theme application or hotspot click accuracy on
+    KDE, which remain untested there.
 - **Niri**: the Matugen post-hook can write a `cursor-theme.kdl` include,
   but Niri support has not been verified on a live Niri session.
 - **Fractional scaling hotspots**: hotspot correctness at 125% / 150% /

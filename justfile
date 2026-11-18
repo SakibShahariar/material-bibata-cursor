@@ -63,6 +63,10 @@ gallery-theme-template:
 hotspot-qa theme="Peach":
     python3 scripts/generate_hotspot_qa_page.py --theme {{theme}}
 
+# Regenerate the descriptive cursor metadata file (#70)
+cursor-metadata:
+    python3 scripts/generate_cursor_metadata.py
+
 # Validate animated cursors against the pinned upstream contract (#39)
 validate-animations:
     python3 scripts/validate_animations.py

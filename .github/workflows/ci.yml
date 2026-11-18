@@ -99,6 +99,14 @@ jobs:
             --themes Peach,Peach-Light \
             --scalable-dir "$RUNNER_TEMP/scalable"
 
+      - name: Verify cursor metadata matches sources and assets
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          python scripts/generate_cursor_metadata.py --check
+          python scripts/validate_cursor_metadata.py \
+            --scalable-dir "$RUNNER_TEMP/scalable" --themes Peach,Peach-Light
+
       - name: Visual regression check against baselines
         run: |
           for theme in Peach Peach-Light; do

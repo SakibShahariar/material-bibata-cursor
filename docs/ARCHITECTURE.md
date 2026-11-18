@@ -189,8 +189,25 @@ trees are byte-identical (#62/#64), animation frames/delays match upstream
 - **Licensing** — Phinger is CC-BY-SA-4.0; only architectural ideas (not
   artwork or code) are referenced here.
 
-## 7. Review status
+## 7. Migration progress (adopted)
 
-This proposal is published for owner review. Per #70's constraints, no artwork
-changes, builder rewrites, or new dependencies are introduced until it is
-reviewed and the dependent issues (#71, #72, #74) decide which pieces to adopt.
+The owner approved the schema on 2026-11-18. Migration steps 1–3 are complete:
+
+- `scripts/cursor-metadata.json` is generated from current sources with
+  `just cursor-metadata` (58 cursors, aliases, hotspots, color roles,
+  handedness classification, sizes, animation descriptors).
+- `generate_cursor_metadata.py --check` detects staleness; CI runs it.
+- `validate_cursor_metadata.py` cross-checks the metadata against `build.toml`,
+  the source pin, the size ladder, and built scalable assets; CI runs it for
+  Peach and Peach-Light.
+- Builders still use their existing inputs: default outputs are unchanged.
+
+Steps 4–5 (metadata-driven opt-in variants, then replacing inline constants)
+remain future work per the dependent issues' decisions: semantic roles
+prototype only (#71), left-handed research only (#72), animation research only
+(#74).
+
+## 8. Review status
+
+Schema adopted; no artwork changes, builder rewrites, or new dependencies have
+been introduced.

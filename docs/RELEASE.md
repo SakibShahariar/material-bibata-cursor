@@ -4,7 +4,7 @@ Use this checklist before tagging and publishing a Material Bibata Cursor releas
 
 ## Before tagging
 
-- [ ] Confirm the intended version number follows the existing semantic-version pattern, such as `v1.5.0`.
+- [ ] Confirm the intended version number follows the existing semantic-version pattern, such as `v1.6.0`.
 - [ ] Review all changes since the previous release.
 - [ ] Confirm `themes.json` changes are intentional, including theme keys, optional `label` values, and color values.
 - [ ] Confirm new or changed themes meet the documented contrast expectations.
@@ -47,7 +47,7 @@ Use this checklist before tagging and publishing a Material Bibata Cursor releas
 
 ## Tag and publish
 
-- [ ] Tag the release, for example `v1.5.0`.
+- [ ] Tag the release, for example `v1.6.0`.
 - [ ] Push the tag to trigger the automated release workflow.
 - [ ] Confirm the release workflow completes successfully.
 - [ ] Confirm the GitHub Release contains the expected Linux archives, Windows ZIPs, and checksum file.

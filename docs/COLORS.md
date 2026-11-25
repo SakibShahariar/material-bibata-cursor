@@ -19,6 +19,9 @@ python3 scripts/build_linux.py Coral
 just build-one Coral
 ```
 
+`Coral` here is an example name for a *new* color you are adding; it is not
+one of the 28 shipped palettes. Use `just list` to see the existing names.
+
 ## Color roles
 
 | Role | Cursor part | Purpose |
@@ -46,7 +49,8 @@ saturated the accent is.
 For Ice Blue: `Body #1a333d` · `Primary #a8cbe2` · `Watch #001e27`.
 
 The same treatment is applied to every palette, so contrast stays consistent
-across all 28 themes.
+across all 28 color families (57 themes including `-Light` variants and
+Classic).
 
 ## Preview
 

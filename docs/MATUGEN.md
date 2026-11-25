@@ -13,7 +13,7 @@ the active Hyprland/GNOME cursor size, and falls back to 24.
 ## Setup
 
 **Prerequisites:** matugen installed, the 57 cursor themes built and installed
-locally (`just build` in a source checkout, or a [release archive](README.md#download)),
+locally (`just build` in a source checkout, or a [release archive](../README.md#download)),
 and a Matugen scheme/template that emits a hex color and the resolved mode.
 
 1. Copy the hook and the palette data into Matugen's config directory:

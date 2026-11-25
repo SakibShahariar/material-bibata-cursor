@@ -25,7 +25,11 @@ The `Cursor asset validation` workflow builds a representative theme set
 - Linux Xcursor, Hyprcursor, and scalable SVG assets build cleanly.
 - Windows `.cur` and animated `.ani` assets build cleanly.
 - Generated assets pass `validate_theme_assets.py` (structure, hotspots,
-  animation metadata).
+  animation metadata) and `validate_animations.py` (frame/delay contract and
+  transparency).
+- Rendered PNGs for representative themes are compared against committed
+  baselines, and the descriptive cursor metadata is checked against sources
+  and built assets.
 - Release archives (Linux tarballs and Windows ZIPs) build and their
   contents validate.
 - Every freedesktop/CSS cursor name resolves to the intended shape — no
@@ -49,8 +53,8 @@ The `Cursor asset validation` workflow builds a representative theme set
 - **Umbriel**: the Matugen post-hook can write an opt-in `cursor-theme.toml`
   include (#75). The generated TOML and opt-in detection are tested, but live
   Umbriel session behavior has not been verified here.
-- **Fractional scaling hotspots**: hotspot correctness at 125% / 150% /
-  200% is tracked separately in #38, not asserted in CI.
+- **Fractional scaling hotspots**: verified manually on GNOME at 125% /
+  150% / 200% (#38); asset-level drift is ≤1px. Not asserted in CI.
 - **Windows `person` / `pin`**: upstream Windows-only names with no Linux
   `x11_name`; Linux parity is tracked in #37.
 
@@ -58,9 +62,10 @@ The `Cursor asset validation` workflow builds a representative theme set
 
 - `all-resize` is the only CSS name resolved through the legacy fallback
   (to `move` art) rather than dedicated or aliased theme art.
-- Theming relies on Bibata source SVGs using only the three recolor slots
-  (`body`, `primary`, `watch`); any future shape with hardcoded colors
-  outside those slots would not be recolored.
+- Theming uses the three upstream slots (`body`, `primary`, `watch`) plus
+  derived primary shades for the spinner and corner-resize accents. Drag
+  state colors (red no-drop, green copy, gray link) are intentionally fixed
+  semantic signals — see [Cursor shapes](CURSOR_SHAPES.md).
 
 ## Related docs
 

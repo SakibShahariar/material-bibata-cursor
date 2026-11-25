@@ -19,7 +19,12 @@ The build recolors source SVGs by replacing three fixed placeholder colors:
 | `#0000FF` | Primary / outline | Vibrant accent |
 | `#FF0000` | Watch / busy accent | Busy-indicator color |
 
-Use these exact placeholder colors in new artwork. Do not introduce additional theme-dependent colors: they will not be recolored per theme.
+Use these exact placeholder colors in new artwork. The spinner and
+corner-resize accents also follow the theme through four derived primary
+shades, mapped from the upstream colors in `scripts/spinner_colors.py`.
+Keep drag-state colors (red no-drop, green copy, gray link) fixed — they are
+semantic signals, not theme accents. Do not add new theme-dependent colors
+without extending the recolor mapping.
 
 ## Static shapes
 

@@ -34,8 +34,9 @@ source canvas.
 
 ## Build flow
 
-The Python Linux builder clones or updates the pinned `bibata_cursor`
-source, patches its render config with each theme's colors, then compiles
+The Python Linux builder uses the vendored `scripts/bibata_cursor/`
+source (no network clone), patches its render config with each theme's
+colors, then compiles
 and installs to `~/.icons` (Xcursor `cursors/` + Hyprland `hyprcursors/`).
 To keep animation-heavy builds fast, the patched renderer rasterizes each
 unique source once at 96px with librsvg and produces the smaller Xcursor

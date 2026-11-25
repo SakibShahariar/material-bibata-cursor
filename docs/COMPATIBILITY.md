@@ -159,10 +159,5 @@ the X11 fallback on XCB; all three are aliased in the theme
   Linux parity decision.
 - `all-resize` is classified as a legacy fallback by the validator, but its
   current name-index resolution selects `grabbing` art.
-- Earlier revisions of this matrix listed Qt enum names (`up_arrow`,
-  `split_v`, `split_h`, `whatsthis`) as gaps. That was incorrect: Qt XCB maps
-  them to standard X11 names (`center_ptr`, `sb_v_double_arrow`,
-  `sb_h_double_arrow`, `question_arrow`), all of which have art in this theme.
-  No new art or aliases are needed.
 - Every CSS and Wayland cursor-shape-v1 name has either dedicated art or an
   explicit alias, so no name renders as an unintended plain arrow.

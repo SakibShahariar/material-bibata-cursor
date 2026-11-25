@@ -8,13 +8,13 @@ packaging command.
 
 ```bash
 just build
-just package v1.5.0
+just package v1.6.0
 ```
 
 This writes:
 
-- `dist/bibata-material-dark-v1.5.0.tar.gz` — 28 dark themes + Classic
-- `dist/bibata-material-light-v1.5.0.tar.gz` — 28 `-Light` themes
+- `dist/bibata-material-dark-v1.6.0.tar.gz` — 28 dark themes + Classic
+- `dist/bibata-material-light-v1.6.0.tar.gz` — 28 `-Light` themes
 
 Each Linux theme folder contains the Xcursor `cursors/` tree, Hyprland
 `hyprcursors/`, and scalable `cursors_scalable/` SVGs. A single archive
@@ -22,18 +22,18 @@ supports X11 apps, Hyprland, and GNOME 51+ / KDE Plasma 6.2+.
 
 ## Windows archives
 
-Make sure the upstream Bibata source is present, build the Windows assets,
-and then package them:
+The pinned upstream source is vendored, so no clone is needed. Build the
+Windows assets, then package them:
 
 ```bash
 just build-win
-just package-win v1.5.0
+just package-win v1.6.0
 ```
 
 This writes:
 
-- `dist/bibata-material-dark-v1.5.0-win.zip` — dark themes + Classic
-- `dist/bibata-material-light-v1.5.0-win.zip` — light themes
+- `dist/bibata-material-dark-v1.6.0-win.zip` — dark themes + Classic
+- `dist/bibata-material-light-v1.6.0-win.zip` — light themes
 
 Each Windows ZIP includes theme folders with `.cur` files, animated
 `wait.ani` and `left_ptr_watch.ani`, per-theme `Install.inf` files, and
@@ -48,13 +48,13 @@ SHA-256 checksums for the archives produced for that version.
 You can filter themes with `--only-dark`, `--only-light`, or `--exclude`:
 
 ```bash
-bash scripts/package_release.sh v1.5.0 --win --only-dark
-bash scripts/package_release.sh v1.5.0 --exclude Classic
+bash scripts/package_release.sh v1.6.0 --win --only-dark
+bash scripts/package_release.sh v1.6.0 --exclude Classic
 ```
 
 ## Automated releases
 
-Pushing a version tag such as `v1.1.0` runs
+Pushing a version tag such as `v1.6.0` runs
 `.github/workflows/release.yml`. It builds and validates Linux and Windows
 cursor assets, packages all four archives, checks their contents, and creates
 or updates the matching GitHub Release.

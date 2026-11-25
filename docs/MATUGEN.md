@@ -1,54 +1,85 @@
 # Matugen setup
 
-Get a theme that matches your wallpaper with
-[matugen](https://github.com/InioX/matugen) and the included post-hook.
+Match your cursor to your wallpaper with
+[matugen](https://github.com/InioX/matugen) and the included post-hook. Matugen
+generates a color from the wallpaper; the hook picks the closest Material Bibata
+preset and applies it — no rebuild on wallpaper change.
 
-The hook supports GNOME/GTK, KDE Plasma, Hyprland, Sway, opt-in Niri, and
-opt-in Umbriel
-configuration include. It preserves `XCURSOR_SIZE` when set and otherwise
-tries to read the active Hyprland or GNOME cursor size before using 24 as a
-fallback.
+The hook applies themes on GNOME/GTK, KDE Plasma, Hyprland, and Sway, and
+supports **opt-in** config updates for [Niri](#niri-support) and
+[Umbriel](#umbriel-support). It keeps `XCURSOR_SIZE` when set, otherwise reads
+the active Hyprland/GNOME cursor size, and falls back to 24.
 
 ## Setup
 
-1. Copy `scripts/cursor_matugen.sh`, `scripts/color_match.py`, and the
-   repository-root `themes.json` into
-   `~/.config/matugen/post-hook-scripts/`.
-2. Add the template to `~/.config/matugen/config.toml`:
+**Prerequisites:** matugen installed, the 57 cursor themes built and installed
+locally (`just build` in a source checkout, or a [release archive](README.md#download)),
+and a Matugen scheme/template that emits a hex color and the resolved mode.
 
-```toml
-[templates.cursor]
-input_path = "~/.config/matugen/templates/cursors.json"
-output_path = "~/.config/colors.json"
-post_hook = "~/.config/matugen/post-hook-scripts/cursor_matugen.sh"
-```
+1. Copy the hook and the palette data into Matugen's config directory:
 
-3. Create `~/.config/matugen/templates/cursors.json` with:
+   ```sh
+   mkdir -p ~/.config/matugen/post-hook-scripts
+   cp scripts/cursor_matugen.sh scripts/color_match.py themes.json \
+      ~/.config/matugen/post-hook-scripts/
+   ```
 
-```json
-{
-    "colors": {
-        "color13": "{{colors.primary.default.hex}}"
-    },
-    "mode": "{{mode}}"
-}
-```
+   `themes.json` must live next to the hook — it is the list of presets the
+   matcher chooses from. (When the hook is run directly from a checkout it
+   finds `themes.json` in the repository root instead.)
 
-Before running the hook, build/install the cursor themes (for example,
-with `just build`) so the matched preset is available locally.
+2. Add this template to `~/.config/matugen/config.toml`:
 
-The hook does **not** build or install themes: it picks the closest preset
-in `themes.json` using `color_match.py` and applies that already-installed
-theme. It uses Matugen's resolved `mode` to compare the dark presets (plus the
-original Classic preset) for Dark mode or the `-Light` presets for Light mode. If a custom/older template omits
-`mode`, it falls back to matching across all presets for compatibility.
-Matching uses CIEDE2000; it does not recolor or rebuild a cursor to match
-Matugen's exact primary hex value, so the result may be close rather than
-identical.
+   ```toml
+   [templates.cursor]
+   input_path = "~/.config/matugen/templates/cursors.json"
+   output_path = "~/.config/colors.json"
+   post_hook = "~/.config/matugen/post-hook-scripts/cursor_matugen.sh"
+   ```
 
-When run directly from a repository checkout, it finds `themes.json` in the
-repository root. When installed as a Matugen post-hook, keep `themes.json`
-beside the copied script.
+3. Create `~/.config/matugen/templates/cursors.json`:
+
+   ```json
+   {
+       "colors": {
+           "color13": "{{colors.primary.default.hex}}"
+       },
+       "mode": "{{mode}}"
+   }
+   ```
+
+   `colors.primary.default.hex` is the semantic primary role (guaranteed by
+   Matugen 4.2.0); `mode` is the resolved `dark`/`light` mode. Both are required
+   for mode-aware matching. Older/custom templates that emit only a hex color
+   still work but fall back to matching across all presets.
+
+How it works: the hook reads `~/.config/colors.json`, uses `color_match.py`
+(CIEDE2000) to choose the nearest installed preset, then applies it via the
+desktop commands above. Dark mode considers the 28 dark palettes plus Classic;
+Light mode considers the 28 `-Light` variants. It does **not** recolor or
+rebuild a cursor to Matugen's exact hex — the result is the closest match, not
+an exact match.
+
+## Verify and troubleshoot
+
+- Check the hook log: run `matugen image /path/to/wallpaper` (or trigger your
+  normal wallpaper change) and look for `Matched cursor theme:` and a `✓ Set …`
+  line. An *imprecise* warning (ΔE > 15) is informational; the closest theme is
+  still applied.
+- Confirm the applied theme:
+  ```sh
+  gsettings get org.gnome.desktop.interface cursor-theme   # GNOME
+  ```
+- `Error: color profile missing` → Matugen did not create `~/.config/colors.json`;
+  check the template's `output_path` and that Matugen ran successfully.
+- `Error: could not extract a valid 6-digit hex color` → the template must emit
+  `{{colors.primary.default.hex}}` as a plain `#RRGGBB` value.
+- Theme changed but the pointer did not: ensure the preset is installed
+  (`~/.local/share/icons/Bibata-Material-<name>`), then log out/in to clear the
+  Xcursor cache.
+- Niri/Umbriel users: the hook only writes their config when you have opted in
+  via the include shown in the sections below. If nothing changes, check that
+  include line.
 
 ## Measuring palette coverage
 

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Prototype opt-in semantic cursor color roles (#71).
 
-Does NOT change shipped recoloring. Loads the descriptive cursor metadata,
-maps the proposed semantic roles (see docs/SEMANTIC_ROLES.md) to concrete
-colors for a light and dark palette, and verifies that preserved color regions
-remain untouched after substitution. Reports contrast ratios for review.
+Does NOT change shipped recoloring. Maps proposed semantic roles to concrete
+colors for a light and dark palette, verifies that preserved color regions
+remain untouched, and reports contrast ratios for review.
 
 Usage:
     python3 scripts/semantic_roles_prototype.py
@@ -20,8 +19,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-# Proposed role map from docs/SEMANTIC_ROLES.md. "error" is only applied when
-# the palette provides it; otherwise the fixed red is preserved.
+# Proposed role map. "error" is only applied when the palette provides it;
+# otherwise the fixed red is preserved.
 ROLE_MAP = {
     "crossed_circle": "error",
     "dnd_no_drop": "error",

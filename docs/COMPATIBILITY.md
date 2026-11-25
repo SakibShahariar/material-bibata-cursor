@@ -166,9 +166,3 @@ the X11 fallback on XCB; all three are aliased in the theme
   No new art or aliases are needed.
 - Every CSS and Wayland cursor-shape-v1 name has either dedicated art or an
   explicit alias, so no name renders as an unintended plain arrow.
-
-
-## Reference audit
-
-For a one-time comparison of Breeze, Adwaita, Capitaine, Rosé Pine Hyprcursor,
-and the pinned Bibata baseline, see the [modern cursor theme reference audit](REFERENCE_THEMES.md).

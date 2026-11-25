@@ -87,13 +87,13 @@ CI checks builder tests, theme contrast, cursor-name resolution, representative 
 
 More guides:
 - [Install and select a theme](docs/INSTALL.md)
-- [SVG cursors](docs/SVG_CURSORS.md)
-- [Cursor shapes](docs/CURSOR_SHAPES.md)
 - [Windows cursors](docs/WINDOWS.md)
-- [Adding a color](docs/COLORS.md)
 - [Matugen setup](docs/MATUGEN.md)
-- [Cursor authoring](docs/AUTHORING.md)
-- [Release checklist](docs/RELEASE.md)
+- [SVG cursors](docs/SVG_CURSORS.md)
+
+For contributors: [cursor shapes](docs/CURSOR_SHAPES.md),
+[adding a color](docs/COLORS.md), [cursor authoring](docs/AUTHORING.md),
+[packaging](docs/PACKAGING.md), [release checklist](docs/RELEASE.md).
 
 ## License and attribution
 

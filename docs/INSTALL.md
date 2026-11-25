@@ -9,6 +9,11 @@ matching `-Light` variants, and `Classic` (the original Bibata colors).
 The theme name used by every desktop below is `Bibata-Material-<Palette>`,
 for example `Bibata-Material-Apricot` or `Bibata-Material-Seafoam-Light`.
 
+> [!TIP]
+> For Nix, you can use the [package from *nix-dryBoil*][dryboil-pkg], a 3rd-party flake.
+
+[dryboil-pkg]: https://github.com/Drazape/nix-dryBoil/tree/main/packages/material-bibata-cursor "GitHub tree path (with README) for the package in nix-dryBoil flake"
+
 ## 1. Get the themes
 
 **Prebuilt (recommended):** download the dark or light archive from the

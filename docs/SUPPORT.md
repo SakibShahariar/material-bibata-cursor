@@ -46,6 +46,9 @@ The `Cursor asset validation` workflow builds a representative theme set
     KDE, which remain untested there.
 - **Niri**: the Matugen post-hook can write a `cursor-theme.kdl` include,
   but Niri support has not been verified on a live Niri session.
+- **Umbriel**: the Matugen post-hook can write an opt-in `cursor-theme.toml`
+  include (#75). The generated TOML and opt-in detection are tested, but live
+  Umbriel session behavior has not been verified here.
 - **Fractional scaling hotspots**: hotspot correctness at 125% / 150% /
   200% is tracked separately in #38, not asserted in CI.
 - **Windows `person` / `pin`**: upstream Windows-only names with no Linux

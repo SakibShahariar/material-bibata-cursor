@@ -213,7 +213,46 @@ if [[ -f "$NIRI_CONFIG_PATH" ]]; then
     fi
 fi
 
-# --- 4F. XCursor fallback ----------------------------------------------
+# --- 4F. Umbriel ---------------------------------------------------------
+#
+# Umbriel reads cursor settings from [input.cursor] in TOML and supports
+# optional config includes (#75). One-time user setup:
+# Add this to ~/.config/umbriel/config.toml (or $XDG_CONFIG_HOME/umbriel):
+#
+#     [include.optional]
+#     files = ["cursor-theme.toml"]
+#
+# The generated file lives beside the main config. We only update it when
+# that include is present, so Umbriel users opt in explicitly.
+
+UMBRIEL_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/umbriel"
+UMBRIEL_CONFIG_PATH="${UMBRIEL_CONFIG:-$UMBRIEL_CONFIG_DIR/config.toml}"
+
+if [[ -f "$UMBRIEL_CONFIG_PATH" ]]; then
+    UMBRIEL_CONFIG_DIR="$(dirname "$UMBRIEL_CONFIG_PATH")"
+    UMBRIEL_CURSOR_CONFIG="$UMBRIEL_CONFIG_DIR/cursor-theme.toml"
+
+    # Accept the documented optional include, e.g. a line inside
+    # [include.optional] files = [ "cursor-theme.toml", ... ] with either
+    # quote style and an optional trailing comma/comment.
+    if grep -Eq \
+        '^[[:space:]]*["'"'"']cursor-theme\.toml["'"'"'][[:space:]]*,?[[:space:]]*(#.*)?$' \
+        "$UMBRIEL_CONFIG_PATH"; then
+
+        UMBRIEL_CURSOR_TMP="$(mktemp "$UMBRIEL_CURSOR_CONFIG.XXXXXX")"
+
+        if printf '[input.cursor]\ntheme = "%s"\n' "$THEME_NAME" \
+            > "$UMBRIEL_CURSOR_TMP" &&
+           mv -f -- "$UMBRIEL_CURSOR_TMP" "$UMBRIEL_CURSOR_CONFIG"; then
+            echo "✓ Updated Umbriel cursor configuration: $THEME_NAME"
+        else
+            rm -f -- "$UMBRIEL_CURSOR_TMP"
+            echo "Warning: failed to update Umbriel cursor configuration" >&2
+        fi
+    fi
+fi
+
+# --- 4G. XCursor fallback ----------------------------------------------
 #
 # Provides the default cursor theme for applications that consult
 # the XCursor default-theme file.

@@ -69,6 +69,21 @@ versions use the Xcursor fallback. Both are installed by the archives.
 
    Or apply live with `hyprctl setcursor Bibata-Material-Apricot 24`.
 
+### Umbriel
+
+Copy the `Bibata-Material-*` folders into `~/.local/share/icons/` and set the
+cursor in `~/.config/umbriel/config.toml` (or via
+`umbriel config set input.cursor.theme "Bibata-Material-Apricot"`):
+
+```toml
+[input.cursor]
+theme = "Bibata-Material-Apricot"
+size = 24
+```
+
+If you use the Matugen hook, see [Umbriel support](MATUGEN.md#umbriel-support)
+for the opt-in include that updates the theme automatically.
+
 ### Windows
 
 Download a `-win.zip` from the latest release. For each theme folder,

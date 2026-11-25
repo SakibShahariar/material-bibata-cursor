@@ -3,7 +3,8 @@
 Get a theme that matches your wallpaper with
 [matugen](https://github.com/InioX/matugen) and the included post-hook.
 
-The hook supports GNOME/GTK, KDE Plasma, Hyprland, Sway, and an opt-in Niri
+The hook supports GNOME/GTK, KDE Plasma, Hyprland, Sway, opt-in Niri, and
+opt-in Umbriel
 configuration include. It preserves `XCURSOR_SIZE` when set and otherwise
 tries to read the active Hyprland or GNOME cursor size before using 24 as a
 fallback.
@@ -262,3 +263,36 @@ Matugen hook.
 - Install the matching `Bibata-Material-*` cursor themes before running the hook.
 - Keep the `include "cursor-theme.kdl"` line in your main Niri configuration.
 - Niri support has not yet been verified on a live Niri session.
+
+## Umbriel support
+
+The hook can also update the cursor theme used by
+[Umbriel](https://github.com/noctalia-dev/umbriel). One-time setup: add the
+generated file as an optional include in your Umbriel configuration, normally
+`~/.config/umbriel/config.toml`:
+
+```toml
+[include.optional]
+files = [
+  "cursor-theme.toml",
+]
+```
+
+Umbriel watches optional includes and reloads them when they change, so the
+theme updates automatically on each Matugen run. The generated
+`cursor-theme.toml` lives beside the main config and contains:
+
+```toml
+[input.cursor]
+theme = "Bibata-Material-Teal"
+```
+
+If your main config already sets `[input.cursor] theme`, remove that key to
+avoid configuring the theme in two places.
+
+### Requirements
+
+- Install the matching `Bibata-Material-*` cursor themes before running the hook.
+- Keep `cursor-theme.toml` in your `[include.optional] files` list.
+- Umbriel support has not been verified on a live Umbriel session; the hook
+  logic and generated TOML are covered by tests only.

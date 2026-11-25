@@ -81,7 +81,7 @@ To refresh the pinned Bibata source tree, run `just vendor`. See [vendored sourc
 
 ## Compatibility and development
 
-The project targets X11, Wayland, GNOME, KDE Plasma, Hyprland, Niri, and Windows. See the [support matrix](docs/SUPPORT.md), [cursor compatibility matrix](docs/COMPATIBILITY.md), and [hotspot QA guide](docs/HOTSPOT_QA.md) for platform-specific coverage and validation status.
+The project targets X11, Wayland, GNOME, KDE Plasma, Hyprland, Niri, Umbriel, and Windows. See the [support matrix](docs/SUPPORT.md), [cursor compatibility matrix](docs/COMPATIBILITY.md), and [hotspot QA guide](docs/HOTSPOT_QA.md) for platform-specific coverage and validation status.
 
 CI checks builder tests, theme contrast, cursor-name resolution, representative Linux/Windows builds, and release archive contents.
 

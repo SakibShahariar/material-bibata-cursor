@@ -69,6 +69,21 @@ versions use the Xcursor fallback. Both are installed by the archives.
 
    Or apply live with `hyprctl setcursor Bibata-Material-Apricot 24`.
 
+### Niri
+
+Copy the `Bibata-Material-*` folders into `~/.local/share/icons/` and add a
+cursor block to `~/.config/niri/config.kdl`:
+
+```kdl
+cursor {
+    xcursor-theme "Bibata-Material-Apricot"
+    xcursor-size 24
+}
+```
+
+If you use the Matugen hook, see [Niri support](MATUGEN.md#niri-support) for
+the opt-in include that updates the theme automatically.
+
 ### Umbriel
 
 Copy the `Bibata-Material-*` folders into `~/.local/share/icons/` and set the
